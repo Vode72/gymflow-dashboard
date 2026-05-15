@@ -1,4 +1,7 @@
-export function calculateEstimatedOneRepMax({ reps, weight }) {
+export function calculateEstimatedOneRepMax(weightOrSet, repsValue) {
+  const weight = typeof weightOrSet === 'object' ? weightOrSet?.weight : weightOrSet
+  const reps = typeof weightOrSet === 'object' ? weightOrSet?.reps : repsValue
+
   if (!reps || !weight) return 0
   return Math.round(weight * (1 + reps / 30))
 }
@@ -6,10 +9,32 @@ export function calculateEstimatedOneRepMax({ reps, weight }) {
 export function calculateTopSet(sets = []) {
   return sets.reduce((best, set) => {
     if (!best) return set
-    const currentScore = set.weight * set.reps
-    const bestScore = best.weight * best.reps
-    return currentScore > bestScore ? set : best
+    if (set.weight > best.weight) return set
+    if (set.weight === best.weight && set.reps > best.reps) return set
+    return best
   }, null)
+}
+
+export function calculateExerciseLogStats(sets = []) {
+  if (!sets.length) {
+    return {
+      topKg: null,
+      topReps: null,
+      estimatedOneRepMax: null,
+    }
+  }
+
+  const topKg = Math.max(...sets.map((set) => set.weight))
+  const topReps = Math.max(...sets.map((set) => set.reps))
+  const estimatedOneRepMax = Math.max(
+    ...sets.map((set) => calculateEstimatedOneRepMax(set.weight, set.reps)),
+  )
+
+  return {
+    topKg,
+    topReps,
+    estimatedOneRepMax,
+  }
 }
 
 export function calculatePersonalRecords(sessions = []) {
@@ -26,7 +51,7 @@ export function calculatePersonalRecords(sessions = []) {
       if (!current || estimatedOneRepMax > current.estimatedOneRepMax) {
         records[exercise.exerciseId] = {
           exerciseId: exercise.exerciseId,
-          name: exercise.name,
+          name: exercise.exerciseName ?? exercise.name,
           topSet,
           estimatedOneRepMax,
           date: session.date,

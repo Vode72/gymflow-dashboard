@@ -164,3 +164,81 @@ Suunniteltu scope:
 ## 12. Kontekstin päivityssääntö tuleville Codex-prompteille
 
 "After implementing any future step, update docs/GYMFLOW_CONTEXT.md by appending a new section with the step number, summary, files changed, key decisions, tests run, build/lint result and next recommended step. Do not delete previous context."
+
+## Step 1.2 — Workout Logging Core
+
+Päivä: 2026-05-15
+
+### Files changed
+
+- `src/hooks/useGymFlowData.js`
+- `src/pages/Workout.jsx`
+- `src/pages/History.jsx`
+- `src/pages/Progress.jsx`
+- `src/components/ExerciseLogCard.jsx`
+- `src/components/SetInputRow.jsx`
+- `src/components/CompletionSummary.jsx`
+- `src/utils/parseSets.js`
+- `src/utils/progressLogic.js`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### Implemented features
+
+- Aktiivinen treeniluonnos tallennetaan avaimella `gymflow_active_draft`.
+- Workout-näkymä alustaa luonnoksen valitun `workoutDays`-päivän perusteella.
+- Liikekohtaiset sarjat kirjataan reps-first-muodossa.
+- Tuetut muodot:
+  - `15/40 + 10/60 + 6/75`
+  - `15x40 / 10x60 / 6x75`
+- Sarjat parsitaan sisäiseen formaattiin `{ reps, weight }`.
+- UI näyttää sarjojen määrän, top kg:n, top repsin ja Epley-kaavan mukaisen arvioidun 1RM:n.
+- Luonnokselle voi kirjata keston ja tuntemuksen.
+- Luonnos autosave-tallentuu localStorageen jokaisella muutoksella.
+- `Merkitse valmiiksi` avaa vahvistuskortin.
+- Vahvistus tallentaa session `completed`-tilassa `gymflow_sessions`-listaan.
+- History näyttää sekä demo-sessiot että uudet tallennetut treenit.
+- Progress lukee tallennetuista sessioista henkilökohtaisia ennätyksiä kevyesti.
+
+### Data model notes
+
+- `workoutSession` tarkoittaa yhtä treenitapahtumaa, ei kalenteripäivää.
+- Samalle päivälle voi tallentua useita completed-sessioita.
+- Treenipäivien logiikka käyttää edelleen geneeristä `workoutDays`-taulukkoa.
+- Nykyinen 4 päivän ohjelma on vain demo-/oletussisältöä.
+- Valmiita treenejä ei lukita datamallissa pysyvästi, vaikka täysi uudelleenavaus jätettiin myöhemmäksi.
+- Ennätykset ja progress lasketaan sessioista, ei erillisestä totuuslähteestä.
+
+### UX decisions
+
+- Workout pysyy korttipohjaisena ja rauhallisena.
+- Validointi on kevyt: virheellinen sarjamuoto näyttää vain pienen huomautuksen.
+- Kesto ja tuntemus ovat yksinkertaiset inputit.
+- Historia pysyy korttinäkymänä eikä muutu taulukoksi.
+- Historyssä on placeholder-painike `Muokkaa myöhemmin`, mutta muokkausflowta ei vielä toteutettu.
+
+### What was intentionally left out
+
+- Ei full Program editing -toimintoja.
+- Ei add/remove/reorder-treenipäiviä.
+- Ei cloud synciä, loginia tai backendia.
+- Ei chart-kirjastoja.
+- Ei täyttä completed workout reopening -workflowta.
+- Ei AI coachia, kaloriseurantaa tai sosiaalista jakamista.
+
+### Tests run
+
+- Parser smoke check:
+  - `15/40 + 10/60 + 6/75`
+  - `15x40 / 10x60 / 6x75`
+- `npm run build`
+- `npm run lint`
+
+### Build/lint result
+
+- Build: passed
+- Lint: passed
+
+### Next recommended step
+
+Step 1.2A — Workout Logging QA + UI polish

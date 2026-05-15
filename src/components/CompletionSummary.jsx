@@ -1,14 +1,22 @@
 import Card from './Card'
 
-export default function CompletionSummary({ workoutName = 'Valittu treeni', duration = '45 min', status = 'Luonnos' }) {
+export default function CompletionSummary({
+  duration = 0,
+  exerciseCount = 0,
+  status = 'Luonnos',
+  totalSets = 0,
+  topHighlight = '',
+  workoutName = 'Valittu treeni',
+}) {
   return (
     <Card tone="flat">
       <span className="card__eyebrow">Yhteenveto</span>
-      <h3>{workoutName}</h3>
+      <h3>{status === 'Valmis' ? 'Treeni valmis' : workoutName}</h3>
       <div className="summary-grid">
-        <p>Kesto: {duration}</p>
+        <p>{workoutName} · {duration || 0} min</p>
+        <p>{exerciseCount} liikettä · {totalSets} sarjaa</p>
         <p>Tila: {status}</p>
-        <p>Valmiiksi merkintä avaa myöhemmin vahvistuksen ennen historiaan tallennusta.</p>
+        {topHighlight ? <p>{topHighlight}</p> : null}
       </div>
     </Card>
   )

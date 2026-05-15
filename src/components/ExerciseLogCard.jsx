@@ -16,9 +16,10 @@ const targetedWarmupOptions = [
 
 function buildWarmupSummary(log) {
   const parts = []
+  const warmupName = log?.customWarmupName?.trim() || log?.warmupType
 
-  if (log?.customWarmupName?.trim()) parts.push(log.customWarmupName.trim())
-  if (log?.durationMinutes) parts.push(`Kesto ${formatDuration(log.durationMinutes)}`)
+  if (warmupName) parts.push(warmupName)
+  if (log?.durationMinutes) parts.push(formatDuration(log.durationMinutes))
   if (log?.note?.trim()) parts.push(log.note.trim())
   if (log?.completed) parts.push('Tehty')
 
@@ -40,6 +41,7 @@ export default function ExerciseLogCard({
       : rawTrackingType
   const defaultWarmupType = getDefaultWarmupType(exercise)
   const title = getExerciseDisplayName(exercise)
+  const isWarmup = trackingType === 'warmupDuration' || trackingType === 'warmupNote'
   const hasInput = log?.setsText?.trim()
   const hasSets = log?.sets?.length > 0
   const hasError = trackingType === 'sets' && hasInput && log?.isValid === false
@@ -49,7 +51,7 @@ export default function ExerciseLogCard({
   const warmupSummary = buildWarmupSummary(log)
 
   return (
-    <Card className="exercise-card">
+    <Card className={`exercise-card ${isWarmup ? 'exercise-card--warmup' : ''}`}>
       <div className="exercise-card__header">
         <div>
           <span className="card__eyebrow">{exercise.muscleGroup}</span>
@@ -57,7 +59,7 @@ export default function ExerciseLogCard({
         </div>
         <span className="pill">{exercise.defaultReps}</span>
       </div>
-      <p>{previousResult ?? 'Edellinen tulos lisätään tähän, kun historiaa kertyy.'}</p>
+      {isWarmup ? null : <p>{previousResult ?? 'Edellinen tulos lisätään tähän, kun historiaa kertyy.'}</p>}
 
       {trackingType === 'warmupDuration' ? (
         <div className="warmup-form">
@@ -100,7 +102,7 @@ export default function ExerciseLogCard({
             onClick={() => onWarmupChange({ completed: !log?.completed })}
             type="button"
           >
-            ✓ Tehty
+            Tehty
           </button>
           {warmupSummary ? <span className="hint hint--success">{warmupSummary}</span> : null}
         </div>
@@ -143,7 +145,7 @@ export default function ExerciseLogCard({
             onClick={() => onWarmupChange({ completed: !log?.completed })}
             type="button"
           >
-            ✓ Tehty
+            Tehty
           </button>
           {warmupSummary ? <span className="hint hint--success">{warmupSummary}</span> : null}
         </div>

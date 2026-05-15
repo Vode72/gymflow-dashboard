@@ -35,6 +35,8 @@ function createDraft(workoutDay, selectedExercises) {
       exerciseId: exercise.id,
       exerciseName: getExerciseDisplayName(exercise),
       trackingType: getExerciseTrackingType(exercise),
+      category: exercise.category ?? '',
+      enabled: true,
       setsText: '',
       sets: [],
       warmupType: getDefaultWarmupType(exercise),
@@ -120,6 +122,7 @@ export function useGymFlowData() {
       completedAt: now.toISOString(),
       status: 'completed',
       durationMinutes: Number(draft.durationMinutes) || 0,
+      exercises: draft.exercises.filter((exercise) => exercise.enabled !== false),
       createdAt: draft.createdAt ?? now.toISOString(),
       updatedAt: now.toISOString(),
     }

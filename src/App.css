@@ -379,6 +379,27 @@ button {
   gap: 12px;
 }
 
+.exercise-card--warmup {
+  box-shadow: 0 10px 28px rgba(71, 58, 40, 0.08);
+}
+
+.exercise-card--warmup .card__body {
+  padding: 13px 14px;
+}
+
+.exercise-card--warmup .exercise-card__header {
+  align-items: center;
+}
+
+.exercise-card--warmup .card__eyebrow,
+.exercise-card--warmup .muted-label {
+  font-size: 0.72rem;
+}
+
+.exercise-card--warmup h3 {
+  font-size: 0.98rem;
+}
+
 .exercise-card__header {
   display: flex;
   justify-content: space-between;
@@ -404,7 +425,7 @@ button {
 
 .warmup-form {
   display: grid;
-  gap: 12px;
+  gap: 9px;
 }
 
 .done-toggle {
@@ -422,6 +443,38 @@ button {
   border-color: rgba(21, 128, 61, 0.36);
   color: var(--success);
   background: rgba(220, 252, 231, 0.7);
+}
+
+.targeted-warmup-toggle {
+  box-shadow: 0 10px 28px rgba(71, 58, 40, 0.08);
+}
+
+.targeted-warmup-toggle .card__body {
+  padding: 13px 14px;
+}
+
+.toggle-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  color: var(--text-main);
+}
+
+.toggle-row input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
+.toggle-row span {
+  display: grid;
+  gap: 2px;
+}
+
+.toggle-row small {
+  color: var(--text-muted);
+  font-size: 0.86rem;
 }
 
 .hint {

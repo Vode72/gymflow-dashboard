@@ -306,6 +306,74 @@ Päivä: 2026-05-15
 
 Step 1.3 — History + Last Results
 
+## Step 1.2B — Targeted Warmup Toggle + Compact Warmup Cards
+
+Päivä: 2026-05-15
+
+### Files changed
+
+- `src/pages/Workout.jsx`
+- `src/components/ExerciseLogCard.jsx`
+- `src/hooks/useGymFlowData.js`
+- `src/utils/workoutLogUtils.js`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was implemented
+
+- Lisättiin Workout-näkymään toggle `Lisää kohdennettu lämmittely`.
+- Day 1 voi näyttää kohdennetun lämmittelyn oletuksena, koska demo-ohjelmassa se on mukana.
+- Muut treenipäivät voivat ottaa kohdennetun lämmittelyn käyttöön per treeniluonnos ilman Program-datan muuttamista.
+- Toggle pois päältä piilottaa kohdennetun lämmittelyn ja jättää sen pois yhteenvedosta.
+- Toggle takaisin päälle säilyttää draft-arvot saman luonnoksen aikana.
+- Disabled targeted warmup suodatetaan pois completed-session tallennuksesta.
+
+### Targeted warmup UX decision
+
+- Kohdennettu lämmittely ei ole pakollinen app-logiikka.
+- Se on per-workout/draft-valinta tässä vaiheessa.
+- Program editing voi myöhemmin lisätä pysyvät päiväkohtaiset oletukset.
+- UI käyttää edelleen lopullisia kenttiä:
+  - `Tyyppi`
+  - `Kirjoita oma kohdennettu lämmittely`
+  - `Merkintä`
+  - `Tehty`
+
+### Compact warmup card decisions
+
+- Warmup-korteille lisättiin `exercise-card--warmup`.
+- Warmup-korteissa on pienempi padding, kevyempi varjo ja tiiviimpi kenttäväli.
+- Warmup-kortit eivät näytä raskasta edellinen tulos -placeholderia.
+- Strength-korttien reps-first-kirjaus, parseri, top kg, top reps ja 1RM-yhteenveto säilyivät ennallaan.
+
+### Data model notes
+
+- Lisättiin `enabled`-kentän käyttö kohdennetulle warmup-logille.
+- Lisättiin `targeted-warmup` draft-only -malli, jota ei lisätä pysyvästi `workoutDays.exerciseIds`-listoihin.
+- `hasLoggedExercise` keskittää summary- ja tallennuslogiikan:
+  - warmupit lasketaan merkinnöiksi
+  - vain set-pohjaiset liikkeet kasvattavat sarjamäärää
+  - disabled targeted warmup ei counttaa
+
+### Tests run
+
+- Day 1 smoke check: demo-ohjelmassa on targeted warmup.
+- Day 2 smoke check: demo-ohjelmassa ei ole targeted warmupia.
+- Disabled targeted warmup smoke check: ei counttaa logged entryksi.
+- Parser smoke check:
+  - `15/20 + 10/30 + 8/40`
+- `npm run build`
+- `npm run lint`
+
+### Build/lint result
+
+- Build: passed
+- Lint: passed
+
+### Next recommended step
+
+Step 1.3 — History + Last Results
+
 ## Step 1.2A — Workout Logging QA + Warmup UX Fixes
 
 Päivä: 2026-05-15

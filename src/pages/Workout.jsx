@@ -4,30 +4,22 @@ import CompletionSummary from '../components/CompletionSummary'
 import ExerciseLogCard from '../components/ExerciseLogCard'
 import WorkoutDayPicker from '../components/WorkoutDayPicker'
 import { formatDuration } from '../utils/durationUtils'
+import { getExerciseTrackingType } from '../utils/exerciseTracking'
 import { isValidSetsText, parseSetsText } from '../utils/parseSets'
 import { calculateExerciseLogStats } from '../utils/progressLogic'
+import {
+  createTargetedWarmupLog,
+  hasLoggedExercise,
+  isGeneralWarmup,
+  isTargetedWarmup,
+  targetedWarmupExercise,
+} from '../utils/workoutLogUtils'
 import { getActiveWorkoutDays, getNextWorkoutDay } from '../utils/workoutLogic'
 
 const feelingOptions = ['Normaali', 'Hyvä', 'Vahva', 'Väsynyt']
 
 function getDraftSummary(draft) {
-  const loggedExercises = draft?.exercises.filter((exercise) => {
-    if (exercise.trackingType === 'warmupDuration' || exercise.trackingType === 'duration') {
-      return Boolean(
-        exercise.durationMinutes ||
-        exercise.completed ||
-        exercise.customWarmupName?.trim(),
-      )
-    }
-    if (exercise.trackingType === 'warmupNote' || exercise.trackingType === 'note') {
-      return Boolean(
-        exercise.note?.trim() ||
-        exercise.completed ||
-        exercise.customWarmupName?.trim(),
-      )
-    }
-    return exercise.sets.length > 0
-  }) ?? []
+  const loggedExercises = draft?.exercises.filter(hasLoggedExercise) ?? []
   const totalSets = loggedExercises.reduce((sum, exercise) => sum + (exercise.sets?.length ?? 0), 0)
   const topExercise = loggedExercises
     .filter((exercise) => exercise.estimatedOneRepMax)
@@ -58,11 +50,28 @@ export default function Workout({
   const [showConfirm, setShowConfirm] = useState(false)
   const [completedSummary, setCompletedSummary] = useState(null)
   const selectedDay = activeDays.find((day) => day.id === selectedDayId) ?? activeDays[0]
+  const currentDraft = activeDraft?.workoutDayId === selectedDay?.id ? activeDraft : null
 
   const selectedExercises = useMemo(() => {
     const bank = new Map(exercises.map((exercise) => [exercise.id, exercise]))
     return selectedDay?.exerciseIds.map((id) => bank.get(id)).filter(Boolean) ?? []
   }, [exercises, selectedDay])
+
+  const visibleExercises = useMemo(() => {
+    const generalWarmups = selectedExercises.filter((exercise) => (
+      isGeneralWarmup({ trackingType: getExerciseTrackingType(exercise) })
+    ))
+    const programTargetedWarmup = selectedExercises.find((exercise) => (
+      isTargetedWarmup({ trackingType: getExerciseTrackingType(exercise) })
+    ))
+    const strengthExercises = selectedExercises.filter((exercise) => getExerciseTrackingType(exercise) === 'sets')
+
+    return {
+      generalWarmups,
+      targetedWarmup: programTargetedWarmup ?? targetedWarmupExercise,
+      strengthExercises,
+    }
+  }, [selectedExercises])
 
   useEffect(() => {
     if (!completedSummary && selectedDay && selectedExercises.length) {
@@ -92,9 +101,11 @@ export default function Workout({
     return results
   }, [sessions])
 
-  const draftSummary = getDraftSummary(activeDraft)
-  const durationHours = Math.floor((Number(activeDraft?.durationMinutes) || 0) / 60)
-  const durationMinutes = (Number(activeDraft?.durationMinutes) || 0) % 60
+  const targetedWarmupLog = currentDraft?.exercises.find(isTargetedWarmup)
+  const targetedWarmupEnabled = Boolean(targetedWarmupLog && targetedWarmupLog.enabled !== false)
+  const draftSummary = getDraftSummary(currentDraft)
+  const durationHours = Math.floor((Number(currentDraft?.durationMinutes) || 0) / 60)
+  const durationMinutes = (Number(currentDraft?.durationMinutes) || 0) % 60
 
   function selectWorkoutDay(dayId) {
     setSelectedDayId(dayId)
@@ -143,6 +154,28 @@ export default function Workout({
     }))
   }
 
+  function toggleTargetedWarmup() {
+    updateDraft((current) => {
+      const existingTargeted = current.exercises.find(isTargetedWarmup)
+
+      if (existingTargeted) {
+        return {
+          ...current,
+          exercises: current.exercises.map((exercise) => (
+            isTargetedWarmup(exercise)
+              ? { ...exercise, enabled: exercise.enabled === false }
+              : exercise
+          )),
+        }
+      }
+
+      return {
+        ...current,
+        exercises: [...current.exercises, createTargetedWarmupLog()],
+      }
+    })
+  }
+
   function updateDraftField(field, value) {
     updateDraft((current) => ({
       ...current,
@@ -158,7 +191,7 @@ export default function Workout({
   }
 
   function confirmCompletion() {
-    const completed = completeWorkout(activeDraft)
+    const completed = completeWorkout(currentDraft)
     setShowConfirm(false)
     setCompletedSummary(completed)
   }
@@ -187,8 +220,8 @@ export default function Workout({
 
       <Card>
         <span className="card__eyebrow">Kirjaustila</span>
-        <h3>{activeDraft?.workoutName ?? selectedDay.name}</h3>
-        <p>Luonnos tallennettu · {activeDraft?.updatedAt ? new Date(activeDraft.updatedAt).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' }) : 'Ei muutoksia'}</p>
+        <h3>{currentDraft?.workoutName ?? selectedDay.name}</h3>
+        <p>Luonnos tallennettu · {currentDraft?.updatedAt ? new Date(currentDraft.updatedAt).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' }) : 'Ei muutoksia'}</p>
         <div className="workout-meta-grid">
           <label className="field">
             <span className="muted-label">Treenin kesto</span>
@@ -212,13 +245,13 @@ export default function Workout({
                 <span>min</span>
               </div>
             </div>
-            <span className="hint">{formatDuration(activeDraft?.durationMinutes)}</span>
+            <span className="hint">{formatDuration(currentDraft?.durationMinutes)}</span>
           </label>
           <label className="field">
             <span className="muted-label">Tuntemus</span>
             <select
               onChange={(event) => updateDraftField('feeling', event.target.value)}
-              value={activeDraft?.feeling ?? 'Normaali'}
+              value={currentDraft?.feeling ?? 'Normaali'}
             >
               {feelingOptions.map((feeling) => (
                 <option key={feeling} value={feeling}>{feeling}</option>
@@ -232,8 +265,46 @@ export default function Workout({
         </div>
       </Card>
 
-      {selectedExercises.map((exercise) => {
-        const log = activeDraft?.exercises.find((item) => item.exerciseId === exercise.id)
+      {visibleExercises.generalWarmups.map((exercise) => {
+        const log = currentDraft?.exercises.find((item) => item.exerciseId === exercise.id)
+        return (
+          <ExerciseLogCard
+            exercise={exercise}
+            key={exercise.id}
+            log={log}
+            onSetsTextChange={(setsText) => updateExerciseSets(exercise.id, setsText)}
+            onWarmupChange={(updates) => updateWarmupLog(exercise.id, updates)}
+            previousResult={previousResults.get(exercise.id)}
+          />
+        )
+      })}
+
+      <Card className="targeted-warmup-toggle">
+        <label className="toggle-row">
+          <input
+            checked={targetedWarmupEnabled}
+            onChange={toggleTargetedWarmup}
+            type="checkbox"
+          />
+          <span>
+            <strong>Lisää kohdennettu lämmittely</strong>
+            <small>Esim. olkapäät, lonkka, polvi tai liikkuvuus.</small>
+          </span>
+        </label>
+      </Card>
+
+      {targetedWarmupEnabled ? (
+        <ExerciseLogCard
+          exercise={visibleExercises.targetedWarmup}
+          log={targetedWarmupLog}
+          onSetsTextChange={(setsText) => updateExerciseSets(visibleExercises.targetedWarmup.id, setsText)}
+          onWarmupChange={(updates) => updateWarmupLog(targetedWarmupLog.exerciseId, updates)}
+          previousResult={previousResults.get(visibleExercises.targetedWarmup.id)}
+        />
+      ) : null}
+
+      {visibleExercises.strengthExercises.map((exercise) => {
+        const log = currentDraft?.exercises.find((item) => item.exerciseId === exercise.id)
         return (
           <ExerciseLogCard
             exercise={exercise}
@@ -266,12 +337,12 @@ export default function Workout({
       ) : null}
 
       <CompletionSummary
-        duration={completedSummary?.durationMinutes ?? activeDraft?.durationMinutes}
+        duration={completedSummary?.durationMinutes ?? currentDraft?.durationMinutes}
         exerciseCount={completedSummary ? getDraftSummary(completedSummary).exerciseCount : draftSummary.exerciseCount}
         status={completedSummary ? 'Valmis' : 'Luonnos'}
         totalSets={completedSummary ? getDraftSummary(completedSummary).totalSets : draftSummary.totalSets}
         topHighlight={completedSummary ? getDraftSummary(completedSummary).topHighlight : draftSummary.topHighlight}
-        workoutName={completedSummary?.workoutName ?? activeDraft?.workoutName ?? selectedDay.name}
+        workoutName={completedSummary?.workoutName ?? currentDraft?.workoutName ?? selectedDay.name}
       />
     </div>
   )

@@ -9,6 +9,7 @@ export default function Program({ program, exercises }) {
         <span className="card__eyebrow">Käyttäjän ohjelma</span>
         <h2>{program.name}</h2>
         <p>Treenipäivät ovat muokattava lista. Ohjelma ei ole sidottu neljään päivään.</p>
+        <p>Demo-ohjelma sisältää neljä treenipäivää. Voit myöhemmin lisätä, poistaa ja nimetä treenipäivät vapaasti.</p>
         <div className="button-row">
           <button className="btn btn--primary" type="button">Lisää treenipäivä</button>
           <button className="btn btn--ghost" type="button">Liikepankki</button>

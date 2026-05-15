@@ -12,7 +12,7 @@
   --danger: #b91c1c;
   --card-radius: 18px;
   --shadow-soft: 0 18px 45px rgba(71, 58, 40, 0.11);
-  --bottom-nav-height: 76px;
+  --bottom-nav-height: 74px;
   --page-max-width: 980px;
   color: var(--text-main);
   background: var(--bg-main);
@@ -56,7 +56,6 @@ button {
 
 .app-shell {
   min-height: 100svh;
-  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 18px);
 }
 
 .app-header {
@@ -71,7 +70,7 @@ button {
 .app-header__inner {
   width: min(100%, var(--page-max-width));
   margin: 0 auto;
-  padding: 16px 18px 12px;
+  padding: 12px 18px 10px;
 }
 
 .app-kicker {
@@ -85,14 +84,14 @@ button {
 
 .app-header h1 {
   margin: 2px 0 0;
-  font-size: clamp(1.55rem, 5vw, 2.1rem);
+  font-size: clamp(1.42rem, 4.5vw, 1.92rem);
   line-height: 1.08;
 }
 
 .page {
   width: min(100%, var(--page-max-width));
   margin: 0 auto;
-  padding: 18px;
+  padding: 16px 18px calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 34px);
 }
 
 .page-stack {
@@ -204,7 +203,7 @@ button {
   border-top: 1px solid rgba(201, 191, 176, 0.8);
   background: rgba(251, 248, 241, 0.94);
   backdrop-filter: blur(18px);
-  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
 }
 
 .bottom-nav__inner {
@@ -217,7 +216,7 @@ button {
 
 .bottom-nav button {
   min-width: 0;
-  min-height: 58px;
+  min-height: 56px;
   border-radius: 14px;
   color: var(--text-muted);
   background: transparent;
@@ -371,12 +370,8 @@ button {
 }
 
 @media (min-width: 780px) {
-  .app-shell {
-    padding-bottom: 22px;
-  }
-
   .page {
-    padding: 24px;
+    padding: 20px 24px calc(var(--bottom-nav-height) + 62px);
   }
 
   .dashboard-grid--two,

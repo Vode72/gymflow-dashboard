@@ -17,12 +17,12 @@ export default function Home({ profile, program, sessions, updateProfile, onNavi
     <div className="page-stack">
       {!profile.name ? (
         <Card tone="accent">
-          <span className="card__eyebrow">Tervetuloa GymFlow’hun</span>
-          <h2>Mikä nimi näytetään?</h2>
-          <p>Aloita nopeasti demo-ohjelmalla. Profiilia voi täydentää myöhemmin.</p>
+          <span className="card__eyebrow">Aloitus</span>
+          <h2>Tervetuloa GymFlow’hun</h2>
+          <p>Aloita nopeasti demo-ohjelmalla. Profiilin, teeman ja yksiköt voit muokata myöhemmin asetuksissa.</p>
           <div className="button-row">
             <button className="btn btn--primary" onClick={() => updateProfile({ name: 'Toni' })} type="button">
-              Jatka nimellä Toni
+              Aloita demo-ohjelmalla
             </button>
             <button className="btn btn--ghost" onClick={() => onNavigate('settings')} type="button">
               Muokkaa asetuksissa

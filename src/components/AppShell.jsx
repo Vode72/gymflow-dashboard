@@ -5,7 +5,7 @@ export default function AppShell({ activeView, children, onNavigate, title }) {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header__inner">
-          <p className="app-kicker">GymFlow Dashboard</p>
+          <p className="app-kicker">GYMFLOW DASHBOARD</p>
           <h1>{title}</h1>
         </div>
       </header>

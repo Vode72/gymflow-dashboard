@@ -9,7 +9,7 @@ export default function WorkoutDayPicker({ days, selectedId, onSelect }) {
           type="button"
         >
           <strong>{day.name}</strong>
-          <span className="hint">{day.description}</span>
+          <span>{day.description}</span>
         </button>
       ))}
     </div>

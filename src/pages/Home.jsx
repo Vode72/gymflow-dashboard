@@ -2,6 +2,7 @@ import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import StatCard from '../components/StatCard'
 import { formatFinnishDate } from '../utils/dateUtils'
+import { formatDuration } from '../utils/durationUtils'
 import { getLatestCompletedSession, getNextWorkoutDay, getTodaySessions, getWorkoutGapMessage } from '../utils/workoutLogic'
 
 export default function Home({ profile, program, sessions, updateProfile, onNavigate }) {
@@ -54,7 +55,7 @@ export default function Home({ profile, program, sessions, updateProfile, onNavi
           <Card>
             <span className="card__eyebrow">Viimeksi</span>
             <h3>{latestSession.workoutName}</h3>
-            <p>{formatFinnishDate(latestSession.date)} · {latestSession.durationMinutes} min · {latestSession.feeling}</p>
+            <p>{formatFinnishDate(latestSession.date)} · {formatDuration(latestSession.durationMinutes)} · {latestSession.feeling}</p>
           </Card>
           <Card>
             <span className="card__eyebrow">Tänään</span>
@@ -78,7 +79,7 @@ export default function Home({ profile, program, sessions, updateProfile, onNavi
                 <strong>{session.workoutName}</strong>
                 <p>{formatFinnishDate(session.date)}</p>
               </div>
-              <span className="pill">{session.durationMinutes} min</span>
+              <span className="pill">{formatDuration(session.durationMinutes)}</span>
             </div>
           ))}
         </div>

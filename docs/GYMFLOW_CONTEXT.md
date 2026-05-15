@@ -242,3 +242,149 @@ Päivä: 2026-05-15
 ### Next recommended step
 
 Step 1.2A — Workout Logging QA + UI polish
+
+## Step 1.2A — Workout Logging QA + UX Fixes
+
+Päivä: 2026-05-15
+
+### Files changed
+
+- `src/data/defaultExercises.js`
+- `src/hooks/useGymFlowData.js`
+- `src/pages/Workout.jsx`
+- `src/pages/History.jsx`
+- `src/pages/Home.jsx`
+- `src/components/ExerciseLogCard.jsx`
+- `src/components/CompletionSummary.jsx`
+- `src/components/WorkoutDayPicker.jsx`
+- `src/utils/durationUtils.js`
+- `src/utils/exerciseTracking.js`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was fixed
+
+- Lisättiin kevyt `trackingType`-malli: `sets`, `duration`, `note`.
+- `Kävelymatto` käyttää nyt duration-kirjausta eikä sarjaparseria.
+- `Olkapäiden lämmittely` käyttää nyt note-kirjausta eikä sarjaparseria.
+- Voimaliikkeet säilyvät reps-first `sets`-kirjauksessa.
+- Vanhalle localStorage-liikepankille lisättiin fallback-logiikka `treadmill`- ja `shoulder-warmup`-liikkeille.
+- Treenin kokonaiskesto kirjataan nyt tunteina ja minuutteina.
+- Kesto näytetään muodossa `54 min`, `1 h 15 min` tai `2 h 5 min`.
+- `Merkitse valmiiksi` avaa nyt selkeän modal/popup-vahvistuksen.
+- Workout day picker näyttää treenipäivän nimen ja kuvauksen eri riveillä.
+- Historyn muokkausplaceholder kertoo selkeämmin, että valmiin treenin uudelleenavaus tulee myöhemmin.
+- Completion summary laskee merkinnät tracking-tyypin mukaan ja laskee sarjat vain set-pohjaisista liikkeistä.
+
+### Key decisions
+
+- Ei toteutettu full Program editing -toimintoja.
+- Ei toteutettu completed workout reopening -flowta.
+- `workoutDays` säilyy geneerisenä taulukkona, eikä 4 päivän demo-ohjelmaa kovakoodattu logiikaksi.
+- Reps-first-formaatti säilyy oletuksena set-pohjaisille liikkeille.
+- Duration- ja note-liikkeille ei lasketa top kg:ta tai 1RM-arviota.
+- Modal toteutettiin CSS:llä ilman ulkoisia riippuvuuksia.
+
+### Tests run
+
+- Parser smoke check: `15/20 + 10/30`
+- Duration smoke check: `10 min` -> `10`
+- Duration display smoke check: `75` -> `1 h 15 min`
+- Demo tracking type smoke check:
+  - `treadmill` -> `duration`
+  - `shoulder-warmup` -> `note`
+  - `barbell-bench` -> `sets`
+- `npm run build`
+- `npm run lint`
+
+### Build/lint result
+
+- Build: passed
+- Lint: passed
+
+### Next recommended step
+
+Step 1.3 — History + Last Results
+
+## Step 1.2A — Workout Logging QA + Warmup UX Fixes
+
+Päivä: 2026-05-15
+
+### Files changed
+
+- `src/data/defaultExercises.js`
+- `src/hooks/useGymFlowData.js`
+- `src/pages/Workout.jsx`
+- `src/components/ExerciseLogCard.jsx`
+- `src/utils/exerciseTracking.js`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was fixed
+
+- Warmup-liikkeet eivät enää käytä sarjamuotoista reps/weight-kirjausta.
+- `Kävelymatto`-demoalku on mallinnettu yleisenä `Yleislämmittely`-merkintänä.
+- `Olkapäiden lämmittely`-demoalku on mallinnettu `Kohdennettu lämmittely`-merkintänä.
+- Tracking type -nimet päivitettiin muotoon `warmupDuration` ja `warmupNote`.
+- Säilytettiin yhteensopivuus aiemmin käytettyihin `duration`- ja `note`-arvoihin.
+- Vanhalle localStorage-liikepankille lisättiin fallback-nimet ja default warmup -tyypit.
+- Warmupit eivät laske top kg-, top reps- tai 1RM-arvoja.
+
+### Warmup UX decisions
+
+- `Yleislämmittely` käyttää kenttää `Tapa` ja vaihtoehtoja:
+  - Kävelymatto
+  - Kuntopyörä
+  - Soutulaite
+  - Crosstrainer
+  - Liikkuvuus
+  - Muu
+- Jos yleislämmittelyssä valitaan `Muu`, näytetään kenttä `Kirjoita oma lämmittely`.
+- `Yleislämmittely` voi tallentaa keston, `Tehty`-tilan, oman nimen tai näiden yhdistelmän.
+- `Kohdennettu lämmittely` käyttää kenttää `Tyyppi` ja vaihtoehtoja:
+  - Olkapäiden lämmittely
+  - Kuminauhalämmittely
+  - Lonkka / pakara
+  - Polvi
+  - Selkä / rintaranka
+  - Lämmittelysarjat
+  - Muu
+- Jos kohdennetussa lämmittelyssä valitaan `Muu`, näytetään kenttä `Kirjoita oma kohdennettu lämmittely`.
+- `Kohdennettu lämmittely` voi tallentaa merkinnän, `Tehty`-tilan, oman nimen tai näiden yhdistelmän.
+
+### Data model notes
+
+- Warmupit ovat tavallisia demo-ohjelman exercise/program itemeitä, eivät pakollista app-logiikkaa.
+- Käyttäjä voi myöhemmin poistaa, korvata tai muokata warmupeja Program / Exercise Bank -editorissa.
+- Luonnoksen warmup-logi tukee kenttiä:
+  - `warmupType`
+  - `customWarmupName`
+  - `durationMinutes`
+  - `note`
+  - `completed`
+- Set-pohjaiset liikkeet säilyttävät reps-first-formaatin ja `{ reps, weight }`-sarjamallin.
+
+### Tests run
+
+- Tracking type smoke check:
+  - `Yleislämmittely` -> `warmupDuration`
+  - `Kohdennettu lämmittely` -> `warmupNote`
+  - `Penkki tangolla` -> `sets`
+- Default warmup smoke check:
+  - `Yleislämmittely` -> `Kävelymatto`
+  - `Kohdennettu lämmittely` -> `Olkapäiden lämmittely`
+- Parser smoke check:
+  - `15/20 + 10/30` -> reps-first sets
+- Duration display smoke check:
+  - `75` -> `1 h 15 min`
+- `npm run build`
+- `npm run lint`
+
+### Build/lint result
+
+- Build: passed
+- Lint: passed
+
+### Next recommended step
+
+Step 1.3 — History + Last Results

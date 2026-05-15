@@ -1,6 +1,7 @@
 import { defaultExercises } from '../data/defaultExercises'
 import { defaultProgram } from '../data/defaultProgram'
 import { demoSessions } from '../data/demoSessions'
+import { getDefaultWarmupType, getExerciseDisplayName, getExerciseTrackingType } from '../utils/exerciseTracking'
 import { useLocalStorage } from './useLocalStorage'
 
 function getLocalDateParts(date = new Date()) {
@@ -32,9 +33,14 @@ function createDraft(workoutDay, selectedExercises) {
     feeling: 'Normaali',
     exercises: selectedExercises.map((exercise) => ({
       exerciseId: exercise.id,
-      exerciseName: exercise.name,
+      exerciseName: getExerciseDisplayName(exercise),
+      trackingType: getExerciseTrackingType(exercise),
       setsText: '',
       sets: [],
+      warmupType: getDefaultWarmupType(exercise),
+      customWarmupName: '',
+      durationMinutes: null,
+      completed: false,
       topKg: null,
       topReps: null,
       estimatedOneRepMax: null,

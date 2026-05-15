@@ -3,6 +3,7 @@ import Card from '../components/Card'
 import CompletionSummary from '../components/CompletionSummary'
 import ExerciseLogCard from '../components/ExerciseLogCard'
 import WorkoutDayPicker from '../components/WorkoutDayPicker'
+import { formatDuration } from '../utils/durationUtils'
 import { isValidSetsText, parseSetsText } from '../utils/parseSets'
 import { calculateExerciseLogStats } from '../utils/progressLogic'
 import { getActiveWorkoutDays, getNextWorkoutDay } from '../utils/workoutLogic'
@@ -10,8 +11,24 @@ import { getActiveWorkoutDays, getNextWorkoutDay } from '../utils/workoutLogic'
 const feelingOptions = ['Normaali', 'Hyvä', 'Vahva', 'Väsynyt']
 
 function getDraftSummary(draft) {
-  const loggedExercises = draft?.exercises.filter((exercise) => exercise.sets.length > 0) ?? []
-  const totalSets = loggedExercises.reduce((sum, exercise) => sum + exercise.sets.length, 0)
+  const loggedExercises = draft?.exercises.filter((exercise) => {
+    if (exercise.trackingType === 'warmupDuration' || exercise.trackingType === 'duration') {
+      return Boolean(
+        exercise.durationMinutes ||
+        exercise.completed ||
+        exercise.customWarmupName?.trim(),
+      )
+    }
+    if (exercise.trackingType === 'warmupNote' || exercise.trackingType === 'note') {
+      return Boolean(
+        exercise.note?.trim() ||
+        exercise.completed ||
+        exercise.customWarmupName?.trim(),
+      )
+    }
+    return exercise.sets.length > 0
+  }) ?? []
+  const totalSets = loggedExercises.reduce((sum, exercise) => sum + (exercise.sets?.length ?? 0), 0)
   const topExercise = loggedExercises
     .filter((exercise) => exercise.estimatedOneRepMax)
     .sort((a, b) => b.estimatedOneRepMax - a.estimatedOneRepMax)[0]
@@ -76,6 +93,14 @@ export default function Workout({
   }, [sessions])
 
   const draftSummary = getDraftSummary(activeDraft)
+  const durationHours = Math.floor((Number(activeDraft?.durationMinutes) || 0) / 60)
+  const durationMinutes = (Number(activeDraft?.durationMinutes) || 0) % 60
+
+  function selectWorkoutDay(dayId) {
+    setSelectedDayId(dayId)
+    setCompletedSummary(null)
+    setShowConfirm(false)
+  }
 
   function updateExerciseSets(exerciseId, setsText) {
     updateDraft((current) => ({
@@ -86,10 +111,33 @@ export default function Workout({
         const sets = parseSetsText(setsText)
         return {
           ...exercise,
+          trackingType: 'sets',
           isValid: isValidSetsText(setsText),
           setsText,
           sets,
+          durationMinutes: null,
+          completed: false,
+          customWarmupName: '',
+          note: '',
           ...calculateExerciseLogStats(sets),
+        }
+      }),
+    }))
+  }
+
+  function updateWarmupLog(exerciseId, updates) {
+    updateDraft((current) => ({
+      ...current,
+      exercises: current.exercises.map((exercise) => {
+        if (exercise.exerciseId !== exerciseId) return exercise
+
+        return {
+          ...exercise,
+          ...updates,
+          sets: [],
+          topKg: null,
+          topReps: null,
+          estimatedOneRepMax: null,
         }
       }),
     }))
@@ -100,6 +148,13 @@ export default function Workout({
       ...current,
       [field]: value,
     }))
+  }
+
+  function updateWorkoutDuration(part, value) {
+    const numericValue = Math.max(0, Number(value) || 0)
+    const nextHours = part === 'hours' ? numericValue : durationHours
+    const nextMinutes = part === 'minutes' ? numericValue : durationMinutes
+    updateDraftField('durationMinutes', nextHours * 60 + nextMinutes)
   }
 
   function confirmCompletion() {
@@ -128,7 +183,7 @@ export default function Workout({
         <p>{selectedDay.description}</p>
       </Card>
 
-      <WorkoutDayPicker days={activeDays} selectedId={selectedDay.id} onSelect={setSelectedDayId} />
+      <WorkoutDayPicker days={activeDays} selectedId={selectedDay.id} onSelect={selectWorkoutDay} />
 
       <Card>
         <span className="card__eyebrow">Kirjaustila</span>
@@ -136,16 +191,28 @@ export default function Workout({
         <p>Luonnos tallennettu · {activeDraft?.updatedAt ? new Date(activeDraft.updatedAt).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' }) : 'Ei muutoksia'}</p>
         <div className="workout-meta-grid">
           <label className="field">
-            <span className="muted-label">Kesto</span>
-            <div className="input-with-unit">
-              <input
-                min="0"
-                onChange={(event) => updateDraftField('durationMinutes', event.target.value)}
-                type="number"
-                value={activeDraft?.durationMinutes ?? ''}
-              />
-              <span>min</span>
+            <span className="muted-label">Treenin kesto</span>
+            <div className="duration-inputs">
+              <div className="input-with-unit">
+                <input
+                  min="0"
+                  onChange={(event) => updateWorkoutDuration('hours', event.target.value)}
+                  type="number"
+                  value={durationHours || ''}
+                />
+                <span>h</span>
+              </div>
+              <div className="input-with-unit">
+                <input
+                  min="0"
+                  onChange={(event) => updateWorkoutDuration('minutes', event.target.value)}
+                  type="number"
+                  value={durationMinutes || ''}
+                />
+                <span>min</span>
+              </div>
             </div>
+            <span className="hint">{formatDuration(activeDraft?.durationMinutes)}</span>
           </label>
           <label className="field">
             <span className="muted-label">Tuntemus</span>
@@ -173,6 +240,7 @@ export default function Workout({
             key={exercise.id}
             log={log}
             onSetsTextChange={(setsText) => updateExerciseSets(exercise.id, setsText)}
+            onWarmupChange={(updates) => updateWarmupLog(exercise.id, updates)}
             previousResult={previousResults.get(exercise.id)}
           />
         )
@@ -184,15 +252,17 @@ export default function Workout({
       </Card>
 
       {showConfirm ? (
-        <Card className="confirmation-card">
-          <span className="card__eyebrow">Vahvistus</span>
-          <h3>Merkitäänkö treeni valmiiksi ja tallennetaan historiaan?</h3>
-          <p>Voit avata treenin myöhemmin uudelleen muokattavaksi.</p>
-          <div className="button-row">
-            <button className="btn btn--ghost" onClick={() => setShowConfirm(false)} type="button">Peruuta</button>
-            <button className="btn btn--primary" onClick={confirmCompletion} type="button">Kyllä, tallenna</button>
+        <div className="modal-backdrop" role="presentation">
+          <div aria-modal="true" className="modal-card" role="dialog">
+            <span className="card__eyebrow">Vahvistus</span>
+            <h3>Merkitäänkö treeni valmiiksi?</h3>
+            <p>Treeni tallennetaan historiaan. Voit avata treenin myöhemmin uudelleen muokattavaksi.</p>
+            <div className="button-row">
+              <button className="btn btn--ghost" onClick={() => setShowConfirm(false)} type="button">Peruuta</button>
+              <button className="btn btn--primary" onClick={confirmCompletion} type="button">Kyllä, tallenna</button>
+            </div>
           </div>
-        </Card>
+        </div>
       ) : null}
 
       <CompletionSummary

@@ -1,4 +1,5 @@
 import Card from './Card'
+import { formatDuration } from '../utils/durationUtils'
 
 export default function CompletionSummary({
   duration = 0,
@@ -13,8 +14,8 @@ export default function CompletionSummary({
       <span className="card__eyebrow">Yhteenveto</span>
       <h3>{status === 'Valmis' ? 'Treeni valmis' : workoutName}</h3>
       <div className="summary-grid">
-        <p>{workoutName} · {duration || 0} min</p>
-        <p>{exerciseCount} liikettä · {totalSets} sarjaa</p>
+        <p>{workoutName} · {formatDuration(duration)}</p>
+        <p>{exerciseCount} merkintää · {totalSets} sarjaa</p>
         <p>Tila: {status}</p>
         {topHighlight ? <p>{topHighlight}</p> : null}
       </div>

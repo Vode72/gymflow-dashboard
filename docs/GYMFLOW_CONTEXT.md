@@ -306,6 +306,80 @@ Päivä: 2026-05-15
 
 Step 1.3 — History + Last Results
 
+## Step 1.2C — Change Day Flow + Warmup Polish + Program Placeholder Actions
+
+Päivä: 2026-05-15
+
+### Files changed
+
+- `src/App.jsx`
+- `src/pages/Home.jsx`
+- `src/pages/Workout.jsx`
+- `src/pages/Program.jsx`
+- `src/components/ExerciseLogCard.jsx`
+- `src/hooks/useGymFlowData.js`
+- `src/utils/workoutLogUtils.js`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was implemented
+
+- Home-näkymän `Vaihda päivä` avaa nyt treenipäivän valintamodaalin.
+- Valittu treenipäivä tallennetaan app-tason UI-tilaan ja välitetään Workout-näkymään.
+- `Aloita treeni` avaa Workout-näkymän valitulla treenipäivällä.
+- Program-sivun placeholder-painikkeet näyttävät näkyvän ilmoituksen, eivätkä tunnu kuolleilta.
+- Kohdennettu lämmittely ei ole enää oletuksena näkyvissä Day 1:llä, vaikka demo-ohjelmassa on targeted warmup item.
+- Kohdennettu lämmittely aktivoituu vain käyttäjän toggle-valinnalla.
+- Warmup-kortteja tiivistettiin ja kevennettiin visuaalisesti.
+- `Tehty`-painikkeen aktiivinen tila erottuu selkeämmin.
+- Warmup-yhteenveto käyttää `Muu`-valinnassa custom-tekstiä, jos se on annettu.
+
+### Home change-day UX decision
+
+- `Vaihda päivä` ei enää navigoi Ohjelma-sivulle.
+- Käyttäjä valitsee treenipäivän kevyessä modal-valitsimessa.
+- Valinta ohittaa automaattisen seuraavan treenin ehdotuksen nykyisessä UI-tilassa.
+- Automaattinen `getNextWorkoutDay`-logiikka säilyy pohjaehdotuksena.
+
+### Program placeholder action decision
+
+- Full Program editing jäi tarkoituksella toteuttamatta.
+- Painikkeet näyttävät nyt inline-ilmoituksen:
+  - ohjelman muokkaus myöhemmin
+  - liikepankin muokkaus myöhemmin
+  - treenipäivän muokkaus myöhemmin
+- Program-näkymä kertoo staattisesti, että nykyinen sivu näyttää demo-ohjelman rakenteen.
+
+### Warmup polish changes
+
+- Warmup-korttien paddingia, gap-arvoja ja label-kokoa pienennettiin.
+- Warmup-korteista poistettiin raskas edellinen tulos -placeholder.
+- `Tehty` näyttää aktiivisena muodossa `✓ Tehty`.
+- Custom warmup -summary toimii:
+  - `Keppijumppa + liikkuvuus · 8 min · Tehty`
+  - `Rintaranka + lapatuet · 2 kierrosta · Tehty`
+- Strength-korttien reps-first-kirjaus pidettiin ennallaan.
+
+### Known limitations
+
+- Valittu treenipäivä on vain nykyisen app-session UI-tila, ei pysyvä asetus.
+- Program editing, Exercise Bank editing ja day-specific targeted warmup defaults ovat edelleen myöhempiä vaiheita.
+- Completed workout reopening ei ole vielä toteutettu.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+
+### Build/lint result
+
+- Build: passed
+- Lint: passed
+
+### Next recommended step
+
+Step 1.3 — History + Last Results
+
 ## Step 1.2B — Targeted Warmup Toggle + Compact Warmup Cards
 
 Päivä: 2026-05-15

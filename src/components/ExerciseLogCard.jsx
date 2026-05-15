@@ -16,7 +16,8 @@ const targetedWarmupOptions = [
 
 function buildWarmupSummary(log) {
   const parts = []
-  const warmupName = log?.customWarmupName?.trim() || log?.warmupType
+  const customName = log?.customWarmupName?.trim()
+  const warmupName = log?.warmupType === 'Muu' && customName ? customName : customName || log?.warmupType
 
   if (warmupName) parts.push(warmupName)
   if (log?.durationMinutes) parts.push(formatDuration(log.durationMinutes))
@@ -102,7 +103,7 @@ export default function ExerciseLogCard({
             onClick={() => onWarmupChange({ completed: !log?.completed })}
             type="button"
           >
-            Tehty
+            {log?.completed ? '✓ Tehty' : 'Tehty'}
           </button>
           {warmupSummary ? <span className="hint hint--success">{warmupSummary}</span> : null}
         </div>
@@ -145,7 +146,7 @@ export default function ExerciseLogCard({
             onClick={() => onWarmupChange({ completed: !log?.completed })}
             type="button"
           >
-            Tehty
+            {log?.completed ? '✓ Tehty' : 'Tehty'}
           </button>
           {warmupSummary ? <span className="hint hint--success">{warmupSummary}</span> : null}
         </div>

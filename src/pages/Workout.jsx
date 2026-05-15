@@ -38,8 +38,10 @@ export default function Workout({
   activeDraft,
   completeWorkout,
   exercises,
+  onSelectWorkoutDay,
   program,
   saveDraft,
+  selectedWorkoutDayId,
   sessions,
   startDraft,
   updateDraft,
@@ -49,7 +51,8 @@ export default function Workout({
   const [selectedDayId, setSelectedDayId] = useState(suggestedDay?.id ?? activeDays[0]?.id)
   const [showConfirm, setShowConfirm] = useState(false)
   const [completedSummary, setCompletedSummary] = useState(null)
-  const selectedDay = activeDays.find((day) => day.id === selectedDayId) ?? activeDays[0]
+  const effectiveSelectedDayId = selectedWorkoutDayId ?? selectedDayId
+  const selectedDay = activeDays.find((day) => day.id === effectiveSelectedDayId) ?? activeDays[0]
   const currentDraft = activeDraft?.workoutDayId === selectedDay?.id ? activeDraft : null
 
   const selectedExercises = useMemo(() => {
@@ -102,13 +105,14 @@ export default function Workout({
   }, [sessions])
 
   const targetedWarmupLog = currentDraft?.exercises.find(isTargetedWarmup)
-  const targetedWarmupEnabled = Boolean(targetedWarmupLog && targetedWarmupLog.enabled !== false)
+  const targetedWarmupEnabled = Boolean(targetedWarmupLog?.enabled && targetedWarmupLog?.enabledByUser)
   const draftSummary = getDraftSummary(currentDraft)
   const durationHours = Math.floor((Number(currentDraft?.durationMinutes) || 0) / 60)
   const durationMinutes = (Number(currentDraft?.durationMinutes) || 0) % 60
 
   function selectWorkoutDay(dayId) {
     setSelectedDayId(dayId)
+    onSelectWorkoutDay(dayId)
     setCompletedSummary(null)
     setShowConfirm(false)
   }
@@ -159,11 +163,12 @@ export default function Workout({
       const existingTargeted = current.exercises.find(isTargetedWarmup)
 
       if (existingTargeted) {
+        const nextEnabled = !targetedWarmupEnabled
         return {
           ...current,
           exercises: current.exercises.map((exercise) => (
             isTargetedWarmup(exercise)
-              ? { ...exercise, enabled: exercise.enabled === false }
+              ? { ...exercise, enabled: nextEnabled, enabledByUser: nextEnabled }
               : exercise
           )),
         }

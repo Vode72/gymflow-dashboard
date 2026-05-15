@@ -20,6 +20,7 @@ const views = {
 
 function App() {
   const [activeView, setActiveView] = useState('home')
+  const [selectedWorkoutDayId, setSelectedWorkoutDayId] = useState(null)
   const gymFlow = useGymFlowData()
   const ActivePage = views[activeView]
 
@@ -37,7 +38,12 @@ function App() {
 
   return (
     <AppShell activeView={activeView} onNavigate={setActiveView} title={pageTitle}>
-      <ActivePage {...gymFlow} onNavigate={setActiveView} />
+      <ActivePage
+        {...gymFlow}
+        onNavigate={setActiveView}
+        onSelectWorkoutDay={setSelectedWorkoutDayId}
+        selectedWorkoutDayId={selectedWorkoutDayId}
+      />
     </AppShell>
   )
 }

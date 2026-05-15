@@ -49,6 +49,7 @@ export function createTargetedWarmupLog() {
     trackingType: targetedWarmupExercise.trackingType,
     category: targetedWarmupExercise.category,
     enabled: true,
+    enabledByUser: true,
     setsText: '',
     sets: [],
     warmupType: targetedWarmupExercise.defaultWarmupType,

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Card from '../components/Card'
 import EmptyState from '../components/EmptyState'
 import StatCard from '../components/StatCard'
@@ -5,9 +6,19 @@ import { formatFinnishDate } from '../utils/dateUtils'
 import { formatDuration } from '../utils/durationUtils'
 import { getLatestCompletedSession, getNextWorkoutDay, getTodaySessions, getWorkoutGapMessage } from '../utils/workoutLogic'
 
-export default function Home({ profile, program, sessions, updateProfile, onNavigate }) {
+export default function Home({
+  onNavigate,
+  onSelectWorkoutDay,
+  profile,
+  program,
+  selectedWorkoutDayId,
+  sessions,
+  updateProfile,
+}) {
+  const [showDayPicker, setShowDayPicker] = useState(false)
   const latestSession = getLatestCompletedSession(sessions)
-  const nextWorkout = getNextWorkoutDay(program, sessions)
+  const suggestedWorkout = getNextWorkoutDay(program, sessions)
+  const nextWorkout = program.workoutDays.find((day) => day.id === selectedWorkoutDayId) ?? suggestedWorkout
   const todaySessions = getTodaySessions(sessions)
   const latestThree = [...sessions]
     .filter((session) => session.status === 'completed')
@@ -40,11 +51,40 @@ export default function Home({ profile, program, sessions, updateProfile, onNavi
           <button className="btn btn--primary" onClick={() => onNavigate('workout')} type="button">
             Aloita treeni
           </button>
-          <button className="btn btn--ghost" onClick={() => onNavigate('program')} type="button">
+          <button className="btn btn--ghost" onClick={() => setShowDayPicker(true)} type="button">
             Vaihda päivä
           </button>
         </div>
       </Card>
+
+      {showDayPicker ? (
+        <div className="modal-backdrop" role="presentation">
+          <div aria-modal="true" className="modal-card" role="dialog">
+            <span className="card__eyebrow">Treeni</span>
+            <h3>Valitse treeni</h3>
+            <p>Valitse, minkä treenin haluat tehdä seuraavaksi.</p>
+            <div className="choice-list">
+              {program.workoutDays.map((day) => (
+                <button
+                  aria-pressed={nextWorkout?.id === day.id}
+                  key={day.id}
+                  onClick={() => {
+                    onSelectWorkoutDay(day.id)
+                    setShowDayPicker(false)
+                  }}
+                  type="button"
+                >
+                  <strong>{day.name}</strong>
+                  <span>{day.description}</span>
+                </button>
+              ))}
+            </div>
+            <div className="button-row">
+              <button className="btn btn--ghost" onClick={() => setShowDayPicker(false)} type="button">Peruuta</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {!latestSession ? (
         <EmptyState title="Ei treenejä vielä.">

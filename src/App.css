@@ -384,7 +384,7 @@ button {
 }
 
 .exercise-card--warmup .card__body {
-  padding: 13px 14px;
+  padding: 11px 12px;
 }
 
 .exercise-card--warmup .exercise-card__header {
@@ -397,7 +397,24 @@ button {
 }
 
 .exercise-card--warmup h3 {
-  font-size: 0.98rem;
+  font-size: 0.95rem;
+}
+
+.exercise-card--warmup .pill {
+  min-height: 26px;
+  padding: 3px 8px;
+  font-size: 0.76rem;
+}
+
+.exercise-card--warmup .field {
+  gap: 4px;
+}
+
+.exercise-card--warmup .field input,
+.exercise-card--warmup .field select {
+  min-height: 42px;
+  border-radius: 12px;
+  padding: 0 12px;
 }
 
 .exercise-card__header {
@@ -430,7 +447,7 @@ button {
 
 .done-toggle {
   justify-self: start;
-  min-height: 44px;
+  min-height: 40px;
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 0 16px;
@@ -440,9 +457,10 @@ button {
 }
 
 .done-toggle[aria-pressed='true'] {
-  border-color: rgba(21, 128, 61, 0.36);
+  border-color: rgba(21, 128, 61, 0.46);
   color: var(--success);
-  background: rgba(220, 252, 231, 0.7);
+  background: rgba(220, 252, 231, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(21, 128, 61, 0.08);
 }
 
 .targeted-warmup-toggle {
@@ -548,6 +566,45 @@ button {
 .modal-card p {
   margin: 8px 0 0;
   color: var(--text-muted);
+}
+
+.choice-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.choice-list button {
+  display: grid;
+  gap: 4px;
+  min-height: 58px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.48);
+  text-align: left;
+}
+
+.choice-list button span {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.choice-list button[aria-pressed='true'] {
+  border-color: rgba(10, 110, 209, 0.55);
+  background: var(--accent-soft);
+}
+
+.inline-notice {
+  margin-top: 12px;
+  border: 1px solid rgba(10, 110, 209, 0.22);
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: var(--text-main);
+  background: rgba(219, 234, 254, 0.45);
+  font-size: 0.9rem;
+  font-weight: 650;
 }
 
 .empty-state {

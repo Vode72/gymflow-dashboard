@@ -31,12 +31,16 @@ function createDraft(workoutDay, selectedExercises) {
     status: 'draft',
     durationMinutes: '',
     feeling: 'Normaali',
-    exercises: selectedExercises.map((exercise) => ({
+    exercises: selectedExercises.map((exercise) => {
+      const trackingType = getExerciseTrackingType(exercise)
+
+      return {
       exerciseId: exercise.id,
       exerciseName: getExerciseDisplayName(exercise),
-      trackingType: getExerciseTrackingType(exercise),
+      trackingType,
       category: exercise.category ?? '',
-      enabled: true,
+      enabled: trackingType !== 'warmupNote',
+      enabledByUser: false,
       setsText: '',
       sets: [],
       warmupType: getDefaultWarmupType(exercise),
@@ -47,7 +51,8 @@ function createDraft(workoutDay, selectedExercises) {
       topReps: null,
       estimatedOneRepMax: null,
       note: '',
-    })),
+      }
+    }),
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
   }
@@ -122,7 +127,7 @@ export function useGymFlowData() {
       completedAt: now.toISOString(),
       status: 'completed',
       durationMinutes: Number(draft.durationMinutes) || 0,
-      exercises: draft.exercises.filter((exercise) => exercise.enabled !== false),
+      exercises: draft.exercises.filter((exercise) => exercise.enabled !== false && (exercise.trackingType !== 'warmupNote' || exercise.enabledByUser)),
       createdAt: draft.createdAt ?? now.toISOString(),
       updatedAt: now.toISOString(),
     }

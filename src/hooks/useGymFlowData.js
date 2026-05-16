@@ -2,6 +2,7 @@ import { defaultExercises } from '../data/defaultExercises'
 import { defaultProgram } from '../data/defaultProgram'
 import { demoSessions } from '../data/demoSessions'
 import { getDefaultWarmupType, getExerciseDisplayName, getExerciseTrackingType } from '../utils/exerciseTracking'
+import { hasLoggedExercise, isTargetedWarmup } from '../utils/workoutLogUtils'
 import { useLocalStorage } from './useLocalStorage'
 
 function getLocalDateParts(date = new Date()) {
@@ -29,7 +30,7 @@ function createDraft(workoutDay, selectedExercises) {
     workoutDayId: workoutDay.id,
     workoutName: workoutDay.name,
     status: 'draft',
-    durationMinutes: '',
+    durationMinutes: 0,
     feeling: 'Normaali',
     exercises: selectedExercises.map((exercise) => {
       const trackingType = getExerciseTrackingType(exercise)
@@ -127,7 +128,10 @@ export function useGymFlowData() {
       completedAt: now.toISOString(),
       status: 'completed',
       durationMinutes: Number(draft.durationMinutes) || 0,
-      exercises: draft.exercises.filter((exercise) => exercise.enabled !== false && (exercise.trackingType !== 'warmupNote' || exercise.enabledByUser)),
+      exercises: draft.exercises.filter((exercise) => (
+        exercise.enabled !== false &&
+        (!isTargetedWarmup(exercise) || (exercise.enabledByUser && hasLoggedExercise(exercise)))
+      )),
       createdAt: draft.createdAt ?? now.toISOString(),
       updatedAt: now.toISOString(),
     }

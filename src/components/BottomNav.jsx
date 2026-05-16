@@ -14,6 +14,7 @@ export default function BottomNav({ activeView, onNavigate }) {
         {items.map((item) => (
           <button
             aria-current={activeView === item.id ? 'page' : undefined}
+            className="bottom-nav__item"
             key={item.id}
             onClick={() => onNavigate(item.id)}
             type="button"

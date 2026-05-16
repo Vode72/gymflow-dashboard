@@ -36,7 +36,7 @@ export default function Home({
             <button className="btn btn--primary" onClick={() => updateProfile({ name: 'Toni' })} type="button">
               Aloita demo-ohjelmalla
             </button>
-            <button className="btn btn--ghost" onClick={() => onNavigate('settings')} type="button">
+            <button className="btn btn--secondary" onClick={() => onNavigate('settings')} type="button">
               Muokkaa asetuksissa
             </button>
           </div>
@@ -51,7 +51,7 @@ export default function Home({
           <button className="btn btn--primary" onClick={() => onNavigate('workout')} type="button">
             Aloita treeni
           </button>
-          <button className="btn btn--ghost" onClick={() => setShowDayPicker(true)} type="button">
+          <button className="btn btn--secondary" onClick={() => setShowDayPicker(true)} type="button">
             Vaihda päivä
           </button>
         </div>

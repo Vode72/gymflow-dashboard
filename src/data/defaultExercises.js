@@ -1,6 +1,6 @@
 export const defaultExercises = [
   { id: 'treadmill', name: 'Yleislämmittely', category: 'warmup', muscleGroup: 'Lämmittely', defaultReps: '8-12 min', trackingType: 'warmupDuration', defaultWarmupType: 'Kävelymatto', alternativeExerciseIds: [], note: 'Rauhallinen aloitus', active: true },
-  { id: 'shoulder-warmup', name: 'Kohdennettu lämmittely', category: 'warmup', muscleGroup: 'Lämmittely', defaultReps: '2-3 kierrosta', trackingType: 'warmupNote', defaultWarmupType: 'Olkapäiden lämmittely', alternativeExerciseIds: ['face-pull'], note: '', active: true },
+  { id: 'shoulder-warmup', name: 'Kohdennettu lämmittely', category: 'warmup', muscleGroup: 'Lämmittely', defaultReps: '2-3 kierrosta', trackingType: 'warmupNote', defaultWarmupType: 'Olkapäät', alternativeExerciseIds: ['face-pull'], note: '', active: true },
   { id: 'scott-curl', name: 'Scott-penkki', category: 'strength', muscleGroup: 'Hauis', defaultReps: '8-12', trackingType: 'sets', alternativeExerciseIds: [], note: '', active: true },
   { id: 'close-smith-bench', name: 'Kapea penkki Smith', category: 'strength', muscleGroup: 'Ojentaja', defaultReps: '6-10', trackingType: 'sets', alternativeExerciseIds: ['barbell-bench'], note: '', active: true },
   { id: 'lat-pulldown', name: 'Ylätalja', category: 'strength', muscleGroup: 'Selkä', defaultReps: '8-12', trackingType: 'sets', alternativeExerciseIds: ['low-row'], note: '', active: true },

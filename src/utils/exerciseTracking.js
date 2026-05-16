@@ -17,6 +17,6 @@ export function getExerciseDisplayName(exercise) {
 export function getDefaultWarmupType(exercise) {
   if (exercise?.defaultWarmupType) return exercise.defaultWarmupType
   if (exercise?.id === 'treadmill') return 'Kävelymatto'
-  if (exercise?.id === 'shoulder-warmup') return 'Olkapäiden lämmittely'
+  if (exercise?.id === 'shoulder-warmup') return 'Olkapäät'
   return ''
 }

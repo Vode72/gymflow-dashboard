@@ -2036,3 +2036,178 @@ Date: 2026-05-16
 ### Next recommended step
 
 Step 1.2F.10 — Kohdennetun lämmittelyn inline-expand ja multi-warmup support
+
+## Step P1 — GymFlow Pro Visual Foundation
+
+Date: 2026-05-17
+
+### Files changed
+
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was visually changed
+
+- Card radius was reduced from a softer 20px direction to a sharper 14px foundation.
+- Smaller card surfaces now use a 10px small radius token where appropriate.
+- Button radius was reduced from pill-shaped defaults to a 10px foundation, with an 8px small button token available.
+- General cards, exercise cards, workout section cards, inline warmup cards, parsed set cards, modal cards, history detail cards, stat cards and bottom nav items were visually tightened.
+- Card and button shadows were reduced to feel more like a premium mobile product and less like a demo form UI.
+- Button role borders were made more restrained while preserving the existing role hierarchy.
+- Success green was locked to a modern green scale:
+  - default `#34c759`
+  - hover `#2fb84f`
+  - active `#28a745`
+
+### Key decisions
+
+- Chip and badge surfaces intentionally remain pill-shaped via chip/badge tokens.
+- Success/vihrea remains reserved for complete, save and approve actions such as `Liike valmis` and `Treeni valmis`.
+- Amber/yellow roles remain for add, suggestion, selected, PR and achievement-style actions.
+- Secondary/neutral roles remain for back, cancel, switch-day and neutral actions.
+- Danger roles remain for destructive actions.
+- Button hierarchy was preserved through CSS token and role styling only.
+
+### What was intentionally left out
+
+- No Home Today Hero Card.
+- No Completion Result Screen.
+- No Backup / Restore.
+- No comments, timers, calendar, achievements or progress charts.
+- No datalogic changes.
+- No parser changes.
+- No localStorage key changes.
+- No autosave changes.
+- No completed-session persistence changes.
+- No warmup or targeted warmup logic changes.
+- No `workoutDays`, `sessions` or `exercises` data model changes.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+
+### Build / Lint
+
+- `npm run build`: passed
+- `npm run lint`: passed
+
+### Next recommended step
+
+Comprehensive Test Session before next feature step, then Step P2 — Home Today Hero Card.
+
+## Step P1A — Radius Tightening Polish
+
+Date: 2026-05-17
+
+### Files changed
+
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was changed
+
+- `--card-radius` was tightened to `12px`.
+- `--card-radius-sm` was tightened to `8px`.
+- `--button-radius` was tightened to `8px`.
+- `--button-radius-sm` was tightened to `6px`.
+- Main card, exercise card, workout section, inline warmup, parsed set, modal, history and stat surfaces now inherit the tighter token values.
+- Day picker cards, workout exercise thumbnails, done toggles and stepper controls were aligned with the tighter small radius tokens.
+- Bottom nav was kept slightly softer than regular buttons, but tightened from the previous P1 shape.
+
+### Key decisions
+
+- Chips and badges were kept pill-shaped.
+- Success green was not changed and remains `#34c759`, `#2fb84f`, `#28a745`.
+- Existing amber/accent, secondary, danger, header, background, card and bottom nav colors were not changed.
+- Button role logic and visual hierarchy were preserved.
+- Padding and touch target sizing were left intact for mobile usability.
+
+### What was intentionally left out
+
+- No datalogic changes.
+- No parser changes.
+- No localStorage key changes.
+- No autosave changes.
+- No completed-session persistence changes.
+- No warmup or targeted warmup logic changes.
+- No `workoutDays`, `sessions` or `exercises` data model changes.
+- No React component logic changes.
+- No JSX structure changes.
+- No broad shadow or border redesign.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+
+### Build / Lint
+
+- `npm run build`: passed
+- `npm run lint`: passed
+
+### Next recommended step
+
+Step P1B — Header Page Title Center Alignment, or Comprehensive Test Session before next feature step.
+
+## Step P1B — Header Page Title Center Alignment
+
+Date: 2026-05-17
+
+### Files changed
+
+- `src/App.jsx`
+- `src/components/AppShell.jsx`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was changed
+
+- Active page title was moved to the center of the app header.
+- Header page title is now displayed in uppercase.
+- Active view title mapping now displays:
+  - `TÄNÄÄN`
+  - `TREENI`
+  - `HISTORIA`
+  - `KEHITYS`
+  - `OHJELMA`
+  - `ASETUKSET`
+- GymFlow brand area was kept on the left.
+- Demo pill was moved to a dedicated right-side status area.
+- `Made by Toni V` was kept as small brand metadata and hidden on narrow mobile widths.
+- Header layout was changed to a compact three-column app-style layout.
+
+### Key decisions
+
+- Navigation behavior and active view state were not changed.
+- Only the display mapping for the header title was changed.
+- Header gradient and existing visual theme were preserved.
+- Radius and color tokens were not changed.
+- Success green was not changed.
+- Button roles and bottom nav styling were not changed.
+
+### What was intentionally left out
+
+- No datalogic changes.
+- No parser changes.
+- No localStorage key changes.
+- No autosave changes.
+- No completed-session persistence changes.
+- No warmup or targeted warmup logic changes.
+- No `workoutDays`, `sessions` or `exercises` data model changes.
+- No new routes or navigation state changes.
+- No broad header redesign beyond page title alignment.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+
+### Build / Lint
+
+- `npm run build`: passed
+- `npm run lint`: passed
+
+### Next recommended step
+
+Comprehensive Test Session, or Step P2 — Home Today Hero Card.

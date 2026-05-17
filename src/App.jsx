@@ -18,6 +18,15 @@ const views = {
   settings: Settings,
 }
 
+const pageTitleMap = {
+  home: 'TÄNÄÄN',
+  workout: 'TREENI',
+  history: 'HISTORIA',
+  progress: 'KEHITYS',
+  program: 'OHJELMA',
+  settings: 'ASETUKSET',
+}
+
 function App() {
   const [activeView, setActiveView] = useState('home')
   const [selectedWorkoutDayId, setSelectedWorkoutDayId] = useState(null)
@@ -25,15 +34,7 @@ function App() {
   const ActivePage = views[activeView]
 
   const pageTitle = useMemo(() => {
-    const titles = {
-      home: 'Tänään',
-      workout: 'Treeni',
-      history: 'Historia',
-      progress: 'Kehitys',
-      program: 'Ohjelma',
-      settings: 'Asetukset',
-    }
-    return titles[activeView]
+    return pageTitleMap[activeView]
   }, [activeView])
 
   return (

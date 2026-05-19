@@ -2211,3 +2211,38 @@ Date: 2026-05-17
 ### Next recommended step
 
 Comprehensive Test Session, or Step P2 — Home Today Hero Card.
+
+## Exercise Thumbnail Assets — Initial Asset Batch
+
+Aloitettu GymFlowin liike-thumbnail-kuvien rakentaminen.
+
+Päätetty kuvatyyli:
+- yksi kuva per liike
+- PNG-muoto
+- vaalea / beige tai valkoinen tausta
+- anatominen fitness-illustration / thumbnail style
+- pääkohdelihas korostetaan punaisella
+- kuvat tallennetaan kansioon `src/assets/exercises/`
+- tiedostonimet englanniksi, pienillä kirjaimilla, ilman ääkkösiä
+- tiedostonimi, `id` ja `imageKey` pyritään pitämään samana myöhempää datakytkentää varten
+
+Hyväksyttyjä / tallennettuja kuvia tähän mennessä:
+- `bench-press-barbell.png`
+- `lat-pulldown.png`
+- `seated-cable-row.png`
+- `scott-bench-curl.png`
+- `smith-close-grip-flat-bench-press.png`
+- `smith-incline-bench-press.png`
+- `cable-rope-triceps-pushdown.png`
+- `cable-straight-bar-triceps-pushdown.png`
+- `cable-ez-bar-triceps-pushdown.png`
+
+Tärkeä päätös:
+Kuvia ei vielä kytketä appin UI:hin tässä vaiheessa. Varsinainen toteutus tehdään myöhemmin erillisessä stepissä:
+
+### Step IMG1 — Exercise Thumbnails
+- lisää `imageKey` liikedataan
+- lisää `exerciseImages` mapping
+- näytä pieni thumbnail liikkeen edessä
+- fallback-kuva, jos liikkeeltä puuttuu kuva
+- ei muutoksia parseriin, autosaveen tai completed-session tallennukseen

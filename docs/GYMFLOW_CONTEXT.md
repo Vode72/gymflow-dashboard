@@ -1,48 +1,63 @@
-# GymFlow Dashboard - projektikonteksti
+# GymFlow Dashboard — Master Context
 
-## 1. Projektin nimi
+Last updated: 2026-05-23
+
+## 1. Project name
 
 GymFlow Dashboard
 
-## 2. Projektin tavoite
+## 2. Product goal
 
-React + Vite + PWA-ready mobile-first workout diary / training dashboard.
+GymFlow Dashboard is a React + Vite + PWA-ready mobile-first workout diary / training dashboard.
 
-Sovelluksen tulee olla:
+The product should feel like:
 
-- nopea käyttää
+- fast to use at the gym
 - mobile-first
-- visuaalisesti viimeistelty
-- SAP Light Beige / FleetFlow Light -henkinen
+- visually polished
+- SAP Light Beige / FleetFlow Light inspired
 - premium minimal
-- dashboard-tyylinen
+- dashboard-style
 - offline-first
-- tuotemainen
-- mahdollisesti portfolio-kelpoinen, viraali ja myöhemmin tuotteistettava
+- product-like
+- portfolio-ready
+- potentially sellable later
 
-Tämä ei ole:
+The product is not:
 
-- sosiaalinen fitness-sovellus
-- kaloriseurannan ekosysteemi
-- AI coach
-- MyFitnessPal-klooni
-- Excel-klooni
+- a social fitness app
+- a calorie tracking ecosystem
+- an AI coach
+- a MyFitnessPal clone
+- an Excel clone
+- a generic workout form demo
 
-## 3. Työnkulku
+Core product questions:
 
-- Toni ja ChatGPT suunnittelevat arkkitehtuurin, UX:n, datamallin ja toteutusaskeleet.
-- ChatGPT antaa copy-paste-valmiit Codex-promptit.
-- Codex tekee koodimuutokset.
-- Askeleiden pitää olla pieniä ja turvallisia.
-- Jokaisen koodausaskeleen jälkeen Codex päivittää tämän kontekstitiedoston.
+- What should I do today?
+- What did I do last time?
+- Am I progressing?
 
-## 4. Tuotteen ydinkysymykset
+## 3. Workflow rule
 
-- Mitä teen tänään?
-- Mitä tein viimeksi?
-- Kehitynkö?
+Toni and ChatGPT plan the architecture, UX, data model and implementation steps together.
 
-## 5. Nykyinen teknologiapino
+Important workflow rule:
+
+- ChatGPT must not give a copy-paste Codex prompt or code before Toni confirms that the step should be turned into a Codex prompt.
+- First: discuss and plan.
+- Then: define the safe scope.
+- Then: ask Toni for confirmation.
+- Only after confirmation: provide one clear copy-paste-ready Codex prompt.
+- Codex implements the code changes.
+- Each code step must be small, safe and testable.
+- After each implementation step, Codex must update this context file.
+
+Standard context update rule for future Codex prompts:
+
+> After implementing any future step, update `docs/GYMFLOW_CONTEXT.md` by appending a new section with the step number, summary, files changed, key decisions, tests run, build/lint result and next recommended step. Do not delete previous context unless Toni explicitly asks to clean or compact the file.
+
+## 4. Current tech stack
 
 - React
 - Vite
@@ -50,2183 +65,332 @@ Tämä ei ole:
 - CSS
 - localStorage
 - PWA-ready manifest
-- ei backendia MVP:ssä
-- ei kirjautumista MVP:ssä
-- ei cloud synciä MVP:ssä
+- GitHub Pages deployment
+- No backend in MVP
+- No login in MVP
+- No cloud sync in MVP
 
-## 6. Visuaalinen suunta
+## 5. Visual direction
+
+Current visual direction:
 
 - GymFlow™ Dashboard
 - Made by Toni V
-- SAP Light Beige / FleetFlow Light -tyyli
-- rauhallinen premium minimal UI
-- korttipohjainen layout
-- isot mobiilikosketusalueet
-- ei neon-fitness-ilmettä
-- ei pieniä Excel-mäisiä ruudukon soluja
+- SAP Light Beige / FleetFlow Light style
+- calm premium minimal UI
+- compact dashboard cards
+- mobile-friendly large touch targets
+- warm beige / amber / green semantic color system
+- no neon fitness look
+- no Excel-like tiny grid cells
+- no overloaded form UI
 
-## 7. Keskeiset arkkitehtuuripäätökset
+Design decisions:
 
-- Treenipäiviä ei saa kovakoodata kiinteäksi Day 1-4 -logiikaksi.
-- Sovelluksen pitää tukea mitä tahansa määrää käyttäjän määrittelemiä treenipäiviä.
-- Nykyinen 4 päivän ohjelma on vain demo-/oletussisältöä.
-- Käyttäjä voi myöhemmin lisätä, poistaa, nimetä uudelleen ja järjestää treenipäiviä.
-- Liikepankki on myöhemmin muokattava.
-- Käyttäjä voi myöhemmin lisätä, muokata ja poistaa liikkeitä.
-- Samalle kalenteripäivälle pitää tukea useita treenisessioita.
-- `workoutSession` tarkoittaa yhtä treenitapahtumaa, ei päivää.
-- Seuraavan treenin ehdotus perustuu viimeisimpään valmistuneeseen sessioon ja aktiiviseen `workoutDays`-järjestykseen.
-- Nopea sarjakirjaus on reps first, weight second.
-- Esimerkit:
+- Success green is reserved for save / complete / accept actions.
+- Amber / yellow is used for add, selected, suggestion, PR and achievement-style actions.
+- Secondary gray is used for neutral actions such as back, cancel and switch day.
+- Danger / reddish brown is reserved for destructive actions.
+- Chips and badges may remain pill-shaped.
+- Cards and buttons are intentionally less round than the first versions.
+- The product should feel sharper and more premium, not overly soft.
+
+Current important visual tokens / decisions:
+
+- Card radius has been tightened.
+- Button radius has been tightened.
+- Success green direction has been accepted.
+- Header has a compact three-column layout.
+- Active page title is centered and uppercase.
+- Bottom navigation is fixed and mobile-first.
+
+Header page title mapping:
+
+- `TÄNÄÄN`
+- `TREENI`
+- `HISTORIA`
+- `KEHITYS`
+- `OHJELMA`
+- `ASETUKSET`
+
+## 6. Core architecture decisions
+
+Important architecture rules:
+
+- Workout days must not be hardcoded as fixed Day 1-4 logic.
+- The app must support any number of user-defined workout days later.
+- The current 4-day program is demo/default content only.
+- Users should later be able to add, delete, rename and reorder workout days.
+- Exercise bank must be editable later.
+- Users should later be able to add, edit and delete exercises.
+- Multiple workout sessions on the same calendar day must be supported.
+- `workoutSession` means one training event, not one day.
+- Next workout suggestion is based on the latest completed session and active `workoutDays` order.
+- Completed workouts must be editable later.
+- Records and progress should be calculated from saved sessions, not stored as a fragile separate truth source.
+
+## 7. Workout logging model
+
+Set-based exercise logging:
+
+- Fast set input is reps first, weight second.
+- Supported examples:
   - `15/40 + 10/60 + 6/75`
   - `15x40 / 10x60 / 6x75`
-- Sisäinen sarjaformaatti:
+- Internal set format:
   - `{ reps, weight }`
-- Valmiit treenit pitää voida myöhemmin muokata.
-- Ennätykset ja kehitys lasketaan tallennetuista sessioista, ei erillisenä hauraana totuutena.
 
-## 8. Nykyiset näkymät
+Tracking types:
 
-- Tänään / Home
-- Treeni / Workout
-- Historia
-- Kehitys / Progress
-- Ohjelma / Program
-- Asetukset / Settings
+- Strength / set-based exercises use set logging.
+- General warmups use warmup duration style logging.
+- Targeted warmups use note/duration/completed style logging.
+- Duration and note exercises do not calculate top kg or estimated 1RM.
 
-## 9. Valmistuneet askeleet
+Current workout draft behavior:
 
-### Step 1.1 - Foundation
+- Active workout draft is stored in localStorage.
+- Draft persists through refresh and browser reopen.
+- If an active draft exists, Workout must use its `workoutDayId` before suggested next day logic.
+- Draft supports duration, feeling, warmups, targeted warmups, exercise logs, quality stars and exercise comments.
+- Completing a workout stores a completed session in the sessions list and clears the draft only after successful save.
 
-Yhteenveto:
+## 8. Current app views
+
+Main views:
+
+- Home / Tänään
+- Workout / Treeni
+- History / Historia
+- Progress / Kehitys
+- Program / Ohjelma
+- Settings / Asetukset
+
+## 9. Current completed feature areas
+
+### Foundation
+
+Implemented:
 
 - mobile-first app shell
 - bottom navigation
-- päänäkymät
-- demo-ohjelma
-- liikepankki
-- demo-sessiot
-- localStorage-hookit
-- utility-rakenne
-- i18n-rakenne
+- main views
+- demo program
+- exercise bank structure
+- demo sessions
+- localStorage hooks
+- utility structure
+- i18n-ready structure
 - PWA manifest
 - reps-first parser
-- geneerinen `workoutDays`-malli
-- useat sessiot samalle päivälle tuettu datamallissa
+- generic workoutDays model
+- multiple sessions per day supported by data model
 
-### Step 1.1A - README + polish
+### Header and navigation polish
 
-Yhteenveto:
+Implemented:
 
-- product-grade README
-- onboarding-copy parannettu
-- Program-sivulle lisätty demo-ohjelman selite
-- header tiivistetty
-- bottom nav -välitys parannettu
+- branded header
+- GymFlow™ Dashboard
+- Made by Toni V
+- Demo status pill
+- compact three-column header
+- centered uppercase active page title
+- bottom nav safe-area spacing
+- fixed bottom navigation
+- active bottom nav visual polish
 
-### Step 1.1B - Header brand + bottom nav safe area
+### Workout Logging Core
 
-Yhteenveto:
+Implemented:
 
-- branded header lisätty:
-  - GymFlow™ Dashboard
-  - `{page title} · Made by Toni V`
-  - Demo-statuspill
-- bottom nav safe-area -välitys korjattu
-- viimeiset kortit voivat skrollata navin yläpuolelle
-
-## 10. Nykyinen status
-
-- Step 1.1 foundation on hyväksytty
-- Step 1.1A on hyväksytty
-- Step 1.1B on hyväksytty
-- Seuraava suunniteltu askel: Step 1.2 Workout Logging Core
-
-## 11. Seuraava suunniteltu askel
-
-### Step 1.2 - Workout Logging Core
-
-Suunniteltu scope:
-
-- aktiivinen draft workout
-- reps-first set input Workout-näkymässä
-- sarjojen parsiminen rakenteiseksi dataksi
-- top kg -laskenta
-- top reps -laskenta
-- estimated 1RM -laskenta
+- active workout draft
+- reps-first set input
+- parsed structured sets
+- top kg calculation
+- top reps calculation
+- estimated 1RM calculation using Epley-style logic
 - feeling input
 - duration input
-- draftin autosave
-- completion confirmation dialog
-- valmiin session tallennus Historiaan
-- salli valmiin treenin avaaminen myöhemmin tulevassa stepissä tai valmistele rakenne sitä varten
-
-## 12. Kontekstin päivityssääntö tuleville Codex-prompteille
-
-"After implementing any future step, update docs/GYMFLOW_CONTEXT.md by appending a new section with the step number, summary, files changed, key decisions, tests run, build/lint result and next recommended step. Do not delete previous context."
-
-## Step 1.2 — Workout Logging Core
-
-Päivä: 2026-05-15
-
-### Files changed
-
-- `src/hooks/useGymFlowData.js`
-- `src/pages/Workout.jsx`
-- `src/pages/History.jsx`
-- `src/pages/Progress.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/components/SetInputRow.jsx`
-- `src/components/CompletionSummary.jsx`
-- `src/utils/parseSets.js`
-- `src/utils/progressLogic.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### Implemented features
-
-- Aktiivinen treeniluonnos tallennetaan avaimella `gymflow_active_draft`.
-- Workout-näkymä alustaa luonnoksen valitun `workoutDays`-päivän perusteella.
-- Liikekohtaiset sarjat kirjataan reps-first-muodossa.
-- Tuetut muodot:
-  - `15/40 + 10/60 + 6/75`
-  - `15x40 / 10x60 / 6x75`
-- Sarjat parsitaan sisäiseen formaattiin `{ reps, weight }`.
-- UI näyttää sarjojen määrän, top kg:n, top repsin ja Epley-kaavan mukaisen arvioidun 1RM:n.
-- Luonnokselle voi kirjata keston ja tuntemuksen.
-- Luonnos autosave-tallentuu localStorageen jokaisella muutoksella.
-- `Merkitse valmiiksi` avaa vahvistuskortin.
-- Vahvistus tallentaa session `completed`-tilassa `gymflow_sessions`-listaan.
-- History näyttää sekä demo-sessiot että uudet tallennetut treenit.
-- Progress lukee tallennetuista sessioista henkilökohtaisia ennätyksiä kevyesti.
-
-### Data model notes
-
-- `workoutSession` tarkoittaa yhtä treenitapahtumaa, ei kalenteripäivää.
-- Samalle päivälle voi tallentua useita completed-sessioita.
-- Treenipäivien logiikka käyttää edelleen geneeristä `workoutDays`-taulukkoa.
-- Nykyinen 4 päivän ohjelma on vain demo-/oletussisältöä.
-- Valmiita treenejä ei lukita datamallissa pysyvästi, vaikka täysi uudelleenavaus jätettiin myöhemmäksi.
-- Ennätykset ja progress lasketaan sessioista, ei erillisestä totuuslähteestä.
-
-### UX decisions
-
-- Workout pysyy korttipohjaisena ja rauhallisena.
-- Validointi on kevyt: virheellinen sarjamuoto näyttää vain pienen huomautuksen.
-- Kesto ja tuntemus ovat yksinkertaiset inputit.
-- Historia pysyy korttinäkymänä eikä muutu taulukoksi.
-- Historyssä on placeholder-painike `Muokkaa myöhemmin`, mutta muokkausflowta ei vielä toteutettu.
-
-### What was intentionally left out
-
-- Ei full Program editing -toimintoja.
-- Ei add/remove/reorder-treenipäiviä.
-- Ei cloud synciä, loginia tai backendia.
-- Ei chart-kirjastoja.
-- Ei täyttä completed workout reopening -workflowta.
-- Ei AI coachia, kaloriseurantaa tai sosiaalista jakamista.
-
-### Tests run
-
-- Parser smoke check:
-  - `15/40 + 10/60 + 6/75`
-  - `15x40 / 10x60 / 6x75`
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2A — Workout Logging QA + UI polish
-
-## Step 1.2A — Workout Logging QA + UX Fixes
-
-Päivä: 2026-05-15
-
-### Files changed
-
-- `src/data/defaultExercises.js`
-- `src/hooks/useGymFlowData.js`
-- `src/pages/Workout.jsx`
-- `src/pages/History.jsx`
-- `src/pages/Home.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/components/CompletionSummary.jsx`
-- `src/components/WorkoutDayPicker.jsx`
-- `src/utils/durationUtils.js`
-- `src/utils/exerciseTracking.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Lisättiin kevyt `trackingType`-malli: `sets`, `duration`, `note`.
-- `Kävelymatto` käyttää nyt duration-kirjausta eikä sarjaparseria.
-- `Olkapäiden lämmittely` käyttää nyt note-kirjausta eikä sarjaparseria.
-- Voimaliikkeet säilyvät reps-first `sets`-kirjauksessa.
-- Vanhalle localStorage-liikepankille lisättiin fallback-logiikka `treadmill`- ja `shoulder-warmup`-liikkeille.
-- Treenin kokonaiskesto kirjataan nyt tunteina ja minuutteina.
-- Kesto näytetään muodossa `54 min`, `1 h 15 min` tai `2 h 5 min`.
-- `Merkitse valmiiksi` avaa nyt selkeän modal/popup-vahvistuksen.
-- Workout day picker näyttää treenipäivän nimen ja kuvauksen eri riveillä.
-- Historyn muokkausplaceholder kertoo selkeämmin, että valmiin treenin uudelleenavaus tulee myöhemmin.
-- Completion summary laskee merkinnät tracking-tyypin mukaan ja laskee sarjat vain set-pohjaisista liikkeistä.
-
-### Key decisions
-
-- Ei toteutettu full Program editing -toimintoja.
-- Ei toteutettu completed workout reopening -flowta.
-- `workoutDays` säilyy geneerisenä taulukkona, eikä 4 päivän demo-ohjelmaa kovakoodattu logiikaksi.
-- Reps-first-formaatti säilyy oletuksena set-pohjaisille liikkeille.
-- Duration- ja note-liikkeille ei lasketa top kg:ta tai 1RM-arviota.
-- Modal toteutettiin CSS:llä ilman ulkoisia riippuvuuksia.
-
-### Tests run
-
-- Parser smoke check: `15/20 + 10/30`
-- Duration smoke check: `10 min` -> `10`
-- Duration display smoke check: `75` -> `1 h 15 min`
-- Demo tracking type smoke check:
-  - `treadmill` -> `duration`
-  - `shoulder-warmup` -> `note`
-  - `barbell-bench` -> `sets`
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2E — Workout Exercise List View
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/utils/workoutLogUtils.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Workout-näkymään lisättiin sisäinen liikelista/detail-rakenne.
-- Treenipäivä näyttää ensin päivän summaryn ja liikkeet korttilistana.
-- Liikekortti näyttää:
-  - liikkeen nimen
-  - tyypin (`Sarjat`, `Lämmittely`, `Merkintä`)
-  - nykyisen treenin tilan (`Ei kirjattu` / `Kirjattu`)
-  - viimeisimmän tuloksen, jos sellainen löytyy completed-sessioista.
-- Yksittäisen liikkeen valinta avaa detail-näkymän, jossa käytetään edelleen nykyistä `ExerciseLogCard`-kirjausta.
-- Detail-näkymään lisättiin `Takaisin liikelistaan` -toiminto.
-- Treenin tiedot, autosave, luonnoksen tallennus ja completion confirmation säilytettiin nykyisessä Workout-näkymässä.
-
-### Key decisions
-
-- Workout käyttää nyt sisäistä liikelista/detail-näkymää.
-- `selectedExerciseId` ohjaa, näytetäänkö päivän liikelista vai yksittäisen liikkeen kirjaus.
-- Nykyinen reps-first-kirjaus säilytettiin.
-- Nykyinen autosave ja completion confirmation säilytettiin.
-- Viimeisin tulos näytetään liikkeen kortilla, jos tallennetuista completed-sessioista löytyy sama `exerciseId`.
-- Uutta plus/miinus-sarjaeditoria, quality-kenttää, liikepankkia, kalenteria tai achievements-toimintoja ei vielä toteutettu.
-
-### What was intentionally left out
-
-- Ei muutettu `workoutSession`-datamallia raskaasti.
-- Ei muutettu reps-first parserin toimintaa.
-- Ei toteutettu uutta sarja kerrallaan -editoria.
-- Ei toteutettu completed workout reopening -flowta.
-- Ei toteutettu kalenteria, achievements-toimintoja tai liikepankkia.
-
-### Tests run
-
-- Smoke check:
-  - `getLastExerciseResult(demoSessions, 'lat-pulldown')`
-  - tuntematon liike palauttaa `Ei aiempaa tulosta`
-  - pelkkä default warmup type ei counttaa kirjaukseksi
-  - reps-first parser säilyy muodolle `15/40 + 10/60 + 6/75`
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2D.3B — Header Gradient Revert + Brand Title Selector Fix
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Header-gradientti palautettiin aiempaan parempaan suuntaan:
-  - `linear-gradient(135deg, #34312d 0%, #4a3429 48%, #6f4228 100%)`
-- Korjattiin pääotsikon CSS-selector käyttämään oikeaa olemassa olevaa rakennetta:
-  - `.app-header .app-brand__name`
-- `GymFlow™ Dashboard` käyttää nyt `--header-title`-tokenia.
-- Headerin yleinen tekstiväri palautettiin `--header-text`-tokeniin, jotta vain pääotsikko on amber.
-
-### Key decisions
-
-- Header-gradientti palautettiin suuntaan tumma vasen / lämmin oikea.
-- Pääotsikon CSS-selector korjattiin, jotta GymFlow™ Dashboard käyttää `--header-title`-tokenia.
-- Vain pääotsikko käyttää amber/oranssi-keltaista väriä.
-- Alaotsikko jätettiin vaaleaksi/beigeksi.
-- Header pidettiin kompaktina eikä muutettu hero-banneriksi.
-- Kortteja, painikkeita, bottom navia ja toiminnallista logiikkaa ei muutettu.
-
-### What was intentionally left out
-
-- Ei muutettu treenilogiikkaa.
-- Ei muutettu `workoutSession`-datamallia.
-- Ei muutettu parseria.
-- Ei muutettu painikkeiden semanttisia rooleja.
-- Ei muutettu kortteja tai bottom navia.
-- Ei lisätty theme selectoria tai uusia featureita.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2D.3A — Header Gradient Direction + Brand Title Accent Polish
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Headerin gradientin suuntaa hienosäädettiin.
-- Käyttöön jäi hillitympi gradientti:
-  - `linear-gradient(135deg, #5f3a27 0%, #463229 48%, #2f3030 100%)`
-- Lisättiin brand title -tokenit:
-  - `--header-title`
-  - `--header-title-soft`
-- `GymFlow™ Dashboard` käyttää nyt amber/oranssi-keltaista `--header-title`-sävyä.
-- Alaotsikko säilyy rauhallisena vaaleana/beigenä.
-
-### Key decisions
-
-- Headerin gradientin suuntaa hienosäädettiin tasapainoisemmaksi.
-- Pääotsikko GymFlow™ Dashboard muutettiin amber/oranssi-keltaiseksi.
-- Alaotsikko jätettiin vaaleaksi/beigeksi rauhallisen kontrastin vuoksi.
-- Header pidettiin kompaktina eikä muutettu hero-banneriksi.
-- Kortteja, painikkeita, bottom navia ja toiminnallista logiikkaa ei muutettu.
-
-### What was intentionally left out
-
-- Ei muutettu treenilogiikkaa.
-- Ei muutettu `workoutSession`-datamallia.
-- Ei muutettu parseria.
-- Ei muutettu painikkeiden semanttisia rooleja.
-- Ei muutettu kortteja tai bottom navia.
-- Ei lisätty theme selectoria tai uusia featureita.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2D.3 — Compact Gradient Header Brand Polish
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Lisättiin headerille oma tumma lämmin gradient-token:
-  - `--header-bg-soft`
-- Lisättiin headerin teksti-, korostus-, border- ja shadow-tokenit:
-  - `--header-text`
-  - `--header-text-muted`
-  - `--header-accent`
-  - `--header-border`
-  - `--header-shadow`
-- Pääheader käyttää nyt kompaktia gradient-brändipalkkia.
-- GymFlow™ Dashboard -teksti käyttää vaaleaa header-tekstiä.
-- Sivunimi ja `Made by Toni V` käyttävät vaaleaa beigeä.
-- GF-logo ja Demo-pill sovitettiin tummaan headeriin hillityillä amber/beige-korostuksilla.
-
-### Key decisions
-
-- Header muutettiin kompaktiksi tummaksi gradient-brändipalkiksi.
-- Header ei ole hero-banneri eikä vie mobiilissa liikaa korkeutta.
-- Pääteksti käyttää vaaleaa tekstiä, alaotsikko vaaleaa beigeä.
-- GF-logo ja Demo-pill sovitettiin tummaan headeriin hillityillä amber/beige-korostuksilla.
-- Kortteja, painikkeita, bottom navia ja toiminnallista logiikkaa ei muutettu.
-
-### What was intentionally left out
-
-- Ei muutettu treenilogiikkaa.
-- Ei muutettu `workoutSession`-datamallia.
-- Ei muutettu parseria.
-- Ei muutettu painikkeiden semanttisia rooleja.
-- Ei muutettu kortteja tai bottom navia.
-- Ei lisätty theme selectoria tai uusia featureita.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2D.2 — SAP Beige Contrast Polish
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Päivitettiin oletus-/SAP Beige -teeman kontrastihierarkiaa.
-- Sivun taustaa tummennettiin lämpimämpään beigeen.
-- Korttien tausta pidettiin selvästi vaaleampana kuin appin tausta.
-- Lisättiin `--panel-header-bg`-token ja käytettiin sitä header-kerroksen sävyttämiseen.
-- Korttien borderia ja varjoa vahvistettiin hillitysti.
-
-### Key decisions
-
-- Oletusteeman sivutaustaa tummennettiin hieman, jotta kortit erottuvat paremmin.
-- Korttien tausta pidettiin vaaleampana kuin appin tausta.
-- Header/panel-header sävyä tummennettiin hieman, jotta se erottuu paremmin.
-- Borderia ja varjoa vahvistettiin hillitysti.
-- Painikeroolien värejä ei muutettu tässä stepissä.
-- Toiminnallista logiikkaa ei muutettu.
-
-### What was intentionally left out
-
-- Ei muutettu treenilogiikkaa.
-- Ei muutettu `workoutSession`-datamallia.
-- Ei muutettu parseria.
-- Ei muutettu painikkeiden semanttisia rooleja.
-- Ei muutettu Charcoal Beige- tai Clean Light -teemojen värejä.
-- Ei lisätty theme selectoria tai uusia featureita.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2D.1 — Success Button Green Tone Polish
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Päivitettiin success-painikkeen vihreä sävy hillitymmäksi.
-- Lisättiin success-hover-token.
-- Lisättiin `.btn--success`-luokalle kevyt premium-henkinen varjo.
-- Lisättiin rauhallinen hover- ja active-tila vain success-painikkeelle.
-
-### Key decisions
-
-- Success-vihreä muutettiin hillitymmäksi sävyyn `#2f7d4f`.
-- Hover-sävyksi asetettiin `#276a43`.
-- Success-rooli säilyy vain tallennus-, valmis- ja hyväksyntätoiminnoille.
-- Muita painikeroolien värejä ei muutettu.
-
-### What was intentionally left out
-
-- Ei muutettu treenilogiikkaa.
-- Ei muutettu `workoutSession`-datamallia.
-- Ei muutettu parseria.
-- Ei muutettu painikkeiden semanttisia rooleja.
-- Ei lisätty uusia featureita.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2D — Visual Direction Lock
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `src/pages/Home.jsx`
-- `src/pages/Workout.jsx`
-- `src/pages/Program.jsx`
-- `src/pages/History.jsx`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Lisättiin design token -pohja GymFlowin visuaaliselle suunnalle.
-- Nykyinen oletustyyli lukittiin SAP Beige -henkiseksi premium minimal -dashboardiksi.
-- Lisättiin tulevien teemojen token-pohjat ilman UI-kytkentää:
-  - `data-theme='charcoal-beige'`
-  - `data-theme='clean-light'`
-- Yhtenäistettiin painikeroolit:
-  - `.btn`
-  - `.btn--primary`
-  - `.btn--secondary`
-  - `.btn--success`
-  - `.btn--accent`
-  - `.btn--warning`
-  - `.btn--danger`
-  - `.btn--ghost`
-- Päivitettiin tärkeimmät nykyiset painikkeet käyttämään uusia rooleja.
-- Korttien perusmuuttujia yhtenäistettiin:
-  - `--card-bg`
-  - `--card-bg-strong`
-  - `--card-radius`
-  - `--card-padding`
-  - `--border-soft`
-  - `--shadow-soft`
-- CSS:ään lisättiin selkeät kommenttirakenteet:
-  - Theme tokens
-  - Button roles
-  - Card base styles
-
-### Key decisions
-
-- Painike-/värisemantiikka lukittiin:
-  - Vihreä = tallenna / valmis / hyväksy
-  - Amber = valittu / PR / saavutus / ehdotus / ehdotettu päivä
-  - Tumma = normaali päätoiminto vaalealla pohjalla
-  - Oranssi = säästeliäs lisäys- tai huomioaction
-  - Punaruskea = poisto / vaarallinen toiminto
-- Kolmen tulevan teeman pohja huomioidaan:
-  - SAP Beige
-  - Charcoal Beige
-  - Clean Light
-- Tässä stepissä ei vielä toteutettu theme selectoria.
-- Tässä stepissä ei vielä toteutettu uutta sarjaeditoria.
-- Tässä stepissä ei vielä toteutettu kalenteria.
-- Tässä stepissä ei vielä toteutettu achievements-toimintoja.
-
-### What was intentionally left out
-
-- Ei muutettu treenin tallennuslogiikkaa.
-- Ei muutettu `workoutSession`-datamallia.
-- Ei muutettu reps-first parserin toimintaa.
-- Ei lisätty uusia UI-kirjastoja, ikoneita tai kuvia.
-- Ei rakennettu Settingsiin teemanvaihtoa.
-- Ei toteutettu liikepankkia, kalenteria, achievements-näkymää tai uutta setti-editoria.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2C — Change Day Flow + Warmup Polish + Program Placeholder Actions
-
-Päivä: 2026-05-15
-
-### Files changed
-
-- `src/App.jsx`
-- `src/pages/Home.jsx`
-- `src/pages/Workout.jsx`
-- `src/pages/Program.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/hooks/useGymFlowData.js`
-- `src/utils/workoutLogUtils.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Home-näkymän `Vaihda päivä` avaa nyt treenipäivän valintamodaalin.
-- Valittu treenipäivä tallennetaan app-tason UI-tilaan ja välitetään Workout-näkymään.
-- `Aloita treeni` avaa Workout-näkymän valitulla treenipäivällä.
-- Program-sivun placeholder-painikkeet näyttävät näkyvän ilmoituksen, eivätkä tunnu kuolleilta.
-- Kohdennettu lämmittely ei ole enää oletuksena näkyvissä Day 1:llä, vaikka demo-ohjelmassa on targeted warmup item.
-- Kohdennettu lämmittely aktivoituu vain käyttäjän toggle-valinnalla.
-- Warmup-kortteja tiivistettiin ja kevennettiin visuaalisesti.
-- `Tehty`-painikkeen aktiivinen tila erottuu selkeämmin.
-- Warmup-yhteenveto käyttää `Muu`-valinnassa custom-tekstiä, jos se on annettu.
-
-### Home change-day UX decision
-
-- `Vaihda päivä` ei enää navigoi Ohjelma-sivulle.
-- Käyttäjä valitsee treenipäivän kevyessä modal-valitsimessa.
-- Valinta ohittaa automaattisen seuraavan treenin ehdotuksen nykyisessä UI-tilassa.
-- Automaattinen `getNextWorkoutDay`-logiikka säilyy pohjaehdotuksena.
-
-### Program placeholder action decision
-
-- Full Program editing jäi tarkoituksella toteuttamatta.
-- Painikkeet näyttävät nyt inline-ilmoituksen:
-  - ohjelman muokkaus myöhemmin
-  - liikepankin muokkaus myöhemmin
-  - treenipäivän muokkaus myöhemmin
-- Program-näkymä kertoo staattisesti, että nykyinen sivu näyttää demo-ohjelman rakenteen.
-
-### Warmup polish changes
-
-- Warmup-korttien paddingia, gap-arvoja ja label-kokoa pienennettiin.
-- Warmup-korteista poistettiin raskas edellinen tulos -placeholder.
-- `Tehty` näyttää aktiivisena muodossa `✓ Tehty`.
-- Custom warmup -summary toimii:
-  - `Keppijumppa + liikkuvuus · 8 min · Tehty`
-  - `Rintaranka + lapatuet · 2 kierrosta · Tehty`
-- Strength-korttien reps-first-kirjaus pidettiin ennallaan.
-
-### Known limitations
-
-- Valittu treenipäivä on vain nykyisen app-session UI-tila, ei pysyvä asetus.
-- Program editing, Exercise Bank editing ja day-specific targeted warmup defaults ovat edelleen myöhempiä vaiheita.
-- Completed workout reopening ei ole vielä toteutettu.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2B — Targeted Warmup Toggle + Compact Warmup Cards
-
-Päivä: 2026-05-15
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/hooks/useGymFlowData.js`
-- `src/utils/workoutLogUtils.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Lisättiin Workout-näkymään toggle `Lisää kohdennettu lämmittely`.
-- Day 1 voi näyttää kohdennetun lämmittelyn oletuksena, koska demo-ohjelmassa se on mukana.
-- Muut treenipäivät voivat ottaa kohdennetun lämmittelyn käyttöön per treeniluonnos ilman Program-datan muuttamista.
-- Toggle pois päältä piilottaa kohdennetun lämmittelyn ja jättää sen pois yhteenvedosta.
-- Toggle takaisin päälle säilyttää draft-arvot saman luonnoksen aikana.
-- Disabled targeted warmup suodatetaan pois completed-session tallennuksesta.
-
-### Targeted warmup UX decision
-
-- Kohdennettu lämmittely ei ole pakollinen app-logiikka.
-- Se on per-workout/draft-valinta tässä vaiheessa.
-- Program editing voi myöhemmin lisätä pysyvät päiväkohtaiset oletukset.
-- UI käyttää edelleen lopullisia kenttiä:
-  - `Tyyppi`
-  - `Kirjoita oma kohdennettu lämmittely`
-  - `Merkintä`
-  - `Tehty`
-
-### Compact warmup card decisions
-
-- Warmup-korteille lisättiin `exercise-card--warmup`.
-- Warmup-korteissa on pienempi padding, kevyempi varjo ja tiiviimpi kenttäväli.
-- Warmup-kortit eivät näytä raskasta edellinen tulos -placeholderia.
-- Strength-korttien reps-first-kirjaus, parseri, top kg, top reps ja 1RM-yhteenveto säilyivät ennallaan.
-
-### Data model notes
-
-- Lisättiin `enabled`-kentän käyttö kohdennetulle warmup-logille.
-- Lisättiin `targeted-warmup` draft-only -malli, jota ei lisätä pysyvästi `workoutDays.exerciseIds`-listoihin.
-- `hasLoggedExercise` keskittää summary- ja tallennuslogiikan:
-  - warmupit lasketaan merkinnöiksi
-  - vain set-pohjaiset liikkeet kasvattavat sarjamäärää
-  - disabled targeted warmup ei counttaa
-
-### Tests run
-
-- Day 1 smoke check: demo-ohjelmassa on targeted warmup.
-- Day 2 smoke check: demo-ohjelmassa ei ole targeted warmupia.
-- Disabled targeted warmup smoke check: ei counttaa logged entryksi.
-- Parser smoke check:
-  - `15/20 + 10/30 + 8/40`
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-
-## Step 1.2A — Workout Logging QA + Warmup UX Fixes
-
-Päivä: 2026-05-15
-
-### Files changed
-
-- `src/data/defaultExercises.js`
-- `src/hooks/useGymFlowData.js`
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/utils/exerciseTracking.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Warmup-liikkeet eivät enää käytä sarjamuotoista reps/weight-kirjausta.
-- `Kävelymatto`-demoalku on mallinnettu yleisenä `Yleislämmittely`-merkintänä.
-- `Olkapäiden lämmittely`-demoalku on mallinnettu `Kohdennettu lämmittely`-merkintänä.
-- Tracking type -nimet päivitettiin muotoon `warmupDuration` ja `warmupNote`.
-- Säilytettiin yhteensopivuus aiemmin käytettyihin `duration`- ja `note`-arvoihin.
-- Vanhalle localStorage-liikepankille lisättiin fallback-nimet ja default warmup -tyypit.
-- Warmupit eivät laske top kg-, top reps- tai 1RM-arvoja.
-
-### Warmup UX decisions
-
-- `Yleislämmittely` käyttää kenttää `Tapa` ja vaihtoehtoja:
-  - Kävelymatto
-  - Kuntopyörä
-  - Soutulaite
-  - Crosstrainer
-  - Liikkuvuus
-  - Muu
-- Jos yleislämmittelyssä valitaan `Muu`, näytetään kenttä `Kirjoita oma lämmittely`.
-- `Yleislämmittely` voi tallentaa keston, `Tehty`-tilan, oman nimen tai näiden yhdistelmän.
-- `Kohdennettu lämmittely` käyttää kenttää `Tyyppi` ja vaihtoehtoja:
-  - Olkapäiden lämmittely
-  - Kuminauhalämmittely
-  - Lonkka / pakara
-  - Polvi
-  - Selkä / rintaranka
-  - Lämmittelysarjat
-  - Muu
-- Jos kohdennetussa lämmittelyssä valitaan `Muu`, näytetään kenttä `Kirjoita oma kohdennettu lämmittely`.
-- `Kohdennettu lämmittely` voi tallentaa merkinnän, `Tehty`-tilan, oman nimen tai näiden yhdistelmän.
-
-### Data model notes
-
-- Warmupit ovat tavallisia demo-ohjelman exercise/program itemeitä, eivät pakollista app-logiikkaa.
-- Käyttäjä voi myöhemmin poistaa, korvata tai muokata warmupeja Program / Exercise Bank -editorissa.
-- Luonnoksen warmup-logi tukee kenttiä:
-  - `warmupType`
-  - `customWarmupName`
-  - `durationMinutes`
-  - `note`
-  - `completed`
-- Set-pohjaiset liikkeet säilyttävät reps-first-formaatin ja `{ reps, weight }`-sarjamallin.
-
-### Tests run
-
-- Tracking type smoke check:
-  - `Yleislämmittely` -> `warmupDuration`
-  - `Kohdennettu lämmittely` -> `warmupNote`
-  - `Penkki tangolla` -> `sets`
-- Default warmup smoke check:
-  - `Yleislämmittely` -> `Kävelymatto`
-  - `Kohdennettu lämmittely` -> `Olkapäiden lämmittely`
-- Parser smoke check:
-  - `15/20 + 10/30` -> reps-first sets
-- Duration display smoke check:
-  - `75` -> `1 h 15 min`
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.3 — History + Last Results
-## Step 1.2F — Workout History & Exercise Detail View
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/utils/workoutLogUtils.js`
-- `src/hooks/useGymFlowData.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Workout-näkymä käyttää päivän liikelistaa ja yksittäisen liikkeen detail-näkymää.
-- Liikekortit näyttävät thumbnail-tyylisen tunnisteen, liikkeen nimen, tyypin, tämän treenin tilan ja viimeisimmän tuloksen.
-- Kirjatut liikkeet erottuvat vihreällä success-henkisellä korostuksella.
-- Liikkeen detailissä säilytettiin nykyinen `ExerciseLogCard` ja reps-first-syöttö.
-- Strength-liikkeille lisättiin kevyt sarjakohtainen editori:
-  - painon +/- säätö
-  - toistojen +/- säätö
-  - laatu tähtinä
-  - sarjan lisäys ja poisto
-- Treenin kesto muutettiin kompaktiksi +/- stepperiksi, oletuksena 8 min.
-- Viimeisin tulos näyttää setit muodossa `12x55 / 10x60` ja lisää session tuntemuksen/laadun, jos se löytyy.
-
-### Key decisions
-
-- `selectedExerciseId`-logiikka säilytettiin Workout-näkymän sisäisenä lista/detail-tilana.
-- Uutta routea ei lisätty.
-- Nykyinen reps-first parseri säilytettiin ennallaan.
-- Autosave, draft ja completed-session tallennuslogiikka säilytettiin.
-- Sarjakohtainen editori päivittää samaa exercise-logia ja pitää `setsText`-tekstimuodon yhteensopivana.
-- Kesto tallentuu edelleen `durationMinutes`-kenttään.
-- Done/not done -korttien värit käyttävät nykyisiä semanttisia rooleja.
-
-### What was intentionally left out
-
-- Ei toteutettu täyttä uutta sarjaeditoriflowta tai quality-analytiikkaa.
-- Ei toteutettu liikepankkia, kalenteria, achievements-toimintoja tai completed workout reopening -flowta.
-- Ei muutettu workoutSession-datamallia raskaasti.
-- Ei muutettu ohjelman editointia tai backend/cloud/login-rakennetta.
-
-### Tests run
-
-- `getLastExerciseResult` smoke check demo-sessioilla.
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2F.1 — Workout Exercise Detail QA + Mobile Polish
-## Step 1.2F.1 — History Details + Workout Section Cards QA Polish
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/pages/History.jsx`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- History-kortit näyttävät nyt session yhteenvedon:
-  - tehtyjen liikkeiden määrä suhteessa ohjelmapäivän liikkeisiin
-  - kokonaissarjat
-  - paras set-pohjainen suoritus, jos saatavilla
-- Historyn liikechipit ovat klikattavia ja avaavat saman session sisällä kevyen detailin.
-- History näyttää ohjelmapäivän tehdyt ja tekemättömät liikkeet eri tiloilla.
-- Workout-lista ryhmiteltiin section-kortteihin:
-  - Lämmittely
-  - Päivän liikkeet
-  - Mukautettu liike
-- Kohdennettu lämmittely näkyy Lämmittely-sectionissa joko rivinä tai kevyenä lisää-toimintona.
-- Mukautettu liike lisättiin placeholder/action cardina.
-
-### QA fixes
-
-- Varmistettiin buildilla, että Step 1.2F:n lista/detail-JSX toimii section-rakenteessa.
-- `selectedExerciseId` säilyy `{ dayId, exerciseId }`-mallissa ja päivän vaihto resetoi detailin listaan.
-- Duration stepper, set-by-set controls, autosave, completion confirmation ja completed-session save -polku säilytettiin.
-
-### Key decisions
-
-- History vastaa nyt paremmin kysymykseen “Mitä tein viimeksi?”
-- History näyttää tehdyt ja tekemättömät liikkeet eri tiloilla.
-- Historyn liikechipit ovat klikattavia ja avaavat kevyen detailin.
-- Workout-lista ryhmiteltiin Lämmittely-, Päivän liikkeet- ja Mukautettu liike -sectioneihin.
-- Mukautettu liike on tässä vaiheessa placeholder/action card, ei vielä oikea dynaaminen custom exercise -toiminto.
-- Step 1.2F:n set-by-set controls, duration stepper, selectedExerciseId, autosave ja completion confirmation säilytettiin.
-
-### What was intentionally left out
-
-- Ei vielä oikeaa custom exercise -lisäystä.
-- Ei vielä completed workout reopening -flowta.
-- Ei vielä kalenteria.
-- Ei vielä achievements-näkymää.
-- Ei vielä isoa datamallirefaktorointia.
-
-### Tests run
-
-- `getLastExerciseResult` smoke check demo-sessioilla.
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2G — Custom Exercise Placeholder to Draft Item
-
-## Step 1.2F.6 — Targeted Warmup State + Duration Stepper Bugfix
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/hooks/useGymFlowData.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Treenin kokonaiskeston stepper korjattiin käyttämään loogista 5 minuutin askelta.
-- Uusien treeniluonnosten kokonaiskeston oletus muutettiin 0 minuuttiin.
-- Vanhojen väliarvojen, kuten 8 min, stepper-käytös pyöristyy järkeviin 5 minuutin askeliin.
-- Kohdennettu lämmittely ei jää enää kirjattu/success-tilaan pelkän `enabled`-tilan takia.
-- Disabled tai tyhjä kohdennettu lämmittely ei tallennu completed-session suoritukseksi.
-
-### Bug details
-
-- Aiempi 8 min oletus ja 5 minuutin askel aiheuttivat epäloogisen 8 min → 3 min -tilanteen.
-- Kohdennetun lämmittelyn `enabled`-tila saattoi pitää rivin aktiivisena, vaikka käyttäjä poisti `Tehty`-valinnan eikä ollut lisännyt muuta sisältöä.
-
-### UI decisions
-
-- Kohdennetulle lämmittelylle lisättiin aktiivisessa tilassa selkeä checkbox/poisto-rivi.
-- Käyttäjä voi poistaa vahingossa lisätyn kohdennetun lämmittelyn käytöstä ilman draft-arvojen pakotettua tyhjennystä.
-- Treenin kokonaiskesto näyttää edelleen `0 min`, `5 min`, `10 min` ja tuntimuodot `formatDuration`-helperin kautta.
-
-### Data/logic decisions
-
-- Treenin kokonaiskeston oletus uusissa luonnoksissa on 0 min, ei 8 min.
-- 8–12 min säilyy vain warmupin tavoiteohjeena, jos sitä näytetään.
-- Kohdennettu lämmittely ei ole kirjattu pelkän enabled-tilan perusteella.
-- Kohdennettu lämmittely on kirjattu vain, jos käyttäjä on merkinnyt sen tehdyksi tai lisännyt sisältöä.
-- Completed-session suodatus käyttää kohdennetulle lämmittelylle `hasLoggedExercise`-päätöstä.
-
-### What was intentionally left out
-
-- Ei muutettu SARJAT-inputia.
-- Ei muutettu Kirjatut sarjat -chippejä.
-- Ei muutettu Sarjakohtainen kirjaus -aluetta.
-- Ei lisätty custom exercise -toimintoa.
-- Ei lisätty kalenteria.
-- Ei lisätty achievements-näkymää.
-- Ei tehty completed workout reopeningia.
-
-### Tests run
-
-- Targeted warmup `hasLoggedExercise` smoke check:
-  - enabled + empty → false
-  - completed → true
-  - note → true
-  - disabled → false
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2G — Custom Exercise Placeholder to Draft Item
-
-## Step 1.2F.5 — Workout Detail Meta Alignment Polish
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Exercise detail -kortin `Tuntemus`-kenttä siirrettiin visuaalisesti lähemmäs `Treenin kesto` -stepperiä.
-- Meta-alue ei enää leviä koko kortin leveydelle desktop/tablet-näkymässä.
-- Kapeimmilla mobiilileveyksillä meta-alue pinoutuu hallitusti rikkomatta layoutia.
-
-### UI decisions
-
-- Tuntemus siirrettiin visuaalisesti lähemmäs Treenin kestoa.
-- Exercise detailin meta-alueesta tehtiin compact-ryhmä.
-- Meta-alueen leveys rajoitettiin, jotta kentät eivät leviä koko kortin leveydelle.
-- Desktop/tablet käyttää `fit-content`-ryhmää ja rajattua select-leveyttä.
-- Mobiilissa kentät pysyvät tiiviinä ja pinoutuvat vasta kapeimmilla näytöillä.
-- Ei tehty datamallin tai treenilogiikan muutoksia.
-
-### What was intentionally left out
-
-- Ei muutoksia SARJAT-inputiin.
-- Ei muutoksia Kirjatut sarjat -chippeihin.
-- Ei muutoksia Sarjakohtainen kirjaus -logiikkaan.
-- Ei uusia ominaisuuksia.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2G — Custom Exercise Placeholder to Draft Item
-
-## Step 1.2F.4 — Exercise Detail Layout + Parsed Set Chips + Bottom Nav Polish
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Exercise detail -kortin treenin kesto ja tuntemus asetettiin samaan compact-layout-riviin.
-- Nopea reps-first `Sarjat`-input säilytettiin.
-- Parsitut sarjat lisättiin `Kirjatut sarjat` -chippeinä nopean inputin alle.
-- Sarjakohtainen kirjaus säilyi edelleen muokkausalueena.
-- Laatustars pidettiin amber/accent-semanttisessa värissä.
-- Bottom navin aktiivista tilaa vahvistettiin hillityllä varjolla.
-
-### UI decisions
-
-- Tuntemus palautettiin treenin keston viereen compact-layoutiin.
-- Parsitut sarjat näytetään pieninä vaakasuuntaisina chippeinä, jotka wrapataan mobiilissa.
-- Sarjakohtainen editori pysyy ensisijaisena muokkausalueena chip-listan alla.
-- Amber = quality/highlight, green = valmis/hyväksy, red/brown = poisto/vaarallinen toiminto.
-- Bottom nav säilytettiin kompaktina eikä navigaation toiminnallista logiikkaa muutettu.
-
-### What was intentionally left out
-
-- Ei vielä custom exercise -lisäystä.
-- Ei completed workout reopeningia.
-- Ei kalenteria.
-- Ei achievements-näkymää.
-- Ei uutta backend/cloud/login-toimintoa.
-- Ei datamallimuutoksia.
-
-### Tests run
-
-- Mojibake smoke check `Workout.jsx` ja `ExerciseLogCard.jsx`.
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2G — Custom Exercise Placeholder to Draft Item
-
-## Step 1.2F.3 — Merge Workout Info + Selected Exercise Card
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Valitun liikkeen detail-näkymässä treenin tiedot ja liikkeen kirjauskortti yhdistettiin yhdeksi kompaktiksi kortiksi.
-- Yhdistetyn kortin header näyttää:
-  - treenipäivän ja kuvauksen
-  - luonnoksen tallennusajan
-  - treenin keston +/- stepperillä
-  - tuntemus-valinnan
-- Kortin body näyttää edellisen tuloksen ja nykyisen `ExerciseLogCard`-kirjauksen.
-- Kortin footerissa on `Liike valmis` -success-painike, joka sulkee detailin ja palauttaa päivän liikelistaan.
-- `ExerciseLogCard` sai kevyen `embedded`-tilan, jotta se voidaan näyttää yhdistetyn kortin sisällä ilman ylimääräistä nested-card-fiilistä.
-- Quality star -värit viimeisteltiin GymFlowin amber/accent-semantikkaan.
-
-### Key decisions
-
-- `selectedExerciseId`-logiikka säilytettiin ennallaan.
-- Reps-first input, set-by-set controls, duration stepper, autosave draft ja completion modal säilytettiin.
-- Treenin tiedot näytetään erillisenä korttina vain listanäkymässä; detailissä ne ovat yhdistetyn kortin headerissa.
-- Vihreä säilyy save/completed/accepted-toiminnoille.
-- Quality stars käyttää amber/accent-tyyliä, ei punaista tai success-vihreää.
-
-### What was intentionally left out
-
-- Ei vielä custom exercise -lisäystä.
-- Ei datamallin muutoksia.
-- Ei reps-first parserin muutoksia.
-- Ei completed workout reopeningia.
-- Ei kalenteria tai achievements-näkymää.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2G — Custom Exercise Placeholder to Draft Item
-
-## Step 1.2F.2 — Workout Section Cards Compact QA Polish + Bottom Nav Active Shadow
-
-Päivä: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Korjattiin Step 1.2F.1:n Workout-näkymään jääneet mojibake-/kirjoitusvirheet.
-- Korjattiin näkyvät tekstit:
-  - `Lämmittely`
-  - `Päivän liikkeet`
-  - `voimaliikettä`
-  - `Lisäliike`
-  - mukautetun liikkeen placeholder- ja palauteteksti
-- Päivän liikkeet -listasta poistettiin normaalia käyttöä haittaava sisäinen scroll-raja.
-
-### UI decisions
-
-- Lämmittelyn lisäys muutettiin selkeämmäksi checkbox/toggle-riviksi.
-- Lämmittely-, Päivän liikkeet- ja Mukautettu liike -kortteja tiivistettiin.
-- Päivän liikkeet -kortin sisäistä scrollia vältetään normaalissa käytössä.
-- Bottom navin aktiivista tilaa vahvistettiin hillityllä varjolla ja pienellä nostolla.
-- Custom exercise -toiminto jätettiin edelleen placeholderiksi.
-
-### What was intentionally left out
-
-- Ei vielä oikeaa custom exercise -lisäystä.
-- Ei vielä completed workout reopeningia.
-- Ei kalenteria.
-- Ei achievements-näkymää.
-- Ei datamallin muutoksia.
-
-### Tests run
-
-- Mojibake smoke check `Workout.jsx` ja `History.jsx`.
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2G — Custom Exercise Placeholder to Draft Item
-## Step 1.2F.8 — Targeted Warmup Popup + Inline-Expand
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/hooks/useGymFlowData.js`
-- `src/utils/workoutLogUtils.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Kohdennetun lämmittelyn lisäys vahvistetaan popupilla ennen aktivointia.
-- Käyttäjä voi perua lisäämisen ilman, että draftiin jää aktiivista targeted warmupia.
-- Kohdennettu lämmittely näkyy nyt inline-expand-korttina valinnan jälkeen.
-- Disabled / tyhjä kohdennettu warmup ei kirjaudu completed-session merkinnäksi.
-- `hasLoggedExercise` ei enää laske enabled-tilaa yksin kirjaukseksi.
-
-### UI decisions
-
-- Popup on hillitty, vaalea ja rounded, primary success-vihreä, secondary neutral.
-- Inline-expand on compact card warmup-sectionin sisällä.
-- Tuntemus ja treenin kesto pysyvät compact-alueessa.
-- Sarjakohtaiset tähdet ovat amber-värisiä, valitsemattomat muted/neutral.
-
-### Data/logic decisions
-
-- `enabled` ei yksin riitä kirjaukseksi.
-- Kohdennettu warmup counttaa vain, jos sillä on `completed`, `note`, `customWarmupName` tai muuta käyttäjän syöttämää sisältöä.
-- Käyttäjä voi ottaa vahingossa lisätyn kohdennetun lämmittelyn pois käytöstä.
-- Draft-arvot säilyvät, jos kohdennettu warmup kytketään pois ja takaisin päälle saman session aikana.
-
-### What was intentionally left out
-
-- Custom exercise -lisäys ei ole vielä toteutettu.
-- Completed workout reopening ei ole mukana.
-- Kalenteri ei ole mukana.
-- Achievements-näkymää ei ole mukana.
-- Sarjakohtainen kirjaus ja SARJAT-input säilyvät ennallaan.
-
-### Tests run
-
-- Popup flow smoke check:
-  - Peruuta
-  - Kyllä, lisään
-- Inline-expand entry smoke check
-- `hasLoggedExercise` smoke check:
-  - enabled + empty -> false
-  - completed -> true
-  - note -> true
-  - disabled -> false
-- `npm run build`
-- `npm run lint`
-
-### Build/lint result
-
-- Build: passed
-- Lint: passed
-
-### Next recommended step
-
-Step 1.2F.9 — Parsed Set Cards vaakatasoon + Liike valmis -painike polish
-
-## Step 1.2F.9 — Bottom Nav + Program Page Button Polish
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `src/pages/Program.jsx`
-- `src/components/BottomNav.jsx`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Bottom nav aktiivinen tila viimeisteltiin hillityllä varjolla ja pienellä nostolla.
-- Hover / active -tilat tehtiin selkeämmiksi ja yhtenäisiksi kaikilla sivuilla.
-- Bottom nav -itemeille lisättiin yhtenäinen border, rounded corners ja 6px-8px padding.
-- Aktiivisen nav-itemin tekstikontrasti vahvistettiin käyttämään accent-tekstisävyä.
-- Program-sivun `Lisää liike` -painike vaihdettiin `btn--accent`-rooliin.
-- Accent-painikkeelle lisättiin hillitty hover/active-varjo ja pieni lift-efekti.
-- Fontti, padding ja border radius pysyvät samassa button-järjestelmässä muiden sivujen kanssa.
-
-### What was intentionally left out
-
-- Ei muutoksia navin logiikkaan.
-- Ei uusia toimintoja ohjelmaan.
-- Ei vielä kohdennetun lämmittelyn inline-expand lisäystä.
-- Ei muutoksia workoutSession-datamalliin.
-
-### Tests run
-
-- Hover ja selected/active tarkistettu CSS-tasolla kaikille bottom nav -itemeille.
-- Program `Lisää liike` -painike tarkistettu käyttämään `btn--accent`-roolia.
-- Bottom navin sisältövara säilyy nykyisen page padding -mallin kautta.
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Step 1.2F.10 — Kohdennetun lämmittelyn inline-expand ja multi-warmup support
-
-## Step 1.2F.12 — Targeted Warmup Inline-Card Finalization Status
-
-Date: 2026-05-16
-
-### Files checked
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/hooks/useGymFlowData.js`
-- `src/utils/workoutLogUtils.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### Current implemented state
-
-- Kohdennetun lämmittelyn popup -> inline-expand -workflow on toteutettu.
-- Cancel sulkee popupin ilman draft-muutoksia.
-- OK avaa inline-cardin ja aktivoi kohdennetun lämmittelyn draftissa.
-- Inline-cardissa on tyyppivalinta, merkintä/note, duration stepper, tehty-toggle, poisto-toiminto ja edellisen session näyttö, jos sellainen löytyy.
-- Duration stepper käyttää 5 minuutin oletusta, 1 minuutin muutoksia ja 0-15 minuutin rajoja.
-- Nykyinen autosave, draft, completed session -tallennus, parsed set cards ja `Liike valmis` -workflow säilyvät.
-
-### Important correction
-
-- Multi-targeted warmup support ei ole vielä toteutettu.
-- Nykyinen `Workout.jsx` käyttää edelleen yhtä kohdennettua warmupia:
-  - `currentDraft?.exercises.find(isTargetedWarmup)`
-  - `existingTargeted`
-  - yksi `targetedWarmupLog`
-- Useampi kohdennettu warmup per päivä vaatii vielä datamalli- ja UI-muutoksen.
-
-### What was intentionally left out
-
-- Custom exercise creation ei ole toteutettu.
-- Kalenteri ja achievements eivät ole mukana.
-- Multi-warmup-datamalli ei ole mukana.
-- Completed workout reopening ei ole mukana.
-
-### Tests / verification
-
-- Code context checked for targeted warmup model.
-- Latest known verification:
-  - `npm run build`: passed
-  - `npm run lint`: passed
-
-### Next recommended step
-
-Step 1.2F.13 — Implement real multi-targeted warmup support or move to Workout final polish / History sarjat ja detail summary
-
-## Step 1.2F.12 — Targeted Warmup Inline-Card Finalization
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/hooks/useGymFlowData.js`
-- `src/utils/workoutLogUtils.js`
-- `src/utils/exerciseTracking.js`
-- `src/data/defaultExercises.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Kohdennettu warmup popup -> inline-card flow viimeisteltiin nykyisen yhden warmupin malliin.
-- Checkbox-henkinen `Lisää kohdennettu lämmittely` -rivi avaa vahvistuspopupin.
-- `Peruuta` sulkee popupin ilman draft-muutoksia.
-- `Kyllä, lisään` aktivoi warmupin ja näyttää inline-expand-cardin warmup-sectionissa.
-- Inline-cardissa on:
-  - lyhennetty type dropdown: `Olkapäät`, `Lonkka`, `Polvi`, `Muu`
-  - merkintä/note
-  - duration stepper
-  - `Tehty` toggle
-  - `Poista` action
-- Duration stepper käyttää 5 minuutin oletusta, 1 minuutin askelia ja 0-15 minuutin rajoja.
-- Vanha `Olkapäiden lämmittely` -arvo normalisoidaan UI:ssa arvoon `Olkapäät`.
-- Uusien defaultien kohdennettu warmup käyttää nyt `Olkapäät`-oletustyyppiä.
-- Inline-card näyttää viimeisimmän kohdennetun warmupin tuloksen, jos historiasta löytyy suoritus.
-- Stepper, `Tehty`-toggle ja `Poista`-toiminto asetettiin samaan kompaktiin action-riviin.
-- Inline-cardin border, shadow, padding ja spacing viimeisteltiin kompaktimmaksi ja erottuvaksi.
-- Existing logic preserved: autosave, draft, completed session, selectedExerciseId, parsed set cards ja `Liike valmis`.
-
-### What was intentionally left out
-
-- Multi-targeted warmup ei ole mukana; edelleen vain yksi kohdennettu warmup per päivä.
-- Treenikalenteri ei ole mukana.
-- Achievements / Progress-kaaviot eivät ole mukana.
-- Program full editing ei ole mukana.
-- Completed workout reopening ei ole mukana.
-
-### Tests run
-
-- Popup / inline-expand workflow checked at code level.
-- Stepper +1/-1 min checked by implementation.
-- `Tehty` / `Poista` toggle path checked by implementation.
-- Last session display checked by existing `getLastExerciseResult` flow.
-- Sarjakortit ja quality stars säilytetty.
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Step 1.2F.13 — Workout final polish / History sarjat ja detail summary
-
-## Step 1.2F.13 — Multi-Targeted Warmup Inline-Cards
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/hooks/useGymFlowData.js`
-- `src/utils/workoutLogUtils.js`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Lisättiin tuki useammalle kohdennetulle warmupille saman treenipäivän draftissa.
-- Ensimmäinen kohdennettu warmup säilyttää popup -> inline-card -flow'n.
-- Popupin `Peruuta` ei tee draft-muutoksia.
-- Popupin `Kyllä, lisään` aktivoi ensimmäisen kohdennetun warmupin.
-- Kun vähintään yksi kohdennettu warmup on lisätty, `+ Lisää kohdennettu lämmittely` lisää uuden inline-cardin suoraan listaan.
-- Jokainen uusi warmup saa oman uniikin `exerciseId`-arvon ja `order`-kentän.
-- Kortit näkyvät lisäysjärjestyksessä.
-- Jokaisessa warmup-cardissa on:
-  - Type dropdown: `Olkapäät`, `Lonkka`, `Polvi`, `Muu`
-  - Merkintä-kenttä
-  - Duration stepper 0-15 min, 1 minuutin askelin, oletus 5 min
-  - `Tehty` toggle
-  - `Poista` action
-- `Tehty` ja `Poista` vaikuttavat vain kyseiseen warmupiin.
-- Poistettu warmup jätetään draftiin disabled-tilaan eikä tallennu completed-session suoritukseksi.
-- Completed-session tallennus tukee useita kohdennettuja warmupeja, koska jokainen on oma `exercise`-loginsa.
-- `hasLoggedExercise` huomioi kohdennetun warmupin duration-arvon kirjaukseksi.
-- Lisättiin `getLastTargetedWarmupResult`, joka hakee viimeisimmän warmup-tuloksen warmup-tyypin mukaan.
-- Inline-cardien compact layout, border, shadow ja spacing säilytettiin nykyisessä GymFlow-tyylissä.
-- Existing logic preserved: autosave, draft, completed session, selectedExerciseId, parsed set cards ja `Liike valmis`.
-
-### UI decisions
-
-- Ensimmäinen lisäys vaatii vahvistuspopupin, jotta vahinkolisäys ei muuta draftia.
-- Seuraavat lisäykset ovat nopeita ja luovat kortin suoraan, koska käyttäjä on jo warmup-listassa.
-- Jokainen warmup-card on oma inline-card listassa, ei erillinen route tai modal.
-- Last session -teksti haetaan warmup-tyypin perusteella, jotta useampi kortti voi näyttää oman relevantin historian.
-
-### What was intentionally left out
-
-- Custom exercise creation ei ole toteutettu.
-- Treenikalenteri ei ole mukana.
-- Achievements / Progress-kaaviot eivät ole mukana.
-- Program full editing ei ole mukana.
-- Completed workout reopening ei ole mukana.
-
-### Tests run
-
-- Multi-targeted warmup code path checked by implementation.
-- Popup -> first inline-card workflow checked by implementation.
-- Additional inline-card creation checked by implementation.
-- Per-card `Tehty` / `Poista` targeting checked by implementation.
-- Stepper 0-15 min and 1 min increment preserved.
-- Last session lookup updated for targeted warmup type matching.
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Step 1.2F.14 — Workout final polish / History sarjat ja detail summary
-
-## Step 1.2F.14 — Multi-Targeted Warmup Popup Confirmation
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Lisättiin popup-varmistus myös toisen ja seuraavien kohdennettujen warmupien lisäämiseen.
-- Ensimmäisen kohdennetun warmupin popup-flow säilyy ennallaan.
-- Kun käyttäjä klikkaa `+ Lisää kohdennettu lämmittely`, draftiin ei tehdä muutosta heti.
-- Lisäkortin popup näyttää otsikon `Haluatko lisätä toisen kohdennetun lämmittelyn?`.
-- Popupin `Peruuta` sulkee dialogin ja palaa olemassa olevaan inline-card-listaan ilman draft-muutoksia.
-- Popupin `Kyllä, lisää` luo uuden kohdennetun warmup inline-cardin.
-- Koodiin lisättiin kommentit popup-varmistuksen, `Peruuta`-toiminnon ja `Kyllä`-toiminnon vastuista.
-- Kaikki Step 1.2F.13:n multi-targeted warmup -toiminnot säilytettiin:
+- autosave
+- completion confirmation modal
+- completed session save to History
+- History reads both demo sessions and saved completed sessions
+- Progress reads saved sessions for basic personal record data
+
+### Warmup model
+
+Implemented:
+
+- General warmup
+- Targeted warmup
+- Warmup type handling
+- Custom warmup name support
+- Warmup note support
+- Warmup completed state
+- Warmup duration logic
+- Targeted warmup popup confirmation
+- Inline targeted warmup cards
+- Multi-targeted warmup support
+- Per-card targeted warmup actions:
   - type dropdown
-  - merkintä
-  - duration stepper 0-15 min, 1 min askel
-  - Tehty / Poista per card
-  - Last session display
-  - autosave draft
-  - selectedExerciseId
-  - Liike valmis
+  - note
+  - duration stepper
+  - completed toggle
+  - remove action
+- Disabled or empty targeted warmups do not save as completed workout entries.
+- `enabled` alone does not count as a logged exercise.
+- Targeted warmup can collapse into a compact done card after marking done.
+- Compact done card can be reopened for editing.
+
+### Workout exercise list / detail flow
+
+Implemented:
+
+- Workout shows a day-level exercise list first.
+- Selecting an exercise opens a detail view.
+- Detail view uses `ExerciseLogCard`.
+- Detail view preserves reps-first input and set-by-set controls.
+- Back to exercise list supported.
+- `Liike valmis` closes detail view and returns to list.
+- `Liike valmis` scrolls toward the next unfinished exercise if available.
+- Exercise list cards show:
+  - exercise name
+  - type
+  - current logging state
+  - latest result if available
+- Workout list is grouped into sections:
+  - Warmup
+  - Daily exercises
+  - Custom exercise placeholder
+
+### Set-by-set editor
+
+Implemented:
+
+- weight +/- control
+- reps +/- control
+- quality stars
+- add set
+- remove set
+- parsed set chips / summary
+- compact set row polish
+- visible `Poista` action
+- remove button has accessible label
+- mobile wrapping avoids horizontal overflow
+
+### Duration and feeling
+
+Implemented:
+
+- workout duration stepper
+- duration quick presets:
+  - 30
+  - 45
+  - 60
+  - 75
+  - 90
+  - 105
+  - 120
+- plus/minus supports 1 minute fine tuning
+- new workout draft default duration is currently 45 minutes
+- selected duration preset highlights when value matches
+- feeling select is aligned with duration controls in the detail meta area
+
+### History
+
+Implemented:
+
+- completed sessions visible in History
+- History cards show session summary
+- History shows:
+  - completed exercise count
+  - total sets
+  - best set-based performance when available
+  - completed and missing exercises
+- History exercise chips are clickable and open light detail inside the same session.
+- History better answers “What did I do last time?”
+
+Still missing:
+
+- full completed workout reopening / editing flow
+- exercise comments shown in History detail
+- calendar view
+- achievements
+- progress charts
+
+### Program
+
+Implemented:
+
+- Program page shows demo program structure.
+- Placeholder actions explain that editing is coming later.
+- Program editing is not yet implemented.
+- Exercise bank editing is not yet implemented.
+- Add/remove/reorder workout days is not yet implemented.
+
+## 10. Current recent QA status
+
+Recent QA fixes completed on 2026-05-23:
+
+- Active draft restore fixed.
+- Refresh/F5 no longer changes the active workout day incorrectly when a draft exists.
+- Browser close and reopen preserves active draft day via localStorage.
+- Duration default changed to 45 min for new drafts.
+- Duration quick presets added.
+- Completion confirmation now navigates to History after successful save.
+- Success button text contrast improved.
+- Amber add/action buttons polished.
+- Set row spacing tightened.
+- Set row remove action made visible and accessible.
+- General warmup lower duplicate duration input removed from UI.
+- Exercise-level comment field added to exercise detail.
+- `exerciseComment` is optional and saved in draft/completed data.
+- Comment display in History is still pending.
+- Targeted warmup can collapse into compact done state.
+- Sarjakohtainen kirjaus was made more compact without a large data model change.
+
+Recent known limitations:
+
+- Manual browser click-through testing was limited in the session.
+- Build and lint passed for recent steps.
+- Full compact logging redesign is still optional.
+- Exercise thumbnail UI connection is not yet implemented.
+
+## 11. Exercise image bank
+
+### Image style standard
+
+GymFlow exercise image style:
+
+- one image per exercise
+- PNG format
+- saved in `src/assets/exercises/`
+- grayscale anatomical muscle-map body
+- target muscles highlighted in red/orange
+- light neutral background
+- realistic gym equipment / bench / dumbbells / cable machine
+- no text
+- no logos
+- filename in English
+- lowercase kebab-case
+- filename, future `id` and future `imageKey` should align where possible
+
+Image generation workflow rule:
+
+- When creating a new GymFlow exercise image, also provide:
+  - Finnish exercise name
+  - English exercise name
+  - kebab-case slug / filename
+- Example:
+  - FI: Sivuolkapää vinopenkissä rintatuettu käsipainoilla
+  - EN: Chest-Supported Incline Dumbbell Lateral Raise
+  - slug: `chest-supported-incline-dumbbell-lateral-raise`
+
+### Initial image batch already accepted earlier
+
+Earlier saved / accepted images:
 
-### What was intentionally left out
-
-- Ei muutoksia `ExerciseLogCard`-kortin sisäiseen toiminnallisuuteen.
-- Ei muutoksia completed-session tallennuslogiikkaan.
-- Ei muutoksia history-, parser- tai program-logiikkaan.
-
-### Tests run
-
-- Popup -> inline-card workflow checked by implementation.
-- Additional warmup add now routes through confirmation popup.
-- Cancel path leaves existing inline cards unchanged.
-- Confirm path creates one new inline card.
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Step 1.2F.15 — Workout final polish / History sarjat ja detail summary
-
-## Step 1.2F.10 — UI Finalization: Button Colors, Bottom Nav, Kohdennettu Warmup
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `src/pages/Home.jsx`
-- `src/pages/Workout.jsx`
-- `src/pages/Program.jsx`
-- `src/components/BottomNav.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/utils/workoutLogUtils.js`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Primary/accent-painikkeiden värit viimeisteltiin uuteen keltaiseen linjaan:
-  - default `#FBBF24`
-  - hover `#F59E0B`
-  - active `#D97706`
-  - text `#FFFFFF`
-- Success-painikkeet viimeisteltiin kirkkaan vihreiksi:
-  - default `#4CAF50`
-  - hover `#45A049`
-  - active `#3E8E41`
-  - text `#FFFFFF`
-- Secondary/neutral-painikkeet säilytettiin vaalean harmaassa mallissa:
-  - default `#E5E7EB`
-  - hover `#D1D5DB`
-  - text `#1F2937`
-- Bottom navin selected-tila päivitettiin soft yellow -taustaan, tummempaan accent-tekstiin, borderiin, varjoon ja pieneen lift-efektiin.
-- Bottom navin inactive/hover-tilat pidettiin tummanharmaalla tekstillä, tummemmalla hover-borderilla ja hillityllä varjolla.
-- Kohdennetun lämmittelyn checkbox-rivi avaa popupin ilman draft-muutoksia.
-- Popupin OK avaa inline-cardin ja cancel jättää draftin ennalleen.
-- Kohdennetun lämmittelyn duration-stepper käyttää 5 minuutin oletusta, 1 minuutin askelta ja 0-15 minuutin rajoja.
-- Kohdennettu warmup näyttää edellisen tallennetun tuloksen, jos historiasta löytyy suoritus.
-- Sarjakohtainen kirjaus käyttää vaakasuuntaisia set-kortteja.
-- Laatustars käyttää keltaista accent-sävyä.
-- Sarjan poistopainike muutettiin tummanharmaaksi.
-
-### UI decisions
-
-- Amber/yellow on lisäys- ja primary-toimintojen pääväri.
-- Success-vihreä on varattu hyväksyntään ja valmiiksi merkitsemiseen, kuten `Liike valmis`.
-- Secondary-harmaa on käytössä peruutuksissa, muokkauksessa, päivävalinnassa ja poistossa.
-- Bottom nav säilyy kompaktina fixed-navigaationa ja sivun bottom padding suojaa sisältöä peittymiseltä.
-- Parsed set summary pysyy sarjakorttien yläpuolella nopeaa tarkistusta varten.
-
-### What was intentionally left out
-
-- Ei muutettu data-logiikkaa.
-- Ei muutettu autosavea.
-- Ei muutettu historyn tallennus- tai näyttölogiikkaa.
-- Ei muutettu reps-first parseria.
-- Ei toteutettu multi-warmup-datamallia.
-- Ei toteutettu completed workout reopening -flowta.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Step 1.2F.11 — Visual QA pass on mobile and desktop viewports
-
-## Step 1.2F.11 — Bottom Nav Border Thickening
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Bottom nav -containerin border paksunnettiin 1px -> 2px.
-- Bottom nav -itemien border paksunnettiin 1px -> 2px.
-- Hover-, active- ja selected-tilat säilyttävät nykyiset värit, soft yellow -taustan, varjot ja lift-efektin.
-
-### UI decisions
-
-- Muutos rajattiin borderin paksuuteen.
-- Värit, paddingit, shadowt, transformit ja nav-toiminnallisuus jätettiin ennalleen.
-
-### What was intentionally left out
-
-- Ei muutoksia BottomNav-komponentin logiikkaan.
-- Ei muutoksia muihin painikkeisiin.
-- Ei muutoksia warmup-, parser-, history- tai autosave-logiikkaan.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Step 1.2F.12 — Mobile visual QA and spacing pass
-
-## Step 1.2F.11F — Accent Button Border Match Active Bottom Nav
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Vaaleankeltaisen pohjavärin painikkeiden border paksunnettiin vastaamaan aktiivisen Bottom Nav -napin borderia.
-- `.btn--primary`, `.btn--accent` ja `.btn--warning` käyttävät nyt `3px solid rgba(180, 83, 9, 0.34)`.
-- Hover-border säilyy samassa tummemmassa sävyssä kuin aktiivisen Bottom Nav -napin hover-border: `rgba(146, 64, 14, 0.46)`.
-- Muutos koskee kaikkia sivuja, joilla käytetään samaa `Lisää treeni` -väriperheen painikeroolia.
-
-### UI decisions
-
-- Border paksuus ja sävy on nyt samaa visuaalista järjestelmää aktiivisen Bottom Nav -napin kanssa.
-- Painikkeiden pohjaväri, tekstiväri, hover/active-taustat, shadowt ja toiminnallisuus säilytettiin ennallaan.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-## Step 1.2F.11E — Active Bottom Nav Border Alignment
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Aktiivisen Bottom Nav -napin border yhdistettiin samaan ruskeaan border-tyyliin kuin vaaleankeltaiset primary/accent/warning-painikkeet.
-- Aktiivisen nav-napin default border käyttää nyt `rgba(180, 83, 9, 0.34)`.
-- Aktiivisen nav-napin hover border käyttää nyt `rgba(146, 64, 14, 0.46)`.
-
-### UI decisions
-
-- Muutos koskee aktiivista Bottom Nav -nappia, koska sen pohjaväri vastaa `Lisää treeni` -painikkeen väriyhdistelmää.
-- Bottom Navin layout, lift, shadow, selected state ja toiminnallisuus säilytettiin ennallaan.
-- Vaaleankeltaiset painikkeet eri sivuilla säilyttävät saman border-tyylin.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-## Step 1.2F.11D — Accent Button Border Polish
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Lisättiin samaan vaaleankeltaiseen väriperheeseen kuuluville painikerooleille hillitty ruskea border:
-  - `.btn--primary`
-  - `.btn--accent`
-  - `.btn--warning`
-- Hover-tilassa border tummenee hieman samaan suuntaan kuin hover-tausta.
-- Muutos koskee esimerkiksi `Aloita treeni`, `Lisää sarja`, `Lisää liike` ja `Lisää treenipäivä` -painikkeita.
-
-### UI decisions
-
-- Border lisättiin roolitasolle, jotta kaikki saman väriset painikkeet pysyvät yhtenäisinä.
-- Buttonien tausta-, hover-, active-, teksti- ja layout-arvot säilytettiin ennallaan.
-- Secondary- ja success-painikkeisiin ei tehty muutoksia.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-## Step 1.2F.11C — Button Background Alignment With Active Bottom Nav
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Primary/accent/warning-painikkeet muutettiin käyttämään aktiivisen Bottom Nav -napin väriyhdistelmää:
-  - default background `#fef3c7`
-  - hover background `#fde68a`
-  - active background `#fcd34d`
-  - text `#b45309`
-- Tämä koskee samoja button-token-rooleja kaikilla sivuilla, esimerkiksi `Aloita treeni`, `Lisää sarja`, `Lisää liike` ja `Lisää treenipäivä`.
-
-### UI decisions
-
-- Painikkeiden väri sidottiin aktiivisen nav-napin pohjan tyyliin, ei nav-napin tekstisävyyn.
-- Bottom Navin oma tyyli jätettiin ennalleen.
-- Secondary- ja success-painikkeisiin ei tehty muutoksia tässä korjauksessa.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-## Step 1.2F.11B — Button Color Alignment With Active Bottom Nav
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Primary/accent/warning-painikkeiden taustasävy vaihdettiin vastaamaan aktiivisen Bottom Nav -tabin tekstisävyä:
-  - default `#b45309`
-  - hover `#92400e`
-  - active `#78350f`
-  - text `#ffffff`
-- Secondary-painikkeiden harmaata tummennettiin kaikilla sivuilla:
-  - default `#d1d5db`
-  - hover `#9ca3af`
-  - text `#1f2937`
-
-### UI decisions
-
-- Muutos tehtiin button-tokenien kautta, jotta sama painiketyyli päivittyy kaikille sivuille.
-- Bottom Navin oma selected-, hover-, active-, border-, shadow- ja lift-tyyli jätettiin ennalleen.
-- Success-painikkeiden vihreää roolia ei muutettu.
-
-### What was intentionally left out
-
-- Ei muutoksia painikelogiikkaan.
-- Ei muutoksia BottomNav-komponenttiin.
-- Ei muutoksia warmup-, parser-, history- tai autosave-logiikkaan.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-## Step 1.2F.11A — Bottom Nav Border Further Thickening
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Bottom nav -containerin border paksunnettiin 2px -> 3px.
-- Bottom nav -itemien border paksunnettiin 2px -> 3px.
-- Nykyiset värit, hover-, selected-, active-, shadow- ja lift-tilat säilytettiin.
-
-### What was intentionally left out
-
-- Ei muutoksia BottomNav-komponentin logiikkaan.
-- Ei muutoksia muihin UI-elementteihin.
-- Ei muutoksia data-, parser-, history- tai autosave-logiikkaan.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-## Step 1.2F.9B — Button System + Warmup/Set Cards Polish
-
-Date: 2026-05-16
-
-### Files changed
-
-- `src/App.css`
-- `src/pages/Home.jsx`
-- `src/pages/Workout.jsx`
-- `src/pages/Program.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/utils/workoutLogUtils.js`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was implemented
-
-- Primary/accent/lisäystoimintojen väri yhtenäistettiin amber/orange-sävyyn:
-  - default `#F59E0B`
-  - hover `#D97706`
-  - active `#B45309`
-  - text `#FFFFFF`
-- Secondary-painikkeet yhtenäistettiin neutral gray/beige -malliin:
-  - default `#E5E7EB`
-  - hover `#D1D5DB`
-  - text `#1F2937`
-- `Aloita treeni`, `Lisää liike`, `Lisää treenipäivä`, `Lisää sarja` ja custom exercise -placeholder käyttävät nyt amber/accent-roolia.
-- `Vaihda päivä`, `Liikepankki`, `Muokkaa`, `Poista` ja peruutustoiminnot käyttävät neutral secondary -roolia.
-- Bottom navin `bottom-nav__item`-tiloja vahvistettiin:
-  - 14px teksti
-  - tummempi hover-border
-  - selected accent-soft background
-  - hillitty varjo ja `translateY(-1px)` lift
-- Kohdennetun lämmittelyn lisääminen käynnistyy checkbox-henkisestä rivistä ja avaa vahvistuspopupin.
-- Vahvistuksen jälkeen inline-card avautuu samaan warmup-sectioniin.
-- Kohdennetun lämmittelyn inline-card näyttää edellisen tuloksen, jos sellainen löytyy historiasta.
-- Kohdennettu lämmittely sai 0-15 minuutin duration-stepperin, oletuksena 5 min ja 1 minuutin askel.
-- Parsed set summary säilyy sarjakorttien yläpuolella.
-- Sarjakohtainen kirjaus muutettiin vaakasuuntaisiksi set-korteiksi, joissa säilyvät paino +/-, reps +/-, quality stars sekä sarjan poisto.
-- Quality stars käyttää nyt samaa amber/accent-sävyä.
-
-### What was intentionally left out
-
-- Ei muutettu autosave-logiikkaa.
-- Ei muutettu `selectedExerciseId`-lista/detail-rakennetta.
-- Ei muutettu completion modalia.
-- Ei lisätty multi-warmup-datamallia.
-- Ei toteutettu completed workout reopening -flowta.
-- Ei lisätty backendia, cloud synciä tai kirjautumista.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Step 1.2F.10 — Kohdennetun lämmittelyn inline-expand ja multi-warmup support
-
-## Step P1 — GymFlow Pro Visual Foundation
-
-Date: 2026-05-17
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was visually changed
-
-- Card radius was reduced from a softer 20px direction to a sharper 14px foundation.
-- Smaller card surfaces now use a 10px small radius token where appropriate.
-- Button radius was reduced from pill-shaped defaults to a 10px foundation, with an 8px small button token available.
-- General cards, exercise cards, workout section cards, inline warmup cards, parsed set cards, modal cards, history detail cards, stat cards and bottom nav items were visually tightened.
-- Card and button shadows were reduced to feel more like a premium mobile product and less like a demo form UI.
-- Button role borders were made more restrained while preserving the existing role hierarchy.
-- Success green was locked to a modern green scale:
-  - default `#34c759`
-  - hover `#2fb84f`
-  - active `#28a745`
-
-### Key decisions
-
-- Chip and badge surfaces intentionally remain pill-shaped via chip/badge tokens.
-- Success/vihrea remains reserved for complete, save and approve actions such as `Liike valmis` and `Treeni valmis`.
-- Amber/yellow roles remain for add, suggestion, selected, PR and achievement-style actions.
-- Secondary/neutral roles remain for back, cancel, switch-day and neutral actions.
-- Danger roles remain for destructive actions.
-- Button hierarchy was preserved through CSS token and role styling only.
-
-### What was intentionally left out
-
-- No Home Today Hero Card.
-- No Completion Result Screen.
-- No Backup / Restore.
-- No comments, timers, calendar, achievements or progress charts.
-- No datalogic changes.
-- No parser changes.
-- No localStorage key changes.
-- No autosave changes.
-- No completed-session persistence changes.
-- No warmup or targeted warmup logic changes.
-- No `workoutDays`, `sessions` or `exercises` data model changes.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Comprehensive Test Session before next feature step, then Step P2 — Home Today Hero Card.
-
-## Step P1A — Radius Tightening Polish
-
-Date: 2026-05-17
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was changed
-
-- `--card-radius` was tightened to `12px`.
-- `--card-radius-sm` was tightened to `8px`.
-- `--button-radius` was tightened to `8px`.
-- `--button-radius-sm` was tightened to `6px`.
-- Main card, exercise card, workout section, inline warmup, parsed set, modal, history and stat surfaces now inherit the tighter token values.
-- Day picker cards, workout exercise thumbnails, done toggles and stepper controls were aligned with the tighter small radius tokens.
-- Bottom nav was kept slightly softer than regular buttons, but tightened from the previous P1 shape.
-
-### Key decisions
-
-- Chips and badges were kept pill-shaped.
-- Success green was not changed and remains `#34c759`, `#2fb84f`, `#28a745`.
-- Existing amber/accent, secondary, danger, header, background, card and bottom nav colors were not changed.
-- Button role logic and visual hierarchy were preserved.
-- Padding and touch target sizing were left intact for mobile usability.
-
-### What was intentionally left out
-
-- No datalogic changes.
-- No parser changes.
-- No localStorage key changes.
-- No autosave changes.
-- No completed-session persistence changes.
-- No warmup or targeted warmup logic changes.
-- No `workoutDays`, `sessions` or `exercises` data model changes.
-- No React component logic changes.
-- No JSX structure changes.
-- No broad shadow or border redesign.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Step P1B — Header Page Title Center Alignment, or Comprehensive Test Session before next feature step.
-
-## Step P1B — Header Page Title Center Alignment
-
-Date: 2026-05-17
-
-### Files changed
-
-- `src/App.jsx`
-- `src/components/AppShell.jsx`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was changed
-
-- Active page title was moved to the center of the app header.
-- Header page title is now displayed in uppercase.
-- Active view title mapping now displays:
-  - `TÄNÄÄN`
-  - `TREENI`
-  - `HISTORIA`
-  - `KEHITYS`
-  - `OHJELMA`
-  - `ASETUKSET`
-- GymFlow brand area was kept on the left.
-- Demo pill was moved to a dedicated right-side status area.
-- `Made by Toni V` was kept as small brand metadata and hidden on narrow mobile widths.
-- Header layout was changed to a compact three-column app-style layout.
-
-### Key decisions
-
-- Navigation behavior and active view state were not changed.
-- Only the display mapping for the header title was changed.
-- Header gradient and existing visual theme were preserved.
-- Radius and color tokens were not changed.
-- Success green was not changed.
-- Button roles and bottom nav styling were not changed.
-
-### What was intentionally left out
-
-- No datalogic changes.
-- No parser changes.
-- No localStorage key changes.
-- No autosave changes.
-- No completed-session persistence changes.
-- No warmup or targeted warmup logic changes.
-- No `workoutDays`, `sessions` or `exercises` data model changes.
-- No new routes or navigation state changes.
-- No broad header redesign beyond page title alignment.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-
-### Build / Lint
-
-- `npm run build`: passed
-- `npm run lint`: passed
-
-### Next recommended step
-
-Comprehensive Test Session, or Step P2 — Home Today Hero Card.
-
-## Exercise Thumbnail Assets — Initial Asset Batch
-
-Aloitettu GymFlowin liike-thumbnail-kuvien rakentaminen.
-
-Päätetty kuvatyyli:
-- yksi kuva per liike
-- PNG-muoto
-- vaalea / beige tai valkoinen tausta
-- anatominen fitness-illustration / thumbnail style
-- pääkohdelihas korostetaan punaisella
-- kuvat tallennetaan kansioon `src/assets/exercises/`
-- tiedostonimet englanniksi, pienillä kirjaimilla, ilman ääkkösiä
-- tiedostonimi, `id` ja `imageKey` pyritään pitämään samana myöhempää datakytkentää varten
-
-Hyväksyttyjä / tallennettuja kuvia tähän mennessä:
 - `bench-press-barbell.png`
 - `lat-pulldown.png`
 - `seated-cable-row.png`
@@ -2237,357 +401,198 @@ Hyväksyttyjä / tallennettuja kuvia tähän mennessä:
 - `cable-straight-bar-triceps-pushdown.png`
 - `cable-ez-bar-triceps-pushdown.png`
 
-Tärkeä päätös:
-Kuvia ei vielä kytketä appin UI:hin tässä vaiheessa. Varsinainen toteutus tehdään myöhemmin erillisessä stepissä:
+### New image batch added to GitHub on 2026-05-23
 
-### Step IMG1 — Exercise Thumbnails
-- lisää `imageKey` liikedataan
-- lisää `exerciseImages` mapping
-- näytä pieni thumbnail liikkeen edessä
-- fallback-kuva, jos liikkeeltä puuttuu kuva
-- ei muutoksia parseriin, autosaveen tai completed-session tallennukseen
+A new batch of 16 exercise images was added to:
 
-## Step QA1 — Workout Session Stability & Critical UX Fixes
+`src/assets/exercises/`
 
-Päiväys: 2026-05-23
+Commit:
 
-### Files changed
+- `Add new GymFlow exercise images`
+
+The Smith machine shoulder press filename was later normalized to lowercase kebab-case.
+
+Added images:
+
+- `smith-machine-seated-shoulder-press.png`
+- `barbell-back-squat.png`
+- `bench-supported-one-arm-dumbbell-row.png`
+- `bench-supported-one-arm-dumbbell-triceps-kickback.png`
+- `cable-lateral-raise.png`
+- `chest-supported-incline-dumbbell-lateral-raise.png`
+- `chest-supported-seated-machine-row.png`
+- `face-pull.png`
+- `leg-press.png`
+- `machine-hack-squat.png`
+- `seated-incline-dumbbell-curl.png`
+- `seated-incline-dumbbell-hammer-curl.png`
+- `single-arm-high-cable-wrist-curl.png`
+- `single-arm-seated-dumbbell-wrist-curl.png`
+- `smith-machine-back-squat.png`
+- `standing-dumbbell-shrug.png`
+
+Exercise name mapping for the new image batch:
+
+| File | Finnish name | English name |
+|---|---|---|
+| `smith-machine-seated-shoulder-press.png` | Smith pystypunnerrus vinopenkissä | Smith Machine Seated Shoulder Press |
+| `barbell-back-squat.png` | Jalkakyykky tangolla | Barbell Back Squat |
+| `bench-supported-one-arm-dumbbell-row.png` | Kulmasoutu penkillä käsipainolla | Bench-Supported One-Arm Dumbbell Row |
+| `bench-supported-one-arm-dumbbell-triceps-kickback.png` | Kickback käsipainolla penkillä | Bench-Supported One-Arm Dumbbell Triceps Kickback |
+| `cable-lateral-raise.png` | Sivuolkapää alataljassa | Cable Lateral Raise |
+| `chest-supported-incline-dumbbell-lateral-raise.png` | Sivuolkapää vinopenkissä rintatuettu käsipainoilla | Chest-Supported Incline Dumbbell Lateral Raise |
+| `chest-supported-seated-machine-row.png` | Kulmasoutu laitteessa, rintatuettu | Chest-Supported Seated Machine Row |
+| `face-pull.png` | Face pull | Face Pull |
+| `leg-press.png` | Jalkaprässi | Leg Press |
+| `machine-hack-squat.png` | Hack-kyykky | Machine Hack Squat |
+| `seated-incline-dumbbell-curl.png` | Hauiskääntö vinopenkissä käsipainoilla | Seated Incline Dumbbell Curl |
+| `seated-incline-dumbbell-hammer-curl.png` | Hammer-kääntö vinopenkissä käsipainoilla | Seated Incline Dumbbell Hammer Curl |
+| `single-arm-high-cable-wrist-curl.png` | Rannekääntö ylätaljassa | Single-Arm High Cable Wrist Curl |
+| `single-arm-seated-dumbbell-wrist-curl.png` | Rannekääntö istuen penkillä käsipainolla | Single-Arm Seated Dumbbell Wrist Curl |
+| `smith-machine-back-squat.png` | Jalkakyykky Smith-laitteessa | Smith Machine Back Squat |
+| `standing-dumbbell-shrug.png` | Hartianosto käsipainoilla | Standing Dumbbell Shrug |
+
+Important current decision:
+
+- Images are now in the repo as assets.
+- Images are not yet connected to the app UI.
+- The next implementation step for images must be separate and safe.
+
+Recommended future image step:
+
+### Step IMG-2 — Connect Exercise Image Assets to Exercise Bank
+
+Scope:
+
+- add `imageKey` or `image` field to exercise data
+- create central exercise image mapping
+- show thumbnails in Workout exercise list cards
+- optionally show a larger image in exercise detail
+- add fallback image or initials when image is missing
+- do not change parser logic
+- do not change autosave logic
+- do not change completed-session persistence
+- do not change workout session data structure except optional image metadata if needed
+
+## 12. Important files
+
+Likely important files:
 
 - `src/App.jsx`
-- `src/pages/Workout.jsx`
+- `src/components/AppShell.jsx`
+- `src/components/BottomNav.jsx`
+- `src/components/Card.jsx`
 - `src/components/ExerciseLogCard.jsx`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### Test session findings
-
-- Keskeneräinen treeni saattoi refreshissä päätyä väärään aktiiviseen treenipäivään, koska Workout valitsi ensin suggested next dayn.
-- Selaimen sulkemisen jälkeen localStorage-draft oli olemassa, mutta UI:n valittu päivä ei käyttänyt sitä ensisijaisesti.
-- `Liike valmis` sulki detail-näkymän, mutta jätti käyttäjän sivun alaosaan.
-- Workout duration -stepperi käytti 5 minuutin askelta.
-- Sarjan poistobutton näytti liian tyhjältä/tulkinnanvaraiselta.
-- Kohdennettu warmup jäi isona auki myös `Tehty`-merkinnän jälkeen.
-- Lisäysroolin buttonit kaipasivat selkeämpää amber fill -tyyliä.
-- Success-buttonien valkoinen teksti oli liian kirkas vihreällä taustalla.
-- Liikekohtaiset kommentit havaittiin tarpeellisiksi, mutta niitä ei toteutettu tässä stepissä.
-
-### What was fixed
-
-- Active workout draft -palautus korjattiin: jos `activeDraft` on olemassa, Workout käyttää sen `workoutDayId`-arvoa ennen suggested next day -logiikkaa.
-- Refresh/F5 ei enää vaihda aktiivista päivää virheellisesti seuraavaan päivään, kun draft on olemassa.
-- Selaimen sulkemisen ja appin uudelleen avaamisen jälkeen sama localStorageen tallennettu draft ohjaa treenipäivän valintaa.
-- Keskeneräiset sarjat, painot, toistot, quality stars, duration, feeling, warmupit, targeted warmupit ja completed-tilat säilyvät olemassa olevan `gymflow_active_draft`-rakenteen kautta.
-- `Liike valmis` sulkee detail-näkymän ja scrollaa seuraavaan tekemättömään liikkeeseen; jos sellaista ei ole, se scrollaa juuri valmistuneen liikkeen kohdalle.
-- Workout duration -stepperi muutettiin 1 minuutin askeliin ja negatiivinen arvo estetään.
-- Sarjan remove-button sai selkeän `aria-label` + `title` -merkityksen ja näkyvän minus-merkin.
-- Kohdennettu warmup vaihtuu `Tehty`-painalluksen jälkeen compact done -tilaan, esimerkiksi `✓ Olkapäät · 5 min · Tehty`, ja compact-kortin voi avata muokkausta varten.
-- Lisäys-/accent-roolin buttonit päivitettiin warm amber fill -tyyliin.
-- Success-buttonien tekstikontrastia parannettiin lisäämällä success text -token `#102016`; vihreät taustavärit jätettiin ennalleen.
-- Sarjakorttien pahin vaakaylivuoto poistettiin vaihtamalla set-lista pystyvirtaan ilman varsinaista compact logging -uudistusta.
-
-### Key decisions
-
-- Completed-session tallennuksen rakennetta ei muutettu.
-- LocalStorage-avaimia ei muutettu.
-- Draftin palautus tehtiin käyttämällä nykyistä `gymflow_active_draft`-rakennetta, ei uutta datamallia.
-- Reps-first parserin peruslogiikka jätettiin ennalleen.
-- `Liike valmis` -scroll toteutettiin yksinkertaisella data-attribuutti + `requestAnimationFrame` -mallilla.
-- Kohdennetun warmupin compact done -tila on UI-tila; tallennettu data pysyy samana.
-
-### What was intentionally left out
-
-- Kommenttikenttiä ei toteutettu. Liikekohtaiset kommentit tehdään myöhemmin Step NOTES1 — Workout & Exercise Comments / Notes.
-- Varsinaista compact set logging layout -uudistusta ei tehty; se jätettiin Step QA1B:hen.
-- Exercise Thumbnails UI-kytkentää ei toteutettu.
-- Progress-, Calendar- ja Achievements-ominaisuuksia ei toteutettu.
-- Completed-session datarakennetta ei muutettu.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-- `npm run dev -- --host 127.0.0.1`
-- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
-
-### Build / Lint result
-
-- `npm run build`: passed
-- `npm run lint`: passed
-- `npm run dev`: started successfully; Vite reported local URL `http://127.0.0.1:5173/gymflow-dashboard/`.
-- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session. Code paths for draft restore, duration step, targeted warmup compact done, remove button labeling and `Liike valmis` scroll were verified by implementation and build/lint.
-
-### Next recommended step
-
-Step QA1B — Compact Set Logging Layout
-
-Alternative next step: Step NOTES1 — Workout & Exercise Comments / Notes
-
-## Step QA1-FIX1 — Follow-up UX Fixes After QA1
-
-Päiväys: 2026-05-23
-
-### Files changed
-
-- `src/pages/Workout.jsx`
-- `src/components/ExerciseLogCard.jsx`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- Success-buttonien tekstiväri vaihdettiin tokeniin `--success-text: #0f2a18`.
-- Kaikki `.btn--success`-painikkeet käyttävät nyt success text -tokenia; success-vihreitä taustavärejä ei muutettu.
-- Sarjan poistobutton korjattiin näkyväksi `−`-merkiksi.
-- Poistobuttonilla on `aria-label="Poista sarja"` ja `title="Poista sarja"`.
-- Sarjakohtaista kirjauskorttia tiivistettiin: kg, toistot ja poisto ovat kompaktimmin samalla rivillä, quality stars jäävät matalaan alariviin.
-- Sarjakortin paddingia, gap-arvoja ja remove-buttonin keskitystä tiivistettiin mobile-first-polishina.
-- Yleislämmittelyn alempi `Kesto`-input poistettiin näkyvistä.
-- Yläosan `Treenin kesto` -stepperi säilytettiin ennallaan.
-- Targeted warmup duration -logiikka ja `warmup-duration-stepper` säilytettiin ennallaan.
-- Liikekohtainen kommenttikenttä lisättiin exercise detail -näkymään otsikolla `Liikkeen kommentti`.
-- Kommentti tallentuu aktiiviseen draftiin optional-kenttänä `exerciseComment`.
-- Kommentti palautuu refreshissä nykyisen `gymflow_active_draft`-autosaven kautta.
-- Kommentti tallentuu completed workout -dataan optional fieldinä, koska completed-session tallennus kopioi exercise-logit nykyisestä draftista.
-
-### Key decisions
-
-- Kommenttikenttä lisättiin vain liikekohtaisena kenttänä, ei treeni- tai sarjakohtaisena kommenttina.
-- `exerciseComment` on optional field, joten vanhat draftit ja completed-sessionit eivät vaadi migraatiota.
-- Parseria, sarjojen parsing-logiikkaa, localStorage-avaimia, autosavea ja completed-session tallennuksen rakennetta ei muutettu.
-- Yleislämmittelyn oma kesto poistettiin vain UI:sta; treenin kokonaiskesto pysyy yläosan stepperissä.
-- Amber fill -tyyli säilytettiin lisäysroolin buttoneissa, kuten `Lisää sarja`.
-
-### What was intentionally left out
-
-- Exercise Thumbnail UI-kytkentää ei toteutettu.
-- Täyttä compact set logging -uudistusta ei toteutettu; tehtiin vain turvallinen tiivistävä polish.
-- Treenikohtaisia kommentteja ei toteutettu.
-- Sarjakohtaisia kommentteja ei toteutettu.
-- Kommentin näyttämistä history detailissä ei rakennettu tässä stepissä; se voidaan viimeistellä Step NOTES1B:ssä.
-- Calendar-, Progress- tai Achievements-ominaisuuksia ei lisätty.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
-- Static code-path checks:
-  - `exerciseComment` update path exists in `Workout.jsx`.
-  - General warmup lower duration input was removed.
-  - Targeted warmup `warmup-duration-stepper` remains.
-  - Remove button keeps `aria-label="Poista sarja"` and visible `−` output via `&minus;`.
-
-### Build / Lint result
-
-- `npm run build`: passed
-- `npm run lint`: passed
-- `npm run dev`: dev server was available at `http://localhost:5173/gymflow-dashboard/`.
-- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session.
-
-### Next recommended step
-
-Step QA1B — Compact Set Logging Layout
-
-Alternative next steps:
-- Step NOTES1B — Show Exercise Comments in History Detail
-- Comprehensive retest after QA fixes
-
-## Step QA1-FIX2 — Compact Set Row Polish
-
-Päiväys: 2026-05-23
-
-### Files changed
-
-- `src/components/ExerciseLogCard.jsx`
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What was fixed
-
-- KG- ja TOISTOT-stepperit pienennettiin kompaktimmiksi.
-- Stepperit eivät enää veny täysleveiksi sarjakortin sisällä leveämmissä näkymissä.
-- Sarjakortin tyhjää vaakasuuntaista ja pystysuuntaista tilaa vähennettiin.
-- Sarjan poistobutton muutettiin tekstilliseksi `Poista`-buttoniksi.
-- Poistobuttonille säilytettiin `aria-label="Poista sarja"`.
-- Layout pyritään pitämään samalla rivillä leveämmissä näkymissä:
-  `sarjan numero` + `KG-stepper` + `TOISTOT-stepper` + `quality stars` + `Poista`.
-- Mobiilissa layout saa rivittyä hallitusti kahdelle riville ilman vaakascrollia.
-- Poistobutton sijoitettiin samaan kompaktikokonaisuuteen eikä enää irralliseksi alareunaan.
-
-### Key decisions
-
-- Muutos tehtiin JSX-tekstillä ja CSS-grid-polishilla ilman datamallimuutoksia.
-- `Poista` pidettiin tummana kompaktina toimintona hyvällä tekstikontrastilla.
-- Touch targetit pidettiin riittävän kokoisina mobiilissa.
-- Amber `Lisää sarja` -buttonin tyyliä ei muutettu.
-- Success-buttonien värejä tai tokeneita ei muutettu.
-
-### What was intentionally left out
-
-- Parseria ei muutettu.
-- Autosavea ei muutettu.
-- LocalStorage-avaimia ei muutettu.
-- Completed-session tallennusta ei muutettu.
-- Warmup- tai targeted warmup -logiikkaa ei muutettu.
-- Exercise Thumbnail UI-kytkentää ei toteutettu.
-- Täyttä Step QA1B compact set logging -uudistusta ei tehty.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
-- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
-
-### Build / Lint result
-
-- `npm run build`: passed
-- `npm run lint`: passed
-- `npm run dev`: dev server was available at `http://localhost:5173/gymflow-dashboard/`.
-- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session.
-
-### Next recommended step
-
-Comprehensive retest after QA fixes
-
-Alternative next step: Step QA1B — Full Compact Set Logging Layout, if the layout still needs a larger redesign.
-
-## Step QA1-FIX3 — Workout Completion Flow & Duration Quick Presets
-
-Päiväys: 2026-05-23
-
-### Files changed
-
+- `src/components/SetInputRow.jsx`
+- `src/components/CompletionSummary.jsx`
+- `src/components/WorkoutDayPicker.jsx`
 - `src/hooks/useGymFlowData.js`
+- `src/pages/Home.jsx`
 - `src/pages/Workout.jsx`
+- `src/pages/History.jsx`
+- `src/pages/Progress.jsx`
+- `src/pages/Program.jsx`
+- `src/pages/Settings.jsx`
+- `src/data/defaultExercises.js`
+- `src/data/defaultWorkoutDays.js`
+- `src/data/demoSessions.js`
+- `src/utils/parseSets.js`
+- `src/utils/progressLogic.js`
+- `src/utils/workoutLogUtils.js`
+- `src/utils/exerciseTracking.js`
+- `src/utils/durationUtils.js`
 - `src/App.css`
+- `src/assets/exercises/`
 - `docs/GYMFLOW_CONTEXT.md`
 
-### What was fixed
+## 13. Current stable state
 
-- Treenin kestoon lisättiin pikavalinnat 30/45/60/75/90/105/120 min.
-- Plus/miinus säilyy 1 minuutin hienosäätöön.
-- Pikavalinta asettaa `durationMinutes`-arvon suoraan aktiiviseen draftiin.
-- Valittu preset korostuu compact chip -tyylillä, kun arvo vastaa preset-minuutteja.
-- Uusi treeniluonnos alkaa oletuksella 45 min.
-- Olemassa olevaa draft-durationia ei ylikirjoiteta, koska `startDraft` ei luo uutta draftia saman aktiivisen päivän päälle.
-- Completion modalin `Peruuta` sulkee modalin ja jättää käyttäjän nykyiseen kohtaan.
-- Completion modalin `Kyllä, tallenna` tallentaa completed workoutin ja ohjaa onnistuneen tallennuksen jälkeen Historyyn.
-- Draft tyhjennetään vasta onnistuneen completed-tallennuksen jälkeen nykyisen `completeWorkout`-polun kautta.
-- Sarjarivin KG/TOISTOT-väliä kasvatettiin hieman ilman stepperien suurentamista.
+Latest known stable state:
 
-### Key decisions
+- Build has passed after recent QA changes.
+- Lint has passed after recent QA changes.
+- New exercise images were added and pushed to GitHub.
+- Smith machine seated shoulder press image filename was normalized to kebab-case.
+- The project is ready for the next planned step after a quick `git status`, `npm run build` and optional manual smoke test.
 
-- Duration-presetit toteutettiin pienellä `DurationControls`-komponentilla `Workout.jsx`-tiedoston sisällä.
-- Sama duration UI näkyy detail-näkymässä ja treenin tiedot -kortissa.
-- Completion flow käyttää nykyistä `onNavigate('history')`-sivunvaihtomekanismia.
-- Completed-session tallennuksen rakennetta ei muutettu.
-- Duration tallentuu edelleen nykyisen draft/autosave-polun kautta.
+Recommended status check before next Codex step:
 
-### What was intentionally left out
+```powershell
+git status
+npm run build
+npm run lint
+```
 
-- Parseria ei muutettu.
-- Autosave-logiikkaa ei muutettu muuten kuin käyttämällä nykyistä duration-kentän tallennuspolkua.
-- Warmup- tai targeted warmup -logiikkaa ei muutettu.
-- Exercise Thumbnail UI-kytkentää ei toteutettu.
-- Headeria, bottom navia tai yleistä sivurakennetta ei muutettu.
-- Erillistä completion success toastia ei lisätty, koska Historyyn ohjaus antaa selkeän lopputilan ilman uutta UI-rakennetta.
+## 14. What not to break
 
-### Tests run
+Future steps must not accidentally break:
 
-- `npm run build`
-- `npm run lint`
-- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
-- Static code-path checks:
-  - New draft default duration is `45`.
-  - Duration presets are `30/45/60/75/90/105/120`.
-  - `Kyllä, tallenna` calls `completeWorkout` and navigates to `history` only after a completed session is returned.
+- active draft restore
+- localStorage keys
+- autosave
+- completed-session save
+- reps-first parser
+- set-by-set editor
+- targeted warmup multi-card logic
+- duration presets
+- History completed session reading
+- generic `workoutDays` model
+- multiple sessions per calendar day support
+- mobile-first layout
+- bottom nav safe-area behavior
+- current visual token system
 
-### Build / Lint result
+## 15. Current recommended next steps
 
-- `npm run build`: passed
-- `npm run lint`: passed
-- `npm run dev`: dev server was available at `http://localhost:5173/gymflow-dashboard/`.
-- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session.
+Primary recommended next step:
 
-### Next recommended step
+### Step IMG-2 — Connect Exercise Image Assets to Exercise Bank
 
-Comprehensive retest after QA fixes
+Reason:
+
+- The image assets are now in the repo.
+- The next logical step is to use them in the app.
+- This should be UI/data display only, not a logging logic change.
+
+Safe scope:
+
+- Add image mapping.
+- Add image keys to matching default exercises.
+- Show thumbnails in Workout exercise list.
+- Optionally show image in Exercise detail.
+- Add fallback for missing image.
+- Do not touch parser, autosave or completed-session save logic.
 
 Alternative next steps:
-- Step QA1B — Full Compact Set Logging Layout
-- Step NOTES1B — Show Exercise Comments in History Detail
 
-## Step QA1-FIX3B — Workout Meta Alignment & Set Row Spacing Polish
+### Step NOTES1B — Show Exercise Comments in History Detail
 
-Päiväys: 2026-05-23
+Reason:
 
-### Files changed
+- Exercise-level comments are already saved in draft/completed data.
+- History does not yet display them.
 
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
+### Step QA1B — Full Compact Set Logging Layout
 
-### What was fixed
+Reason:
 
-- Tuntemus-select kohdistettiin takaisin samalle tasolle Treenin keston kanssa workout detailin meta-alueessa.
-- Meta-rivin alignment vaihdettiin yläankkuriin, jotta duration-pikavalinnat eivät pudota Tuntemus-kenttää alemmas.
-- Duration-pikavalinnat säilytettiin ennallaan.
-- KG- ja TOISTOT-stepperien väliä kasvatettiin hieman.
-- Stepperien kokoa ei muutettu.
-- Poista-buttonia ei muutettu.
-- Stars-layoutia ei muutettu.
+- Current compact set polish is acceptable, but a stronger mobile-first logging row could still improve the gym use case.
 
-### Key decisions
+### Step P2 — Home Today Hero Card
 
-- Muutos tehtiin vain CSS:llä.
-- Leveämmissä näkymissä Treenin kesto ja Tuntemus pysyvät samalla top-alignmentillä.
-- Mobiilissa nykyinen pinoutuva järjestys säilyy: Treenin kesto, duration-pikavalinnat, Tuntemus.
-- Set-row’n väliä kasvatettiin maltillisesti ilman, että mobiilin vaakaylivuotoriskiä lisättiin.
+Reason:
 
-### What was intentionally left out
+- Improves “What should I do today?” product feel.
+- Should be visual/UI only.
 
-- Parseria ei muutettu.
-- Autosavea ei muutettu.
-- LocalStorage-avaimia ei muutettu.
-- Completed-session tallennusta ei muutettu.
-- Warmup- tai targeted warmup -logiikkaa ei muutettu.
-- Duration-pikavalintojen arvoja tai toimintaa ei muutettu.
-- Headeria, bottom navia tai sivurakennetta ei muutettu.
+## 16. Current product direction summary
 
-### Tests run
+GymFlow should become a premium mobile workout dashboard that feels fast during real gym use.
 
-- `npm run build`
-- `npm run lint`
-- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
+The most important UX principle:
 
-### Build / Lint result
-
-- `npm run build`: passed
-- `npm run lint`: passed
-- `npm run dev`: dev server was available at `http://localhost:5173/gymflow-dashboard/`.
-- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session.
-
-### Next recommended step
-
-Comprehensive retest after QA fixes
-
-Alternative next step: Step NOTES1B — Show Exercise Comments in History Detail
-
-## Step QA1-FIX3C — Set Row Micro Spacing Polish
-
-Päiväys: 2026-05-23
-
-### Files changed
-
-- `src/App.css`
-- `docs/GYMFLOW_CONTEXT.md`
-
-### What changed
-
-- KG- ja TOISTOT-ryhmien väliä kasvatettiin hieman sarjakohtaisessa kirjauksessa.
-- Mobiilin breakpoint-välit pidettiin maltillisina, jotta sarjarivi pysyy tiiviinä.
-- Toiminnallisuutta ei muutettu.
-
-### Tests run
-
-- `npm run build`
-- `npm run lint`
+- During training, the user should not fight forms.
+- The user should see the day, pick an exercise, log sets quickly, mark the exercise done, and move on.
+- History and progress should answer what happened last time and whether performance is improving.
+- Program and exercise bank editing can come later, but the architecture must keep supporting them.

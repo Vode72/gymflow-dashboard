@@ -34,11 +34,12 @@
   --button-success-bg: #34c759;
   --button-success-bg-hover: #2fb84f;
   --button-success-bg-active: #28a745;
-  --button-success-text: #ffffff;
-  --button-accent-bg: #fef3c7;
-  --button-accent-bg-hover: #fde68a;
-  --button-accent-bg-active: #fcd34d;
-  --button-accent-text: #b45309;
+  --success-text: #0f2a18;
+  --button-success-text: var(--success-text);
+  --button-accent-bg: #f0b43a;
+  --button-accent-bg-hover: #e4a52a;
+  --button-accent-bg-active: #d59620;
+  --button-accent-text: #261806;
   --button-warning-bg: #fef3c7;
   --button-warning-bg-hover: #fde68a;
   --button-warning-bg-active: #fcd34d;
@@ -96,11 +97,12 @@
   --button-success-bg: #34c759;
   --button-success-bg-hover: #2fb84f;
   --button-success-bg-active: #28a745;
-  --button-success-text: #ffffff;
-  --button-accent-bg: #fef3c7;
-  --button-accent-bg-hover: #fde68a;
-  --button-accent-bg-active: #fcd34d;
-  --button-accent-text: #b45309;
+  --success-text: #0f2a18;
+  --button-success-text: var(--success-text);
+  --button-accent-bg: #f0b43a;
+  --button-accent-bg-hover: #e4a52a;
+  --button-accent-bg-active: #d59620;
+  --button-accent-text: #261806;
   --button-warning-bg: #fef3c7;
   --button-warning-bg-hover: #fde68a;
   --button-warning-bg-active: #fcd34d;
@@ -128,11 +130,12 @@
   --button-success-bg: #34c759;
   --button-success-bg-hover: #2fb84f;
   --button-success-bg-active: #28a745;
-  --button-success-text: #ffffff;
-  --button-accent-bg: #fef3c7;
-  --button-accent-bg-hover: #fde68a;
-  --button-accent-bg-active: #fcd34d;
-  --button-accent-text: #b45309;
+  --success-text: #0f2a18;
+  --button-success-text: var(--success-text);
+  --button-accent-bg: #f0b43a;
+  --button-accent-bg-hover: #e4a52a;
+  --button-accent-bg-active: #d59620;
+  --button-accent-text: #261806;
   --button-warning-bg: #fef3c7;
   --button-warning-bg-hover: #fde68a;
   --button-warning-bg-active: #fcd34d;
@@ -448,6 +451,7 @@ button {
   border: 1px solid rgba(180, 83, 9, 0.32);
   color: var(--button-accent-text);
   background: var(--button-accent-bg);
+  box-shadow: 0 6px 14px rgba(180, 83, 9, 0.16);
 }
 
 .btn--accent:hover {
@@ -710,7 +714,8 @@ button {
 
 .set-input-row input,
 .field input,
-.field select {
+.field select,
+.field textarea {
   width: 100%;
   min-height: 48px;
   border: 1px solid var(--border);
@@ -720,18 +725,24 @@ button {
   background: rgba(255, 255, 255, 0.52);
 }
 
+.field textarea {
+  min-height: 84px;
+  padding: 11px 14px;
+  line-height: 1.35;
+  resize: vertical;
+}
+
 .set-builder {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   padding-top: 2px;
 }
 
 .set-builder__list {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding: 2px 2px 8px;
-  scroll-snap-type: x proximity;
+  display: grid;
+  gap: 8px;
+  overflow-x: visible;
+  padding: 1px 1px 6px;
 }
 
 .parsed-set-chips {
@@ -776,21 +787,24 @@ button {
 }
 
 .set-builder__row {
-  flex: 0 0 min(100%, 336px);
-  grid-template-columns: 28px minmax(92px, 1fr) minmax(92px, 1fr);
+  width: 100%;
+  grid-template-columns: 26px max-content max-content minmax(120px, 1fr) auto;
+  grid-template-areas: "index weight reps quality remove";
   align-items: center;
+  column-gap: 22px;
+  row-gap: 5px;
   border: 1px solid var(--card-border-strong);
-  border-radius: var(--card-radius);
-  padding: 12px;
+  border-radius: var(--card-radius-sm);
+  padding: 8px 9px;
   background: var(--card-bg-strong);
   box-shadow: var(--card-shadow-soft);
-  scroll-snap-align: start;
 }
 
 .set-builder__index {
   display: grid;
-  width: 28px;
-  height: 28px;
+  grid-area: index;
+  width: 26px;
+  height: 26px;
   place-items: center;
   border-radius: 999px;
   color: var(--text-muted);
@@ -800,14 +814,25 @@ button {
 }
 
 .stepper-control {
-  display: grid;
-  gap: 4px;
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.set-builder__row > .stepper-control:first-of-type {
+  grid-area: weight;
+}
+
+.set-builder__row > .stepper-control:nth-of-type(2) {
+  grid-area: reps;
 }
 
 .stepper-control div {
   display: inline-flex;
   align-items: center;
-  width: fit-content;
+  width: auto;
   border: 1px solid var(--border);
   border-radius: var(--button-radius-sm);
   overflow: hidden;
@@ -816,20 +841,23 @@ button {
 
 .stepper-control button {
   min-width: 34px;
-  min-height: 34px;
+  min-height: 36px;
 }
 
 .stepper-control strong {
-  min-width: 42px;
-  padding: 0 8px;
+  min-width: 40px;
+  flex: 0 0 auto;
+  padding: 0 7px;
   text-align: center;
 }
 
 .quality-stars {
   display: inline-flex;
+  grid-area: quality;
   align-items: center;
   gap: 1px;
-  grid-column: 2 / -1;
+  justify-self: start;
+  min-height: 36px;
 }
 
 .quality-stars button {
@@ -845,13 +873,19 @@ button {
 }
 
 .set-builder__remove {
-  grid-column: 3;
+  display: grid;
+  grid-area: remove;
   justify-self: end;
-  width: 34px;
-  height: 34px;
+  min-width: 64px;
+  height: 36px;
+  place-items: center;
+  padding: 0 10px;
   border-radius: var(--button-radius-sm);
   color: #ffffff;
   background: #374151;
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1;
 }
 
 .warmup-form {
@@ -1132,8 +1166,19 @@ button {
   grid-template-columns: 20px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
-  color: var(--accent);
+  border: 1px solid rgba(180, 83, 9, 0.28);
+  border-radius: var(--card-radius-sm);
+  padding: 9px 10px;
+  color: var(--button-accent-text);
+  background: var(--button-accent-bg);
   font-weight: 800;
+}
+
+.workout-targeted-action:hover {
+  border-color: rgba(146, 64, 14, 0.42);
+  background: var(--button-accent-bg-hover);
+  box-shadow: 0 6px 14px rgba(180, 83, 9, 0.16);
+  transform: translateY(-1px);
 }
 
 .workout-targeted-action input {
@@ -1147,7 +1192,7 @@ button {
 .workout-targeted-action small {
   display: block;
   margin-top: 2px;
-  color: var(--text-muted);
+  color: rgba(38, 24, 6, 0.74);
   font-size: 0.8rem;
   font-weight: 650;
 }
@@ -1201,6 +1246,36 @@ button {
   min-height: 34px;
   padding: 0 11px;
   font-size: 0.82rem;
+}
+
+.targeted-warmup-done-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(52, 199, 89, 0.24);
+  border-radius: var(--card-radius-sm);
+  padding: 8px 10px;
+  color: var(--text-main);
+  background: rgba(220, 252, 231, 0.74);
+  text-align: left;
+}
+
+.targeted-warmup-done-card span {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.targeted-warmup-done-card small {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .workout-popup {
@@ -1328,7 +1403,7 @@ button {
 .workout-detail-card__meta-row {
   display: grid;
   grid-template-columns: auto minmax(160px, 210px);
-  align-items: end;
+  align-items: start;
   width: fit-content;
   max-width: 620px;
   gap: 24px;
@@ -1346,6 +1421,10 @@ button {
   min-width: 0;
 }
 
+.workout-detail-card__feeling {
+  align-self: start;
+}
+
 .workout-detail-card__feeling select {
   width: 100%;
   min-height: 44px;
@@ -1359,6 +1438,10 @@ button {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+.exercise-comment-field textarea {
+  background: rgba(255, 255, 255, 0.62);
 }
 
 .field {
@@ -1387,6 +1470,36 @@ button {
   border-radius: var(--button-radius-sm);
   overflow: hidden;
   background: var(--card-bg-strong);
+}
+
+.duration-control {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.duration-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.duration-presets button {
+  min-width: 42px;
+  min-height: 32px;
+  border: 1px solid rgba(180, 83, 9, 0.22);
+  border-radius: var(--button-radius-sm);
+  padding: 0 9px;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.48);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.duration-presets button[aria-pressed='true'] {
+  border-color: rgba(146, 64, 14, 0.48);
+  color: var(--button-accent-text);
+  background: var(--button-accent-bg);
 }
 
 .duration-stepper button,
@@ -1640,15 +1753,19 @@ button {
   }
 
   .set-builder__row {
-    grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 26px max-content max-content minmax(0, 1fr);
+    grid-template-areas:
+      "index weight reps reps"
+      ". quality quality remove";
+    column-gap: 16px;
   }
 
   .quality-stars {
-    grid-column: 2 / -1;
+    grid-area: quality;
   }
 
   .set-builder__remove {
-    grid-column: 3;
+    grid-area: remove;
     justify-self: end;
   }
 }
@@ -1661,6 +1778,40 @@ button {
 
   .workout-detail-card__feeling {
     max-width: 210px;
+  }
+
+  .set-builder__row {
+    grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "index weight reps"
+      ". quality remove";
+    column-gap: 12px;
+  }
+
+  .stepper-control {
+    grid-template-columns: 1fr;
+  }
+
+  .stepper-control div {
+    width: 100%;
+  }
+
+  .stepper-control button {
+    min-width: 32px;
+  }
+
+  .stepper-control strong {
+    min-width: 34px;
+    flex: 1;
+  }
+
+  .quality-stars button {
+    min-width: 26px;
+  }
+
+  .set-builder__remove {
+    min-width: 62px;
+    padding: 0 8px;
   }
 }
 

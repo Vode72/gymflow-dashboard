@@ -2246,3 +2246,348 @@ Kuvia ei vielä kytketä appin UI:hin tässä vaiheessa. Varsinainen toteutus te
 - näytä pieni thumbnail liikkeen edessä
 - fallback-kuva, jos liikkeeltä puuttuu kuva
 - ei muutoksia parseriin, autosaveen tai completed-session tallennukseen
+
+## Step QA1 — Workout Session Stability & Critical UX Fixes
+
+Päiväys: 2026-05-23
+
+### Files changed
+
+- `src/App.jsx`
+- `src/pages/Workout.jsx`
+- `src/components/ExerciseLogCard.jsx`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### Test session findings
+
+- Keskeneräinen treeni saattoi refreshissä päätyä väärään aktiiviseen treenipäivään, koska Workout valitsi ensin suggested next dayn.
+- Selaimen sulkemisen jälkeen localStorage-draft oli olemassa, mutta UI:n valittu päivä ei käyttänyt sitä ensisijaisesti.
+- `Liike valmis` sulki detail-näkymän, mutta jätti käyttäjän sivun alaosaan.
+- Workout duration -stepperi käytti 5 minuutin askelta.
+- Sarjan poistobutton näytti liian tyhjältä/tulkinnanvaraiselta.
+- Kohdennettu warmup jäi isona auki myös `Tehty`-merkinnän jälkeen.
+- Lisäysroolin buttonit kaipasivat selkeämpää amber fill -tyyliä.
+- Success-buttonien valkoinen teksti oli liian kirkas vihreällä taustalla.
+- Liikekohtaiset kommentit havaittiin tarpeellisiksi, mutta niitä ei toteutettu tässä stepissä.
+
+### What was fixed
+
+- Active workout draft -palautus korjattiin: jos `activeDraft` on olemassa, Workout käyttää sen `workoutDayId`-arvoa ennen suggested next day -logiikkaa.
+- Refresh/F5 ei enää vaihda aktiivista päivää virheellisesti seuraavaan päivään, kun draft on olemassa.
+- Selaimen sulkemisen ja appin uudelleen avaamisen jälkeen sama localStorageen tallennettu draft ohjaa treenipäivän valintaa.
+- Keskeneräiset sarjat, painot, toistot, quality stars, duration, feeling, warmupit, targeted warmupit ja completed-tilat säilyvät olemassa olevan `gymflow_active_draft`-rakenteen kautta.
+- `Liike valmis` sulkee detail-näkymän ja scrollaa seuraavaan tekemättömään liikkeeseen; jos sellaista ei ole, se scrollaa juuri valmistuneen liikkeen kohdalle.
+- Workout duration -stepperi muutettiin 1 minuutin askeliin ja negatiivinen arvo estetään.
+- Sarjan remove-button sai selkeän `aria-label` + `title` -merkityksen ja näkyvän minus-merkin.
+- Kohdennettu warmup vaihtuu `Tehty`-painalluksen jälkeen compact done -tilaan, esimerkiksi `✓ Olkapäät · 5 min · Tehty`, ja compact-kortin voi avata muokkausta varten.
+- Lisäys-/accent-roolin buttonit päivitettiin warm amber fill -tyyliin.
+- Success-buttonien tekstikontrastia parannettiin lisäämällä success text -token `#102016`; vihreät taustavärit jätettiin ennalleen.
+- Sarjakorttien pahin vaakaylivuoto poistettiin vaihtamalla set-lista pystyvirtaan ilman varsinaista compact logging -uudistusta.
+
+### Key decisions
+
+- Completed-session tallennuksen rakennetta ei muutettu.
+- LocalStorage-avaimia ei muutettu.
+- Draftin palautus tehtiin käyttämällä nykyistä `gymflow_active_draft`-rakennetta, ei uutta datamallia.
+- Reps-first parserin peruslogiikka jätettiin ennalleen.
+- `Liike valmis` -scroll toteutettiin yksinkertaisella data-attribuutti + `requestAnimationFrame` -mallilla.
+- Kohdennetun warmupin compact done -tila on UI-tila; tallennettu data pysyy samana.
+
+### What was intentionally left out
+
+- Kommenttikenttiä ei toteutettu. Liikekohtaiset kommentit tehdään myöhemmin Step NOTES1 — Workout & Exercise Comments / Notes.
+- Varsinaista compact set logging layout -uudistusta ei tehty; se jätettiin Step QA1B:hen.
+- Exercise Thumbnails UI-kytkentää ei toteutettu.
+- Progress-, Calendar- ja Achievements-ominaisuuksia ei toteutettu.
+- Completed-session datarakennetta ei muutettu.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+- `npm run dev -- --host 127.0.0.1`
+- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
+
+### Build / Lint result
+
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm run dev`: started successfully; Vite reported local URL `http://127.0.0.1:5173/gymflow-dashboard/`.
+- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session. Code paths for draft restore, duration step, targeted warmup compact done, remove button labeling and `Liike valmis` scroll were verified by implementation and build/lint.
+
+### Next recommended step
+
+Step QA1B — Compact Set Logging Layout
+
+Alternative next step: Step NOTES1 — Workout & Exercise Comments / Notes
+
+## Step QA1-FIX1 — Follow-up UX Fixes After QA1
+
+Päiväys: 2026-05-23
+
+### Files changed
+
+- `src/pages/Workout.jsx`
+- `src/components/ExerciseLogCard.jsx`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was fixed
+
+- Success-buttonien tekstiväri vaihdettiin tokeniin `--success-text: #0f2a18`.
+- Kaikki `.btn--success`-painikkeet käyttävät nyt success text -tokenia; success-vihreitä taustavärejä ei muutettu.
+- Sarjan poistobutton korjattiin näkyväksi `−`-merkiksi.
+- Poistobuttonilla on `aria-label="Poista sarja"` ja `title="Poista sarja"`.
+- Sarjakohtaista kirjauskorttia tiivistettiin: kg, toistot ja poisto ovat kompaktimmin samalla rivillä, quality stars jäävät matalaan alariviin.
+- Sarjakortin paddingia, gap-arvoja ja remove-buttonin keskitystä tiivistettiin mobile-first-polishina.
+- Yleislämmittelyn alempi `Kesto`-input poistettiin näkyvistä.
+- Yläosan `Treenin kesto` -stepperi säilytettiin ennallaan.
+- Targeted warmup duration -logiikka ja `warmup-duration-stepper` säilytettiin ennallaan.
+- Liikekohtainen kommenttikenttä lisättiin exercise detail -näkymään otsikolla `Liikkeen kommentti`.
+- Kommentti tallentuu aktiiviseen draftiin optional-kenttänä `exerciseComment`.
+- Kommentti palautuu refreshissä nykyisen `gymflow_active_draft`-autosaven kautta.
+- Kommentti tallentuu completed workout -dataan optional fieldinä, koska completed-session tallennus kopioi exercise-logit nykyisestä draftista.
+
+### Key decisions
+
+- Kommenttikenttä lisättiin vain liikekohtaisena kenttänä, ei treeni- tai sarjakohtaisena kommenttina.
+- `exerciseComment` on optional field, joten vanhat draftit ja completed-sessionit eivät vaadi migraatiota.
+- Parseria, sarjojen parsing-logiikkaa, localStorage-avaimia, autosavea ja completed-session tallennuksen rakennetta ei muutettu.
+- Yleislämmittelyn oma kesto poistettiin vain UI:sta; treenin kokonaiskesto pysyy yläosan stepperissä.
+- Amber fill -tyyli säilytettiin lisäysroolin buttoneissa, kuten `Lisää sarja`.
+
+### What was intentionally left out
+
+- Exercise Thumbnail UI-kytkentää ei toteutettu.
+- Täyttä compact set logging -uudistusta ei toteutettu; tehtiin vain turvallinen tiivistävä polish.
+- Treenikohtaisia kommentteja ei toteutettu.
+- Sarjakohtaisia kommentteja ei toteutettu.
+- Kommentin näyttämistä history detailissä ei rakennettu tässä stepissä; se voidaan viimeistellä Step NOTES1B:ssä.
+- Calendar-, Progress- tai Achievements-ominaisuuksia ei lisätty.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
+- Static code-path checks:
+  - `exerciseComment` update path exists in `Workout.jsx`.
+  - General warmup lower duration input was removed.
+  - Targeted warmup `warmup-duration-stepper` remains.
+  - Remove button keeps `aria-label="Poista sarja"` and visible `−` output via `&minus;`.
+
+### Build / Lint result
+
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm run dev`: dev server was available at `http://localhost:5173/gymflow-dashboard/`.
+- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session.
+
+### Next recommended step
+
+Step QA1B — Compact Set Logging Layout
+
+Alternative next steps:
+- Step NOTES1B — Show Exercise Comments in History Detail
+- Comprehensive retest after QA fixes
+
+## Step QA1-FIX2 — Compact Set Row Polish
+
+Päiväys: 2026-05-23
+
+### Files changed
+
+- `src/components/ExerciseLogCard.jsx`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was fixed
+
+- KG- ja TOISTOT-stepperit pienennettiin kompaktimmiksi.
+- Stepperit eivät enää veny täysleveiksi sarjakortin sisällä leveämmissä näkymissä.
+- Sarjakortin tyhjää vaakasuuntaista ja pystysuuntaista tilaa vähennettiin.
+- Sarjan poistobutton muutettiin tekstilliseksi `Poista`-buttoniksi.
+- Poistobuttonille säilytettiin `aria-label="Poista sarja"`.
+- Layout pyritään pitämään samalla rivillä leveämmissä näkymissä:
+  `sarjan numero` + `KG-stepper` + `TOISTOT-stepper` + `quality stars` + `Poista`.
+- Mobiilissa layout saa rivittyä hallitusti kahdelle riville ilman vaakascrollia.
+- Poistobutton sijoitettiin samaan kompaktikokonaisuuteen eikä enää irralliseksi alareunaan.
+
+### Key decisions
+
+- Muutos tehtiin JSX-tekstillä ja CSS-grid-polishilla ilman datamallimuutoksia.
+- `Poista` pidettiin tummana kompaktina toimintona hyvällä tekstikontrastilla.
+- Touch targetit pidettiin riittävän kokoisina mobiilissa.
+- Amber `Lisää sarja` -buttonin tyyliä ei muutettu.
+- Success-buttonien värejä tai tokeneita ei muutettu.
+
+### What was intentionally left out
+
+- Parseria ei muutettu.
+- Autosavea ei muutettu.
+- LocalStorage-avaimia ei muutettu.
+- Completed-session tallennusta ei muutettu.
+- Warmup- tai targeted warmup -logiikkaa ei muutettu.
+- Exercise Thumbnail UI-kytkentää ei toteutettu.
+- Täyttä Step QA1B compact set logging -uudistusta ei tehty.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
+
+### Build / Lint result
+
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm run dev`: dev server was available at `http://localhost:5173/gymflow-dashboard/`.
+- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session.
+
+### Next recommended step
+
+Comprehensive retest after QA fixes
+
+Alternative next step: Step QA1B — Full Compact Set Logging Layout, if the layout still needs a larger redesign.
+
+## Step QA1-FIX3 — Workout Completion Flow & Duration Quick Presets
+
+Päiväys: 2026-05-23
+
+### Files changed
+
+- `src/hooks/useGymFlowData.js`
+- `src/pages/Workout.jsx`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was fixed
+
+- Treenin kestoon lisättiin pikavalinnat 30/45/60/75/90/105/120 min.
+- Plus/miinus säilyy 1 minuutin hienosäätöön.
+- Pikavalinta asettaa `durationMinutes`-arvon suoraan aktiiviseen draftiin.
+- Valittu preset korostuu compact chip -tyylillä, kun arvo vastaa preset-minuutteja.
+- Uusi treeniluonnos alkaa oletuksella 45 min.
+- Olemassa olevaa draft-durationia ei ylikirjoiteta, koska `startDraft` ei luo uutta draftia saman aktiivisen päivän päälle.
+- Completion modalin `Peruuta` sulkee modalin ja jättää käyttäjän nykyiseen kohtaan.
+- Completion modalin `Kyllä, tallenna` tallentaa completed workoutin ja ohjaa onnistuneen tallennuksen jälkeen Historyyn.
+- Draft tyhjennetään vasta onnistuneen completed-tallennuksen jälkeen nykyisen `completeWorkout`-polun kautta.
+- Sarjarivin KG/TOISTOT-väliä kasvatettiin hieman ilman stepperien suurentamista.
+
+### Key decisions
+
+- Duration-presetit toteutettiin pienellä `DurationControls`-komponentilla `Workout.jsx`-tiedoston sisällä.
+- Sama duration UI näkyy detail-näkymässä ja treenin tiedot -kortissa.
+- Completion flow käyttää nykyistä `onNavigate('history')`-sivunvaihtomekanismia.
+- Completed-session tallennuksen rakennetta ei muutettu.
+- Duration tallentuu edelleen nykyisen draft/autosave-polun kautta.
+
+### What was intentionally left out
+
+- Parseria ei muutettu.
+- Autosave-logiikkaa ei muutettu muuten kuin käyttämällä nykyistä duration-kentän tallennuspolkua.
+- Warmup- tai targeted warmup -logiikkaa ei muutettu.
+- Exercise Thumbnail UI-kytkentää ei toteutettu.
+- Headeria, bottom navia tai yleistä sivurakennetta ei muutettu.
+- Erillistä completion success toastia ei lisätty, koska Historyyn ohjaus antaa selkeän lopputilan ilman uutta UI-rakennetta.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
+- Static code-path checks:
+  - New draft default duration is `45`.
+  - Duration presets are `30/45/60/75/90/105/120`.
+  - `Kyllä, tallenna` calls `completeWorkout` and navigates to `history` only after a completed session is returned.
+
+### Build / Lint result
+
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm run dev`: dev server was available at `http://localhost:5173/gymflow-dashboard/`.
+- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session.
+
+### Next recommended step
+
+Comprehensive retest after QA fixes
+
+Alternative next steps:
+- Step QA1B — Full Compact Set Logging Layout
+- Step NOTES1B — Show Exercise Comments in History Detail
+
+## Step QA1-FIX3B — Workout Meta Alignment & Set Row Spacing Polish
+
+Päiväys: 2026-05-23
+
+### Files changed
+
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What was fixed
+
+- Tuntemus-select kohdistettiin takaisin samalle tasolle Treenin keston kanssa workout detailin meta-alueessa.
+- Meta-rivin alignment vaihdettiin yläankkuriin, jotta duration-pikavalinnat eivät pudota Tuntemus-kenttää alemmas.
+- Duration-pikavalinnat säilytettiin ennallaan.
+- KG- ja TOISTOT-stepperien väliä kasvatettiin hieman.
+- Stepperien kokoa ei muutettu.
+- Poista-buttonia ei muutettu.
+- Stars-layoutia ei muutettu.
+
+### Key decisions
+
+- Muutos tehtiin vain CSS:llä.
+- Leveämmissä näkymissä Treenin kesto ja Tuntemus pysyvät samalla top-alignmentillä.
+- Mobiilissa nykyinen pinoutuva järjestys säilyy: Treenin kesto, duration-pikavalinnat, Tuntemus.
+- Set-row’n väliä kasvatettiin maltillisesti ilman, että mobiilin vaakaylivuotoriskiä lisättiin.
+
+### What was intentionally left out
+
+- Parseria ei muutettu.
+- Autosavea ei muutettu.
+- LocalStorage-avaimia ei muutettu.
+- Completed-session tallennusta ei muutettu.
+- Warmup- tai targeted warmup -logiikkaa ei muutettu.
+- Duration-pikavalintojen arvoja tai toimintaa ei muutettu.
+- Headeria, bottom navia tai sivurakennetta ei muutettu.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`
+- Dev server HTTP smoke: `http://localhost:5173/gymflow-dashboard/` returned 200.
+
+### Build / Lint result
+
+- `npm run build`: passed
+- `npm run lint`: passed
+- `npm run dev`: dev server was available at `http://localhost:5173/gymflow-dashboard/`.
+- Manual click-through smoke was limited because the in-app browser automation tool was not exposed in this session.
+
+### Next recommended step
+
+Comprehensive retest after QA fixes
+
+Alternative next step: Step NOTES1B — Show Exercise Comments in History Detail
+
+## Step QA1-FIX3C — Set Row Micro Spacing Polish
+
+Päiväys: 2026-05-23
+
+### Files changed
+
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+### What changed
+
+- KG- ja TOISTOT-ryhmien väliä kasvatettiin hieman sarjakohtaisessa kirjauksessa.
+- Mobiilin breakpoint-välit pidettiin maltillisina, jotta sarjarivi pysyy tiiviinä.
+- Toiminnallisuutta ei muutettu.
+
+### Tests run
+
+- `npm run build`
+- `npm run lint`

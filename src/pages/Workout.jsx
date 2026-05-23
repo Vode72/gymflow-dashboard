@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Card from '../components/Card'
 import CompletionSummary from '../components/CompletionSummary'
 import ExerciseLogCard from '../components/ExerciseLogCard'
@@ -20,6 +20,7 @@ import {
 import { getActiveWorkoutDays, getNextWorkoutDay } from '../utils/workoutLogic'
 
 const feelingOptions = ['Normaali', 'Hyvä', 'Vahva', 'Väsynyt']
+const durationPresets = [30, 45, 60, 75, 90, 105, 120]
 
 function getDraftSummary(draft) {
   const loggedExercises = draft?.exercises.filter(hasLoggedExercise) ?? []
@@ -50,6 +51,30 @@ function getExerciseInitials(exercise) {
     .toUpperCase()
 }
 
+function DurationControls({ onAdjust, onSelectPreset, value }) {
+  return (
+    <div className="duration-control">
+      <div className="duration-stepper">
+        <button onClick={() => onAdjust(-1)} type="button">-</button>
+        <strong>{formatDuration(value)}</strong>
+        <button onClick={() => onAdjust(1)} type="button">+</button>
+      </div>
+      <div aria-label="Treenin keston pikavalinnat" className="duration-presets">
+        {durationPresets.map((preset) => (
+          <button
+            aria-pressed={value === preset}
+            key={preset}
+            onClick={() => onSelectPreset(preset)}
+            type="button"
+          >
+            {preset}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
   const trackingType = log?.trackingType ?? getExerciseTrackingType(exercise)
   const typeLabel = getExerciseLogTypeLabel({ trackingType })
@@ -57,7 +82,12 @@ function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
   const lastResult = getLastExerciseResult(sessions, exercise.id)
 
   return (
-    <button className={`workout-exercise-row ${status === 'Kirjattu' ? 'is-logged' : ''}`} onClick={onSelect} type="button">
+    <button
+      className={`workout-exercise-row ${status === 'Kirjattu' ? 'is-logged' : ''}`}
+      data-workout-exercise-id={exercise.id}
+      onClick={onSelect}
+      type="button"
+    >
       <span className="workout-exercise-row__badge" aria-hidden="true">
         {getExerciseInitials(exercise)}
       </span>
@@ -78,6 +108,7 @@ export default function Workout({
   activeDraft,
   completeWorkout,
   exercises,
+  onNavigate,
   onSelectWorkoutDay,
   program,
   saveDraft,
@@ -88,14 +119,15 @@ export default function Workout({
 }) {
   const activeDays = getActiveWorkoutDays(program)
   const suggestedDay = getNextWorkoutDay(program, sessions)
-  const [selectedDayId, setSelectedDayId] = useState(suggestedDay?.id ?? activeDays[0]?.id)
+  const [selectedDayId, setSelectedDayId] = useState(activeDraft?.workoutDayId ?? suggestedDay?.id ?? activeDays[0]?.id)
   const [selectedExerciseState, setSelectedExerciseState] = useState({ dayId: null, exerciseId: null })
   const [showConfirm, setShowConfirm] = useState(false)
   const [completedSummary, setCompletedSummary] = useState(null)
   const [customExerciseNotice, setCustomExerciseNotice] = useState('')
   const [targetedWarmupPopupOpen, setTargetedWarmupPopupOpen] = useState(false)
   const [targetedWarmupPopupMode, setTargetedWarmupPopupMode] = useState('first')
-  const effectiveSelectedDayId = selectedWorkoutDayId ?? selectedDayId
+  const pendingExerciseScrollRef = useRef(null)
+  const effectiveSelectedDayId = selectedWorkoutDayId ?? activeDraft?.workoutDayId ?? selectedDayId
   const selectedDay = activeDays.find((day) => day.id === effectiveSelectedDayId) ?? activeDays[0]
   const currentDraft = activeDraft?.workoutDayId === selectedDay?.id ? activeDraft : null
 
@@ -139,6 +171,19 @@ export default function Workout({
   const selectedExerciseLog = currentDraft?.exercises.find((item) => item.exerciseId === selectedExercise?.id)
   const draftSummary = getDraftSummary(currentDraft)
   const workoutDurationMinutes = Number(currentDraft?.durationMinutes) || 0
+
+  useEffect(() => {
+    if (selectedExercise || !pendingExerciseScrollRef.current) return undefined
+
+    const targetId = pendingExerciseScrollRef.current
+    pendingExerciseScrollRef.current = null
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.querySelector(`[data-workout-exercise-id="${targetId}"]`)
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [selectedExercise])
 
   function selectWorkoutDay(dayId) {
     setSelectedDayId(dayId)
@@ -217,6 +262,17 @@ export default function Workout({
           estimatedOneRepMax: null,
         }
       }),
+    }))
+  }
+
+  function updateExerciseComment(exerciseId, exerciseComment) {
+    updateDraft((current) => ({
+      ...current,
+      exercises: current.exercises.map((exercise) => (
+        exercise.exerciseId === exerciseId
+          ? { ...exercise, exerciseComment }
+          : exercise
+      )),
     }))
   }
 
@@ -301,17 +357,34 @@ export default function Workout({
 
   function adjustWorkoutDuration(change) {
     const current = Number(currentDraft?.durationMinutes) || 0
-    const nextDuration = change > 0
-      ? Math.ceil((current + 1) / 5) * 5
-      : Math.max(0, Math.floor((current - 1) / 5) * 5)
+    const nextDuration = Math.max(0, current + change)
 
     updateDraftField('durationMinutes', nextDuration)
+  }
+
+  function setWorkoutDuration(durationMinutes) {
+    updateDraftField('durationMinutes', Math.max(0, Number(durationMinutes) || 0))
+  }
+
+  function finishSelectedExercise() {
+    if (!selectedExercise || !selectedDay) return
+
+    const selectedIndex = exerciseList.findIndex((exercise) => exercise.id === selectedExercise.id)
+    const nextUnfinishedExercise = exerciseList
+      .slice(selectedIndex + 1)
+      .find((exercise) => !hasLoggedExercise(currentDraft?.exercises.find((item) => item.exerciseId === exercise.id)))
+
+    pendingExerciseScrollRef.current = nextUnfinishedExercise?.id ?? selectedExercise.id ?? exerciseList[0]?.id ?? null
+    setSelectedExerciseState({ dayId: selectedDay.id, exerciseId: null })
   }
 
   function confirmCompletion() {
     const completed = completeWorkout(currentDraft)
     setShowConfirm(false)
     setCompletedSummary(completed)
+    if (completed) {
+      onNavigate('history')
+    }
   }
 
   if (!selectedDay) {
@@ -478,11 +551,11 @@ export default function Workout({
             <div className="workout-detail-card__meta-row">
               <label className="field workout-detail-card__duration">
                 <span className="muted-label">Treenin kesto</span>
-                <div className="duration-stepper">
-                  <button onClick={() => adjustWorkoutDuration(-5)} type="button">-</button>
-                  <strong>{formatDuration(workoutDurationMinutes)}</strong>
-                  <button onClick={() => adjustWorkoutDuration(5)} type="button">+</button>
-                </div>
+                <DurationControls
+                  onAdjust={adjustWorkoutDuration}
+                  onSelectPreset={setWorkoutDuration}
+                  value={workoutDurationMinutes}
+                />
               </label>
               <label className="field workout-detail-card__feeling">
                 <span className="muted-label">Tuntemus</span>
@@ -512,12 +585,21 @@ export default function Workout({
             )}
             previousResult={getLastExerciseResult(sessions, selectedExercise.id)}
           />
+            <label className="field exercise-comment-field">
+              <span className="muted-label">Liikkeen kommentti</span>
+              <textarea
+                onChange={(event) => updateExerciseComment(selectedExercise.id, event.target.value)}
+                placeholder="esim. hyvä tuntuma, seuraavalla kerralla +2,5 kg"
+                rows="3"
+                value={selectedExerciseLog?.exerciseComment ?? ''}
+              />
+            </label>
           </div>
 
           <div className="workout-detail-card__footer">
             <button
               className="btn btn--success"
-              onClick={() => setSelectedExerciseState({ dayId: selectedDay.id, exerciseId: null })}
+              onClick={finishSelectedExercise}
               type="button"
             >
               Liike valmis
@@ -534,12 +616,12 @@ export default function Workout({
         <div className="workout-meta-grid">
           <label className="field">
             <span className="muted-label">Treenin kesto</span>
-            <div className="duration-stepper">
-              <button onClick={() => adjustWorkoutDuration(-5)} type="button">-</button>
-              <strong>{formatDuration(workoutDurationMinutes)}</strong>
-              <button onClick={() => adjustWorkoutDuration(5)} type="button">+</button>
-            </div>
-            <span className="hint">Säädä 5 minuutin askelilla. Oletus 0 min.</span>
+            <DurationControls
+              onAdjust={adjustWorkoutDuration}
+              onSelectPreset={setWorkoutDuration}
+              value={workoutDurationMinutes}
+            />
+            <span className="hint">Säädä 1 minuutin askelilla. Oletus 45 min.</span>
           </label>
           <label className="field">
             <span className="muted-label">Tuntemus</span>

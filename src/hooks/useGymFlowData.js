@@ -30,7 +30,7 @@ function createDraft(workoutDay, selectedExercises) {
     workoutDayId: workoutDay.id,
     workoutName: workoutDay.name,
     status: 'draft',
-    durationMinutes: 0,
+    durationMinutes: 45,
     feeling: 'Normaali',
     exercises: selectedExercises.map((exercise) => {
       const trackingType = getExerciseTrackingType(exercise)

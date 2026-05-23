@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Card from './Card'
 import SetInputRow from './SetInputRow'
 import { formatDuration } from '../utils/durationUtils'
@@ -75,6 +76,7 @@ export default function ExerciseLogCard({
   const structuredSets = log?.sets?.map(normalizeSet) ?? []
   const targetedWarmupDuration = Math.min(15, Math.max(0, Number(log?.durationMinutes ?? 5) || 0))
   const targetedWarmupType = normalizeTargetedWarmupType(log?.warmupType || defaultWarmupType)
+  const [targetedWarmupExpanded, setTargetedWarmupExpanded] = useState(false)
 
   function updateStructuredSet(index, updates) {
     if (!onStructuredSetsChange) return
@@ -104,6 +106,14 @@ export default function ExerciseLogCard({
     onWarmupChange({
       durationMinutes: Math.min(15, Math.max(0, targetedWarmupDuration + change)),
     })
+  }
+
+  function toggleTargetedWarmupDone() {
+    if (!onWarmupChange) return
+
+    const nextCompleted = !log?.completed
+    onWarmupChange({ completed: nextCompleted })
+    if (nextCompleted) setTargetedWarmupExpanded(false)
   }
 
   const Wrapper = embedded ? 'div' : Card
@@ -145,18 +155,6 @@ export default function ExerciseLogCard({
               />
             </label>
           ) : null}
-          <label className="field">
-            <span className="muted-label">Kesto</span>
-            <div className="input-with-unit">
-              <input
-                min="0"
-                onChange={(event) => onWarmupChange({ durationMinutes: Number(event.target.value) || null })}
-                type="number"
-                value={log?.durationMinutes ?? ''}
-              />
-              <span>min</span>
-            </div>
-          </label>
           <button
             aria-pressed={Boolean(log?.completed)}
             className="done-toggle"
@@ -169,7 +167,18 @@ export default function ExerciseLogCard({
         </div>
       ) : null}
 
-      {trackingType === 'warmupNote' ? (
+      {trackingType === 'warmupNote' && log?.completed && !targetedWarmupExpanded ? (
+        <button
+          className="targeted-warmup-done-card"
+          onClick={() => setTargetedWarmupExpanded(true)}
+          type="button"
+        >
+          <span>{warmupSummary ? `✓ ${warmupSummary}` : '✓ Kohdennettu lämmittely · Tehty'}</span>
+          <small>Muokkaa</small>
+        </button>
+      ) : null}
+
+      {trackingType === 'warmupNote' && (!log?.completed || targetedWarmupExpanded) ? (
         <div className="warmup-form">
           <label className="field">
             <span className="muted-label">Tyyppi</span>
@@ -212,7 +221,7 @@ export default function ExerciseLogCard({
             <button
               aria-pressed={Boolean(log?.completed)}
               className="done-toggle"
-              onClick={() => onWarmupChange({ completed: !log?.completed })}
+              onClick={toggleTargetedWarmupDone}
               type="button"
             >
               {log?.completed ? '✓ Tehty' : 'Tehty'}
@@ -294,9 +303,10 @@ export default function ExerciseLogCard({
                     aria-label="Poista sarja"
                     className="set-builder__remove"
                     onClick={() => removeStructuredSet(index)}
+                    title="Poista sarja"
                     type="button"
                   >
-                    -
+                    Poista
                   </button>
                 </div>
                 ))}

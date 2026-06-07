@@ -638,3 +638,37 @@ Result:
 Next recommended step:
 - QA test image display on mobile viewport.
 - Then consider showing exercise images in Program and History views later.
+
+## Step IMG-2C — Exercise Image Mapping Audit
+
+Date: 2026-06-07
+
+Summary:
+- Added an audit script for exercise image mappings.
+- Checked default exercise imageKeys against actual image assets and centralized imports.
+- Reported missing/unused/mismatched image mappings.
+- Applied only safe fixes where matches were exact.
+
+Files changed:
+- scripts/auditExerciseImages.mjs
+- package.json
+- src/data/defaultExercises.js
+- src/data/exerciseImages.js
+- docs/GYMFLOW_CONTEXT.md
+
+Tests run:
+- npm run build
+- npm run lint
+- npm run audit:images
+
+Result:
+- Build passed.
+- Lint passed.
+- Image audit passed.
+
+Notes:
+- Audit found 0 critical errors.
+- Added missing centralized imports/exports for `dumbbell-lateral-raise.png` and `standing-dumbbell-front-raise.png`.
+- Fixed `Sivulkapää käsipainoilla` to `Sivuolkapää käsipainoilla`.
+- Added `imageKey: 'dumbbell-lateral-raise'` to the existing default dumbbell lateral raise exercise.
+- Remaining warnings are expected for the current smaller default exercise bank: `Kulmasoutu` has no exact imageKey, and multiple image assets correspond to expected exercises that are not yet present in `defaultExercises.js`.

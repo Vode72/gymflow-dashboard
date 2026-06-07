@@ -13,6 +13,7 @@ import chestSupportedInclineDumbbellLateralRaise from '../assets/exercises/chest
 import chestSupportedInclineDumbbellRearDeltRaise from '../assets/exercises/chest-supported-incline-dumbbell-rear-delt-raise.png'
 import chestSupportedSeatedMachineRow from '../assets/exercises/chest-supported-seated-machine-row.png'
 import declineSitUpBench from '../assets/exercises/decline-sit-up-bench.png'
+import dumbbellLateralRaise from '../assets/exercises/dumbbell-lateral-raise.png'
 import dumbbellPulloverOnBench from '../assets/exercises/dumbbell-pullover-on-bench.png'
 import facePull from '../assets/exercises/face-pull.png'
 import highCableChestFly from '../assets/exercises/high-cable-chest-fly.png'
@@ -39,6 +40,7 @@ import smithCloseGripFlatBenchPress from '../assets/exercises/smith-close-grip-f
 import smithInclineBenchPress from '../assets/exercises/smith-incline-bench-press.png'
 import smithMachineBackSquat from '../assets/exercises/smith-machine-back-squat.png'
 import smithMachineSeatedShoulderPress from '../assets/exercises/smith-machine-seated-shoulder-press.png'
+import standingDumbbellFrontRaise from '../assets/exercises/standing-dumbbell-front-raise.png'
 import standingDumbbellShrug from '../assets/exercises/standing-dumbbell-shrug.png'
 import stationaryBike from '../assets/exercises/stationary-bike.png'
 import stretchingRoutine from '../assets/exercises/stretching-routine.png'
@@ -61,6 +63,7 @@ export const exerciseImages = {
   'chest-supported-incline-dumbbell-rear-delt-raise': chestSupportedInclineDumbbellRearDeltRaise,
   'chest-supported-seated-machine-row': chestSupportedSeatedMachineRow,
   'decline-sit-up-bench': declineSitUpBench,
+  'dumbbell-lateral-raise': dumbbellLateralRaise,
   'dumbbell-pullover-on-bench': dumbbellPulloverOnBench,
   'face-pull': facePull,
   'high-cable-chest-fly': highCableChestFly,
@@ -87,6 +90,7 @@ export const exerciseImages = {
   'smith-incline-bench-press': smithInclineBenchPress,
   'smith-machine-back-squat': smithMachineBackSquat,
   'smith-machine-seated-shoulder-press': smithMachineSeatedShoulderPress,
+  'standing-dumbbell-front-raise': standingDumbbellFrontRaise,
   'standing-dumbbell-shrug': standingDumbbellShrug,
   'stationary-bike': stationaryBike,
   'stretching-routine': stretchingRoutine,

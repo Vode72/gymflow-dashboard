@@ -1,63 +1,51 @@
 # GymFlow Dashboard — Master Context
 
-Last updated: 2026-05-23
+Last updated: 2026-06-07
 
-## 1. Project name
+## 1. Project
 
-GymFlow Dashboard
+GymFlow Dashboard is a React + Vite + PWA-ready, mobile-first workout diary and training dashboard.
 
-## 2. Product goal
+Product direction:
+- Fast to use at the gym.
+- Mobile-first.
+- SAP Light Beige / FleetFlow Light inspired.
+- Premium minimal dashboard style.
+- Offline-first MVP using localStorage.
+- Portfolio-ready and product-like.
 
-GymFlow Dashboard is a React + Vite + PWA-ready mobile-first workout diary / training dashboard.
-
-The product should feel like:
-
-- fast to use at the gym
-- mobile-first
-- visually polished
-- SAP Light Beige / FleetFlow Light inspired
-- premium minimal
-- dashboard-style
-- offline-first
-- product-like
-- portfolio-ready
-- potentially sellable later
-
-The product is not:
-
-- a social fitness app
-- a calorie tracking ecosystem
-- an AI coach
-- a MyFitnessPal clone
-- an Excel clone
-- a generic workout form demo
-
-Core product questions:
-
+The product should answer:
 - What should I do today?
 - What did I do last time?
 - Am I progressing?
 
-## 3. Workflow rule
+The product is not:
+- A social fitness app.
+- A calorie tracking ecosystem.
+- An AI coach.
+- A MyFitnessPal clone.
+- An Excel clone.
+- A generic workout form demo.
 
-Toni and ChatGPT plan the architecture, UX, data model and implementation steps together.
+## 2. Workflow Rule
+
+Toni and ChatGPT plan architecture, UX, data model and implementation steps together.
 
 Important workflow rule:
-
 - ChatGPT must not give a copy-paste Codex prompt or code before Toni confirms that the step should be turned into a Codex prompt.
 - First: discuss and plan.
 - Then: define the safe scope.
 - Then: ask Toni for confirmation.
 - Only after confirmation: provide one clear copy-paste-ready Codex prompt.
-- Codex implements the code changes.
+- Codex implements code changes.
 - Each code step must be small, safe and testable.
-- After each implementation step, Codex must update this context file.
+- After each implementation step, Codex must update `docs/GYMFLOW_CONTEXT.md`.
 
-Standard context update rule for future Codex prompts:
+Standard context update rule:
 
-> After implementing any future step, update `docs/GYMFLOW_CONTEXT.md` by appending a new section with the step number, summary, files changed, key decisions, tests run, build/lint result and next recommended step. Do not delete previous context unless Toni explicitly asks to clean or compact the file.
+> After implementing any future step, update `docs/GYMFLOW_CONTEXT.md` by appending or integrating a section with the step number, summary, files changed, key decisions, tests run, build/lint/audit result and next recommended step. Do not delete important project knowledge unless Toni explicitly asks to clean or compact the file.
 
-## 4. Current tech stack
+## 3. Current Tech Stack
 
 - React
 - Vite
@@ -70,42 +58,30 @@ Standard context update rule for future Codex prompts:
 - No login in MVP
 - No cloud sync in MVP
 
-## 5. Visual direction
+## 4. Visual Direction
 
 Current visual direction:
-
 - GymFlow™ Dashboard
 - Made by Toni V
 - SAP Light Beige / FleetFlow Light style
-- calm premium minimal UI
-- compact dashboard cards
-- mobile-friendly large touch targets
-- warm beige / amber / green semantic color system
-- no neon fitness look
-- no Excel-like tiny grid cells
-- no overloaded form UI
+- Calm premium minimal UI
+- Compact dashboard cards
+- Mobile-friendly large touch targets
+- Warm beige / amber / green semantic color system
+- No neon fitness look
+- No Excel-like tiny grid cells
+- No overloaded form UI
 
 Design decisions:
-
 - Success green is reserved for save / complete / accept actions.
 - Amber / yellow is used for add, selected, suggestion, PR and achievement-style actions.
 - Secondary gray is used for neutral actions such as back, cancel and switch day.
 - Danger / reddish brown is reserved for destructive actions.
 - Chips and badges may remain pill-shaped.
-- Cards and buttons are intentionally less round than the first versions.
+- Cards and buttons are intentionally less round than early versions.
 - The product should feel sharper and more premium, not overly soft.
 
-Current important visual tokens / decisions:
-
-- Card radius has been tightened.
-- Button radius has been tightened.
-- Success green direction has been accepted.
-- Header has a compact three-column layout.
-- Active page title is centered and uppercase.
-- Bottom navigation is fixed and mobile-first.
-
 Header page title mapping:
-
 - `TÄNÄÄN`
 - `TREENI`
 - `HISTORIA`
@@ -113,10 +89,9 @@ Header page title mapping:
 - `OHJELMA`
 - `ASETUKSET`
 
-## 6. Core architecture decisions
+## 5. Core Architecture Decisions
 
 Important architecture rules:
-
 - Workout days must not be hardcoded as fixed Day 1-4 logic.
 - The app must support any number of user-defined workout days later.
 - The current 4-day program is demo/default content only.
@@ -129,10 +104,9 @@ Important architecture rules:
 - Completed workouts must be editable later.
 - Records and progress should be calculated from saved sessions, not stored as a fragile separate truth source.
 
-## 7. Workout logging model
+## 6. Workout Logging Model
 
 Set-based exercise logging:
-
 - Fast set input is reps first, weight second.
 - Supported examples:
   - `15/40 + 10/60 + 6/75`
@@ -141,24 +115,42 @@ Set-based exercise logging:
   - `{ reps, weight }`
 
 Tracking types:
-
 - Strength / set-based exercises use set logging.
 - General warmups use warmup duration style logging.
 - Targeted warmups use note/duration/completed style logging.
 - Duration and note exercises do not calculate top kg or estimated 1RM.
 
 Current workout draft behavior:
-
 - Active workout draft is stored in localStorage.
 - Draft persists through refresh and browser reopen.
 - If an active draft exists, Workout must use its `workoutDayId` before suggested next day logic.
-- Draft supports duration, feeling, warmups, targeted warmups, exercise logs, quality stars and exercise comments.
+- Draft supports workout-level duration, feeling, warmups, targeted warmups, exercise logs, exercise-level duration, quality stars and exercise comments.
 - Completing a workout stores a completed session in the sessions list and clears the draft only after successful save.
 
-## 8. Current app views
+Workout-level duration:
+- Stored on the draft/session root as `durationMinutes`.
+- Represents the whole workout duration.
+- Default for new workout drafts: 45 minutes.
+- Presets: 30 / 45 / 60 / 75 / 90 / 105 / 120.
+- Shown in the lower `Treenin tiedot` section.
+
+Exercise-level duration:
+- Stored on the active draft exercise log item:
+  - `activeDraft.exercises[].durationMinutes`
+- Represents the selected exercise duration, not the whole workout.
+- Exercise detail label: `LIIKKEEN KESTO`.
+- Default display for missing/old data: 10 minutes.
+- New non-targeted exercise log items default to 10 minutes.
+- Presets: 5 / 10 / 15 / 20 / 25 / 30.
+- Plus/minus step: 5 minutes.
+- Min: 5 minutes.
+- Max: 60 minutes.
+- Completed sessions preserve this value because completed exercise log items are copied from the draft.
+- Old data must keep working when `durationMinutes` is missing.
+
+## 7. Current App Views
 
 Main views:
-
 - Home / Tänään
 - Workout / Treeni
 - History / Historia
@@ -166,72 +158,69 @@ Main views:
 - Program / Ohjelma
 - Settings / Asetukset
 
-## 9. Current completed feature areas
+## 8. Current Completed Feature Areas
 
 ### Foundation
 
 Implemented:
+- Mobile-first app shell.
+- Bottom navigation.
+- Main views.
+- Demo program.
+- Exercise bank structure.
+- Demo sessions.
+- localStorage hooks.
+- Utility structure.
+- i18n-ready structure.
+- PWA manifest.
+- Reps-first parser.
+- Generic workoutDays model.
+- Multiple sessions per day supported by data model.
 
-- mobile-first app shell
-- bottom navigation
-- main views
-- demo program
-- exercise bank structure
-- demo sessions
-- localStorage hooks
-- utility structure
-- i18n-ready structure
-- PWA manifest
-- reps-first parser
-- generic workoutDays model
-- multiple sessions per day supported by data model
-
-### Header and navigation polish
+### Header and Navigation Polish
 
 Implemented:
-
-- branded header
-- GymFlow™ Dashboard
-- Made by Toni V
-- Demo status pill
-- compact three-column header
-- centered uppercase active page title
-- bottom nav safe-area spacing
-- fixed bottom navigation
-- active bottom nav visual polish
+- Branded header.
+- GymFlow™ Dashboard.
+- Made by Toni V.
+- Demo status pill.
+- Compact three-column header.
+- Centered uppercase active page title.
+- Bottom nav safe-area spacing.
+- Fixed bottom navigation.
+- Active bottom nav visual polish.
 
 ### Workout Logging Core
 
 Implemented:
+- Active workout draft.
+- Reps-first set input.
+- Parsed structured sets.
+- Top kg calculation.
+- Top reps calculation.
+- Estimated 1RM calculation using Epley-style logic.
+- Workout-level feeling input.
+- Workout-level duration input in `Treenin tiedot`.
+- Exercise-level duration input in Workout detail.
+- Autosave.
+- Completion confirmation modal.
+- Completed session save to History.
+- History reads both demo sessions and saved completed sessions.
+- Progress reads saved sessions for basic personal record data.
 
-- active workout draft
-- reps-first set input
-- parsed structured sets
-- top kg calculation
-- top reps calculation
-- estimated 1RM calculation using Epley-style logic
-- feeling input
-- duration input
-- autosave
-- completion confirmation modal
-- completed session save to History
-- History reads both demo sessions and saved completed sessions
-- Progress reads saved sessions for basic personal record data
-
-### Warmup model
+### Warmup Model
 
 Implemented:
-
-- General warmup
-- Targeted warmup
-- Warmup type handling
-- Custom warmup name support
-- Warmup note support
-- Warmup completed state
-- Warmup duration logic
-- Targeted warmup popup confirmation
-- Inline targeted warmup cards
-- Multi-targeted warmup support
+- General warmup.
+- Targeted warmup.
+- Warmup type handling.
+- Custom warmup name support.
+- Warmup note support.
+- Warmup completed state.
+- Warmup duration logic.
+- Targeted warmup popup confirmation.
+- Inline targeted warmup cards.
+- Multi-targeted warmup support.
 - Per-card targeted warmup actions:
   - type dropdown
   - note
@@ -243,10 +232,9 @@ Implemented:
 - Targeted warmup can collapse into a compact done card after marking done.
 - Compact done card can be reopened for editing.
 
-### Workout exercise list / detail flow
+### Workout Exercise List / Detail Flow
 
 Implemented:
-
 - Workout shows a day-level exercise list first.
 - Selecting an exercise opens a detail view.
 - Detail view uses `ExerciseLogCard`.
@@ -255,6 +243,7 @@ Implemented:
 - `Liike valmis` closes detail view and returns to list.
 - `Liike valmis` scrolls toward the next unfinished exercise if available.
 - Exercise list cards show:
+  - exercise thumbnail or fallback
   - exercise name
   - type
   - current logging state
@@ -263,46 +252,74 @@ Implemented:
   - Warmup
   - Daily exercises
   - Custom exercise placeholder
+- Workout detail meta area shows:
+  - exercise-level duration
+  - workout feeling
+  - compact exercise image preview
 
-### Set-by-set editor
-
-Implemented:
-
-- weight +/- control
-- reps +/- control
-- quality stars
-- add set
-- remove set
-- parsed set chips / summary
-- compact set row polish
-- visible `Poista` action
-- remove button has accessible label
-- mobile wrapping avoids horizontal overflow
-
-### Duration and feeling
+### Set-by-set Editor
 
 Implemented:
+- Weight +/- control.
+- Reps +/- control.
+- Quality stars.
+- Add set.
+- Remove set.
+- Parsed set chips / summary.
+- Compact set row polish.
+- Visible `Poista` action.
+- Remove button has accessible label.
+- Mobile wrapping avoids horizontal overflow.
 
-- workout duration stepper
-- duration quick presets:
-  - 30
-  - 45
-  - 60
-  - 75
-  - 90
-  - 105
-  - 120
-- plus/minus supports 1 minute fine tuning
-- new workout draft default duration is currently 45 minutes
-- selected duration preset highlights when value matches
-- feeling select is aligned with duration controls in the detail meta area
+### Duration and Feeling
+
+Implemented:
+- Workout-level duration:
+  - `TREENIN KESTO`
+  - stored on the draft/session root
+  - default 45 minutes
+  - presets 30 / 45 / 60 / 75 / 90 / 105 / 120
+  - used in the lower `Treenin tiedot` section
+- Exercise-level duration:
+  - `LIIKKEEN KESTO`
+  - stored in `activeDraft.exercises[].durationMinutes`
+  - default 10 minutes
+  - presets 5 / 10 / 15 / 20 / 25 / 30
+  - plus/minus step 5 minutes
+  - min 5 minutes, max 60 minutes
+  - shown in Workout detail meta area
+- Feeling select remains in the Workout detail meta area and in the workout details section.
+
+### Exercise Images
+
+Implemented:
+- Exercise image assets are connected to Workout UI.
+- `src/data/exerciseImages.js` exists as centralized image mapping.
+- `imageKey` is used in `src/data/defaultExercises.js`.
+- Workout exercise list shows thumbnails.
+- Workout exercise detail shows a compact image preview in the meta area.
+- Missing image handling/fallback exists.
+- Existing localStorage exercise banks get missing default imageKeys through derived data by matching exercise id; localStorage keys and saved session data are not changed.
+- `bench-press.png` is the current repo file for `Penkki tangolla`, so the imageKey is `bench-press`.
+
+### Image Audit
+
+Implemented:
+- `scripts/auditExerciseImages.mjs` exists.
+- `npm run audit:images` is available.
+- Audit checks:
+  - default exercise imageKeys
+  - actual PNG files in `src/assets/exercises`
+  - centralized imports/exports in `src/data/exerciseImages.js`
+  - expected exercise names and possible Finnish name typos
+- Latest result after IMG-2D: 0 critical errors.
+- Warnings are expected because the image bank is broader than the current default exercise bank.
 
 ### History
 
 Implemented:
-
-- completed sessions visible in History
-- History cards show session summary
+- Completed sessions visible in History.
+- History cards show session summary.
 - History shows:
   - completed exercise count
   - total sets
@@ -312,72 +329,74 @@ Implemented:
 - History better answers “What did I do last time?”
 
 Still missing:
-
-- full completed workout reopening / editing flow
-- exercise comments shown in History detail
-- calendar view
-- achievements
-- progress charts
+- Full completed workout reopening / editing flow.
+- Exercise comments shown in History detail.
+- Exercise-level duration shown in History detail.
+- Calendar view.
+- Achievements.
+- Progress charts.
 
 ### Program
 
 Implemented:
-
 - Program page shows demo program structure.
 - Placeholder actions explain that editing is coming later.
-- Program editing is not yet implemented.
-- Exercise bank editing is not yet implemented.
-- Add/remove/reorder workout days is not yet implemented.
 
-## 10. Current recent QA status
+Still missing:
+- Program editing.
+- Exercise bank editing.
+- Add/remove/reorder workout days.
 
-Recent QA fixes completed on 2026-05-23:
+## 9. Current Stable State
 
-- Active draft restore fixed.
-- Refresh/F5 no longer changes the active workout day incorrectly when a draft exists.
-- Browser close and reopen preserves active draft day via localStorage.
-- Duration default changed to 45 min for new drafts.
-- Duration quick presets added.
-- Completion confirmation now navigates to History after successful save.
-- Success button text contrast improved.
-- Amber add/action buttons polished.
-- Set row spacing tightened.
-- Set row remove action made visible and accessible.
-- General warmup lower duplicate duration input removed from UI.
-- Exercise-level comment field added to exercise detail.
-- `exerciseComment` is optional and saved in draft/completed data.
-- Comment display in History is still pending.
-- Targeted warmup can collapse into compact done state.
-- Sarjakohtainen kirjaus was made more compact without a large data model change.
+Latest known stable state:
+- Build passed after IMG-2D.
+- Lint passed after IMG-2D.
+- Image audit passed with 0 critical errors.
+- Workout exercise images are connected in list and detail views.
+- Current default exercises have imageKeys where applicable.
+- Some extra image assets are intentionally unused because they are reserved for future exercise-bank expansion.
+- Exercise-level duration is implemented separately from workout-level duration.
+- Browser/mobile manual QA has not been claimed as completed in the latest steps.
 
-Recent known limitations:
+Recommended verification before future code steps:
 
-- Manual browser click-through testing was limited in the session.
-- Build and lint passed for recent steps.
-- Full compact logging redesign is still optional.
-- Exercise thumbnail UI connection is not yet implemented.
+```powershell
+npm run build
+npm run lint
+npm run audit:images
+```
 
-## 11. Exercise image bank
+## 10. Exercise Image Bank
 
-### Image style standard
+Image style standard:
+- One image per exercise.
+- PNG format.
+- Saved in `src/assets/exercises/`.
+- Grayscale anatomical muscle-map body.
+- Target muscles highlighted in red/orange.
+- Light neutral background.
+- Realistic gym equipment / bench / dumbbells / cable machine.
+- No text.
+- No logos.
+- Filename in English.
+- Lowercase kebab-case.
+- Filename, future `id` and future `imageKey` should align where possible.
 
-GymFlow exercise image style:
+Current implementation:
+- Assets live in `src/assets/exercises/`.
+- Central image mapping lives in `src/data/exerciseImages.js`.
+- Exercise data references images by `imageKey`.
+- UI uses `getExerciseImage(imageKey)` instead of hardcoding image imports in components.
+- Missing images use fallback initials/neutral blocks.
+- `npm run audit:images` validates mappings and reports expected gaps.
 
-- one image per exercise
-- PNG format
-- saved in `src/assets/exercises/`
-- grayscale anatomical muscle-map body
-- target muscles highlighted in red/orange
-- light neutral background
-- realistic gym equipment / bench / dumbbells / cable machine
-- no text
-- no logos
-- filename in English
-- lowercase kebab-case
-- filename, future `id` and future `imageKey` should align where possible
+Current notes:
+- The image bank contains more assets than the current default exercise bank.
+- `low-cable-ez-bar-curl.png` is mapped centrally for future `Hauiskääntö alataljassa`, but that exercise is not yet present in `defaultExercises.js`.
+- Extra assets should be connected through future exercise-bank expansion, not by silently mapping wrong exercise variations.
 
 Image generation workflow rule:
-
 - When creating a new GymFlow exercise image, also provide:
   - Finnish exercise name
   - English exercise name
@@ -387,98 +406,9 @@ Image generation workflow rule:
   - EN: Chest-Supported Incline Dumbbell Lateral Raise
   - slug: `chest-supported-incline-dumbbell-lateral-raise`
 
-### Initial image batch already accepted earlier
-
-Earlier saved / accepted images:
-
-- `bench-press-barbell.png`
-- `lat-pulldown.png`
-- `seated-cable-row.png`
-- `scott-bench-curl.png`
-- `smith-close-grip-flat-bench-press.png`
-- `smith-incline-bench-press.png`
-- `cable-rope-triceps-pushdown.png`
-- `cable-straight-bar-triceps-pushdown.png`
-- `cable-ez-bar-triceps-pushdown.png`
-
-### New image batch added to GitHub on 2026-05-23
-
-A new batch of 16 exercise images was added to:
-
-`src/assets/exercises/`
-
-Commit:
-
-- `Add new GymFlow exercise images`
-
-The Smith machine shoulder press filename was later normalized to lowercase kebab-case.
-
-Added images:
-
-- `smith-machine-seated-shoulder-press.png`
-- `barbell-back-squat.png`
-- `bench-supported-one-arm-dumbbell-row.png`
-- `bench-supported-one-arm-dumbbell-triceps-kickback.png`
-- `cable-lateral-raise.png`
-- `chest-supported-incline-dumbbell-lateral-raise.png`
-- `chest-supported-seated-machine-row.png`
-- `face-pull.png`
-- `leg-press.png`
-- `machine-hack-squat.png`
-- `seated-incline-dumbbell-curl.png`
-- `seated-incline-dumbbell-hammer-curl.png`
-- `single-arm-high-cable-wrist-curl.png`
-- `single-arm-seated-dumbbell-wrist-curl.png`
-- `smith-machine-back-squat.png`
-- `standing-dumbbell-shrug.png`
-
-Exercise name mapping for the new image batch:
-
-| File | Finnish name | English name |
-|---|---|---|
-| `smith-machine-seated-shoulder-press.png` | Smith pystypunnerrus vinopenkissä | Smith Machine Seated Shoulder Press |
-| `barbell-back-squat.png` | Jalkakyykky tangolla | Barbell Back Squat |
-| `bench-supported-one-arm-dumbbell-row.png` | Kulmasoutu penkillä käsipainolla | Bench-Supported One-Arm Dumbbell Row |
-| `bench-supported-one-arm-dumbbell-triceps-kickback.png` | Kickback käsipainolla penkillä | Bench-Supported One-Arm Dumbbell Triceps Kickback |
-| `cable-lateral-raise.png` | Sivuolkapää alataljassa | Cable Lateral Raise |
-| `chest-supported-incline-dumbbell-lateral-raise.png` | Sivuolkapää vinopenkissä rintatuettu käsipainoilla | Chest-Supported Incline Dumbbell Lateral Raise |
-| `chest-supported-seated-machine-row.png` | Kulmasoutu laitteessa, rintatuettu | Chest-Supported Seated Machine Row |
-| `face-pull.png` | Face pull | Face Pull |
-| `leg-press.png` | Jalkaprässi | Leg Press |
-| `machine-hack-squat.png` | Hack-kyykky | Machine Hack Squat |
-| `seated-incline-dumbbell-curl.png` | Hauiskääntö vinopenkissä käsipainoilla | Seated Incline Dumbbell Curl |
-| `seated-incline-dumbbell-hammer-curl.png` | Hammer-kääntö vinopenkissä käsipainoilla | Seated Incline Dumbbell Hammer Curl |
-| `single-arm-high-cable-wrist-curl.png` | Rannekääntö ylätaljassa | Single-Arm High Cable Wrist Curl |
-| `single-arm-seated-dumbbell-wrist-curl.png` | Rannekääntö istuen penkillä käsipainolla | Single-Arm Seated Dumbbell Wrist Curl |
-| `smith-machine-back-squat.png` | Jalkakyykky Smith-laitteessa | Smith Machine Back Squat |
-| `standing-dumbbell-shrug.png` | Hartianosto käsipainoilla | Standing Dumbbell Shrug |
-
-Important current decision:
-
-- Images are now in the repo as assets.
-- Images are not yet connected to the app UI.
-- The next implementation step for images must be separate and safe.
-
-Recommended future image step:
-
-### Step IMG-2 — Connect Exercise Image Assets to Exercise Bank
-
-Scope:
-
-- add `imageKey` or `image` field to exercise data
-- create central exercise image mapping
-- show thumbnails in Workout exercise list cards
-- optionally show a larger image in exercise detail
-- add fallback image or initials when image is missing
-- do not change parser logic
-- do not change autosave logic
-- do not change completed-session persistence
-- do not change workout session data structure except optional image metadata if needed
-
-## 12. Important files
+## 11. Important Files
 
 Likely important files:
-
 - `src/App.jsx`
 - `src/components/AppShell.jsx`
 - `src/components/BottomNav.jsx`
@@ -488,6 +418,7 @@ Likely important files:
 - `src/components/CompletionSummary.jsx`
 - `src/components/WorkoutDayPicker.jsx`
 - `src/hooks/useGymFlowData.js`
+- `src/hooks/useLocalStorage.js`
 - `src/pages/Home.jsx`
 - `src/pages/Workout.jsx`
 - `src/pages/History.jsx`
@@ -495,6 +426,7 @@ Likely important files:
 - `src/pages/Program.jsx`
 - `src/pages/Settings.jsx`
 - `src/data/defaultExercises.js`
+- `src/data/exerciseImages.js`
 - `src/data/defaultWorkoutDays.js`
 - `src/data/demoSessions.js`
 - `src/utils/parseSets.js`
@@ -504,189 +436,136 @@ Likely important files:
 - `src/utils/durationUtils.js`
 - `src/App.css`
 - `src/assets/exercises/`
+- `scripts/auditExerciseImages.mjs`
 - `docs/GYMFLOW_CONTEXT.md`
 
-## 13. Current stable state
-
-Latest known stable state:
-
-- Build has passed after recent QA changes.
-- Lint has passed after recent QA changes.
-- New exercise images were added and pushed to GitHub.
-- Smith machine seated shoulder press image filename was normalized to kebab-case.
-- The project is ready for the next planned step after a quick `git status`, `npm run build` and optional manual smoke test.
-
-Recommended status check before next Codex step:
-
-```powershell
-git status
-npm run build
-npm run lint
-```
-
-## 14. What not to break
+## 12. What Not To Break
 
 Future steps must not accidentally break:
+- Active draft restore.
+- localStorage keys.
+- Autosave.
+- Completed-session save.
+- Reps-first parser.
+- Set-by-set editor.
+- Targeted warmup multi-card logic.
+- Workout-level duration.
+- Exercise-level duration.
+- `imageKey` / `exerciseImages` mapping.
+- Image audit script.
+- History completed session reading.
+- Generic `workoutDays` model.
+- Multiple sessions per calendar day support.
+- Mobile-first layout.
+- Bottom nav safe-area behavior.
+- Current visual token system.
 
-- active draft restore
-- localStorage keys
-- autosave
-- completed-session save
-- reps-first parser
-- set-by-set editor
-- targeted warmup multi-card logic
-- duration presets
-- History completed session reading
-- generic `workoutDays` model
-- multiple sessions per calendar day support
-- mobile-first layout
-- bottom nav safe-area behavior
-- current visual token system
+## 13. Current Recommended Next Steps
 
-## 15. Current recommended next steps
-
-Primary recommended next step:
-
-### Step IMG-2 — Connect Exercise Image Assets to Exercise Bank
-
-Reason:
-
-- The image assets are now in the repo.
-- The next logical step is to use them in the app.
-- This should be UI/data display only, not a logging logic change.
-
-Safe scope:
-
-- Add image mapping.
-- Add image keys to matching default exercises.
-- Show thumbnails in Workout exercise list.
-- Optionally show image in Exercise detail.
-- Add fallback for missing image.
-- Do not touch parser, autosave or completed-session save logic.
-
-Alternative next steps:
-
-### Step NOTES1B — Show Exercise Comments in History Detail
+### EXB-1 — Expand Exercise Bank From Master Spreadsheet
 
 Reason:
+- Image bank is broader than current default exercise bank.
+- Excel master list exists at `docs/assets/gymflow_liikepankki_kuvat_en.xlsx`.
+- Several mapped image assets are ready but not yet present as default exercises.
+- Exercise bank expansion should be data-only / low-risk and should not change logging logic.
 
-- Exercise-level comments are already saved in draft/completed data.
-- History does not yet display them.
-
-### Step QA1B — Full Compact Set Logging Layout
-
-Reason:
-
-- Current compact set polish is acceptable, but a stronger mobile-first logging row could still improve the gym use case.
-
-### Step P2 — Home Today Hero Card
+### HIST-1 — Show Exercise Comments and Duration in History Detail
 
 Reason:
+- Exercise comments are already saved but not fully visible in History.
+- Exercise-level `durationMinutes` is now saved with completed exercise logs.
+- History can better answer “What did I do last time?” by showing notes and exercise duration.
 
-- Improves “What should I do today?” product feel.
-- Should be visual/UI only.
+### QA-IMG-3 — Browser/Mobile Smoke Test
 
-## 16. Current product direction summary
+Reason:
+- Manual mobile QA should verify image sizing, duration controls, no horizontal scroll and completed-session save.
+
+## 14. Current Product Direction Summary
 
 GymFlow should become a premium mobile workout dashboard that feels fast during real gym use.
 
 The most important UX principle:
-
 - During training, the user should not fight forms.
 - The user should see the day, pick an exercise, log sets quickly, mark the exercise done, and move on.
 - History and progress should answer what happened last time and whether performance is improving.
 - Program and exercise bank editing can come later, but the architecture must keep supporting them.
 
-## Step IMG-2 — Connect Exercise Image Assets to Exercise Bank
+## 15. Recent Implemented Steps
+
+### Step IMG-2 — Connect Exercise Image Assets to Exercise Bank
 
 Date: 2026-06-07
 
 Summary:
 - Connected committed exercise image assets to the exercise bank and Workout UI.
-- Added centralized image mapping.
+- Added centralized image mapping in `src/data/exerciseImages.js`.
 - Added imageKey fields to matching default exercises.
 - Added thumbnails to Workout exercise list.
-- Added larger image display to exercise detail.
+- Added exercise image display to Workout detail.
 - Added fallback handling for missing images.
 
 Files changed:
-- src/data/exerciseImages.js
-- src/data/defaultExercises.js
-- src/hooks/useGymFlowData.js
-- src/pages/Workout.jsx
-- src/App.css
-- docs/GYMFLOW_CONTEXT.md
+- `src/data/exerciseImages.js`
+- `src/data/defaultExercises.js`
+- `src/hooks/useGymFlowData.js`
+- `src/pages/Workout.jsx`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
 
 Key decisions:
-- Images are referenced by imageKey, not hardcoded directly in UI.
+- Images are referenced by `imageKey`, not hardcoded directly in UI.
 - Missing images use a fallback.
-- This step is display-only and does not change workout logging persistence.
-- The repo contains `bench-press.png`, so `Penkki tangolla` uses imageKey `bench-press` instead of the prompt example `bench-press-barbell`.
-- Existing exercises with unclear or missing exact image matches remain without imageKey.
-- Existing localStorage exercise banks get missing default imageKeys through derived data by matching exercise id; localStorage keys and saved session data are not changed.
+- This step was display-only and did not change workout logging persistence.
+- Existing localStorage exercise banks get missing default imageKeys through derived data by matching exercise id.
 
 Tests run:
-- npm run build
-- npm run lint
+- `npm run build` passed.
+- `npm run lint` passed.
 
-Result:
-- Build passed.
-- Lint passed.
-- Vite foreground startup reported `http://127.0.0.1:5173/gymflow-dashboard/`.
-- Manual browser click-through was not completed because the Browser plugin control tool was not exposed in this session and the detached dev server did not stay reachable from the shell.
-
-Next recommended step:
-- QA test image display on mobile viewport.
-- Then consider showing exercise images in Program and History views later.
-
-## Step IMG-2C — Exercise Image Mapping Audit
+### Step IMG-2C — Exercise Image Mapping Audit
 
 Date: 2026-06-07
 
 Summary:
-- Added an audit script for exercise image mappings.
+- Added `scripts/auditExerciseImages.mjs`.
+- Added `npm run audit:images`.
 - Checked default exercise imageKeys against actual image assets and centralized imports.
 - Reported missing/unused/mismatched image mappings.
-- Applied only safe fixes where matches were exact.
+- Applied safe exact fixes only.
 
 Files changed:
-- scripts/auditExerciseImages.mjs
-- package.json
-- src/data/defaultExercises.js
-- src/data/exerciseImages.js
-- docs/GYMFLOW_CONTEXT.md
+- `scripts/auditExerciseImages.mjs`
+- `package.json`
+- `src/data/defaultExercises.js`
+- `src/data/exerciseImages.js`
+- `docs/GYMFLOW_CONTEXT.md`
+
+Key decisions:
+- Audit exits with code 1 only for critical missing files/exports.
+- Unused image assets and missing future exercises are warnings.
+- Warnings are expected until the exercise bank expands.
 
 Tests run:
-- npm run build
-- npm run lint
-- npm run audit:images
+- `npm run build` passed.
+- `npm run lint` passed.
+- `npm run audit:images` passed.
 
-Result:
-- Build passed.
-- Lint passed.
-- Image audit passed.
-
-Notes:
-- Audit found 0 critical errors.
-- Added missing centralized imports/exports for `dumbbell-lateral-raise.png` and `standing-dumbbell-front-raise.png`.
-- Fixed `Sivulkapää käsipainoilla` to `Sivuolkapää käsipainoilla`.
-- Added `imageKey: 'dumbbell-lateral-raise'` to the existing default dumbbell lateral raise exercise.
-- Remaining warnings are expected for the current smaller default exercise bank: `Kulmasoutu` has no exact imageKey, and multiple image assets correspond to expected exercises that are not yet present in `defaultExercises.js`.
-
-## Step IMG-2C Fix — Kulmasoutu ImageKey
+### Step IMG-2C Fix — Kulmasoutu ImageKey
 
 Date: 2026-06-07
 
 Summary:
-- Added imageKey for Kulmasoutu / bent-over-row.
-- Image: bench-supported-one-arm-dumbbell-row.
+- Added imageKey for `Kulmasoutu` / `bent-over-row`.
+- Image: `bench-supported-one-arm-dumbbell-row`.
 
 Result:
 - Build passed.
 - Lint passed.
 - Image audit passed with 0 critical errors and 53 warnings.
 
-## Step IMG-2C Fix — Low Cable EZ Bar Curl Image Mapping
+### Step IMG-2C Fix — Low Cable EZ Bar Curl Image Mapping
 
 Date: 2026-06-07
 
@@ -694,8 +573,8 @@ Summary:
 - Added Low Cable EZ Bar Curl image mapping.
 - FI: Hauiskääntö alataljassa
 - EN: Low Cable EZ Bar Curl
-- imageKey: low-cable-ez-bar-curl
-- file: low-cable-ez-bar-curl.png
+- imageKey: `low-cable-ez-bar-curl`
+- file: `low-cable-ez-bar-curl.png`
 
 Result:
 - Build passed.
@@ -703,7 +582,7 @@ Result:
 - Image audit passed with 0 critical errors and 55 warnings.
 - `Hauiskääntö alataljassa` is not yet present in `defaultExercises.js`, so no default exercise imageKey was added in this step.
 
-## Step IMG-2D — Mobile QA Polish for Exercise Images
+### Step IMG-2D — Mobile QA Polish for Exercise Images
 
 Date: 2026-06-07
 
@@ -711,7 +590,7 @@ Summary:
 - Moved/compacted Workout detail exercise image near the workout meta controls.
 - Reduced excessive empty space around detail images.
 - Kept thumbnails compact.
-- Corrected dumbbell lateral raise Finnish display name.
+- Corrected dumbbell lateral raise Finnish display name to `Sivuolkapäät käsipainoilla, seisten`.
 - No workout logging logic changed.
 
 Result:
@@ -719,25 +598,25 @@ Result:
 - Lint passed.
 - Image audit passed with 0 critical errors and 55 warnings.
 
-## Step IMG-2D — Exercise Duration Split and Image Meta Polish
+### Step IMG-2D — Exercise Duration Split and Image Meta Polish
 
 Date: 2026-06-07
 
 Summary:
 - Split workout-level duration and exercise-level duration in Workout detail.
-- Exercise detail now uses “Liikkeen kesto” with default 10 min.
+- Exercise detail now uses `Liikkeen kesto` with default 10 min.
 - Exercise duration presets are 5/10/15/20/25/30 minutes.
-- Workout-level “Treenin kesto” remains in the workout summary/details section with 30–120 min presets.
+- Workout-level `Treenin kesto` remains in the workout summary/details section with 30-120 min presets.
 - Exercise image preview remains compact in the detail meta area.
 - Autosave compatibility preserved.
 - No parser logic changed.
 
-Tests run:
-- npm run build
-- npm run lint
-- npm run audit:images
+Files changed:
+- `src/pages/Workout.jsx`
+- `src/hooks/useGymFlowData.js`
+- `docs/GYMFLOW_CONTEXT.md`
 
-Result:
-- Build passed.
-- Lint passed.
-- Image audit passed with 0 critical errors and 55 warnings.
+Tests run:
+- `npm run build` passed.
+- `npm run lint` passed.
+- `npm run audit:images` passed with 0 critical errors and 55 warnings.

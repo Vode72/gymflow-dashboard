@@ -596,3 +596,45 @@ The most important UX principle:
 - The user should see the day, pick an exercise, log sets quickly, mark the exercise done, and move on.
 - History and progress should answer what happened last time and whether performance is improving.
 - Program and exercise bank editing can come later, but the architecture must keep supporting them.
+
+## Step IMG-2 — Connect Exercise Image Assets to Exercise Bank
+
+Date: 2026-06-07
+
+Summary:
+- Connected committed exercise image assets to the exercise bank and Workout UI.
+- Added centralized image mapping.
+- Added imageKey fields to matching default exercises.
+- Added thumbnails to Workout exercise list.
+- Added larger image display to exercise detail.
+- Added fallback handling for missing images.
+
+Files changed:
+- src/data/exerciseImages.js
+- src/data/defaultExercises.js
+- src/hooks/useGymFlowData.js
+- src/pages/Workout.jsx
+- src/App.css
+- docs/GYMFLOW_CONTEXT.md
+
+Key decisions:
+- Images are referenced by imageKey, not hardcoded directly in UI.
+- Missing images use a fallback.
+- This step is display-only and does not change workout logging persistence.
+- The repo contains `bench-press.png`, so `Penkki tangolla` uses imageKey `bench-press` instead of the prompt example `bench-press-barbell`.
+- Existing exercises with unclear or missing exact image matches remain without imageKey.
+- Existing localStorage exercise banks get missing default imageKeys through derived data by matching exercise id; localStorage keys and saved session data are not changed.
+
+Tests run:
+- npm run build
+- npm run lint
+
+Result:
+- Build passed.
+- Lint passed.
+- Vite foreground startup reported `http://127.0.0.1:5173/gymflow-dashboard/`.
+- Manual browser click-through was not completed because the Browser plugin control tool was not exposed in this session and the detached dev server did not stay reachable from the shell.
+
+Next recommended step:
+- QA test image display on mobile viewport.
+- Then consider showing exercise images in Program and History views later.

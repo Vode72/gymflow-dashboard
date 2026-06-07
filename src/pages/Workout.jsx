@@ -3,6 +3,7 @@ import Card from '../components/Card'
 import CompletionSummary from '../components/CompletionSummary'
 import ExerciseLogCard from '../components/ExerciseLogCard'
 import WorkoutDayPicker from '../components/WorkoutDayPicker'
+import { getExerciseImage } from '../data/exerciseImages'
 import { formatDuration } from '../utils/durationUtils'
 import { getExerciseDisplayName, getExerciseTrackingType } from '../utils/exerciseTracking'
 import { isValidSetsText, parseSetsText } from '../utils/parseSets'
@@ -51,6 +52,17 @@ function getExerciseInitials(exercise) {
     .toUpperCase()
 }
 
+function ExerciseImageFallback({ exercise, large = false }) {
+  return (
+    <span
+      aria-label={`${getExerciseDisplayName(exercise)} exercise illustration`}
+      className={large ? 'exercise-detail-fallback' : 'exercise-card-fallback'}
+    >
+      {getExerciseInitials(exercise)}
+    </span>
+  )
+}
+
 function DurationControls({ onAdjust, onSelectPreset, value }) {
   return (
     <div className="duration-control">
@@ -80,6 +92,7 @@ function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
   const typeLabel = getExerciseLogTypeLabel({ trackingType })
   const status = hasLoggedExercise(log) ? 'Kirjattu' : 'Ei kirjattu'
   const lastResult = getLastExerciseResult(sessions, exercise.id)
+  const exerciseImage = getExerciseImage(exercise.imageKey)
 
   return (
     <button
@@ -88,8 +101,16 @@ function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
       onClick={onSelect}
       type="button"
     >
-      <span className="workout-exercise-row__badge" aria-hidden="true">
-        {getExerciseInitials(exercise)}
+      <span className="exercise-card-media" aria-hidden={exerciseImage ? undefined : 'true'}>
+        {exerciseImage ? (
+          <img
+            alt={`${getExerciseDisplayName(exercise)} exercise illustration`}
+            className="exercise-card-thumb"
+            src={exerciseImage}
+          />
+        ) : (
+          <ExerciseImageFallback exercise={exercise} />
+        )}
       </span>
       <div className="workout-exercise-row__content">
         <span className="workout-exercise-row__meta">{typeLabel}</span>
@@ -169,6 +190,7 @@ export default function Workout({
   const selectedExerciseId = selectedExerciseState.dayId === selectedDay?.id ? selectedExerciseState.exerciseId : null
   const selectedExercise = exerciseList.find((exercise) => exercise.id === selectedExerciseId)
   const selectedExerciseLog = currentDraft?.exercises.find((item) => item.exerciseId === selectedExercise?.id)
+  const selectedExerciseImage = getExerciseImage(selectedExercise?.imageKey)
   const draftSummary = getDraftSummary(currentDraft)
   const workoutDurationMinutes = Number(currentDraft?.durationMinutes) || 0
 
@@ -572,6 +594,17 @@ export default function Workout({
           </div>
 
           <div className="workout-detail-card__body">
+            <div className="exercise-detail-image-wrap">
+              {selectedExerciseImage ? (
+                <img
+                  alt={`${getExerciseDisplayName(selectedExercise)} exercise illustration`}
+                  className="exercise-detail-image"
+                  src={selectedExerciseImage}
+                />
+              ) : (
+                <ExerciseImageFallback exercise={selectedExercise} large />
+              )}
+            </div>
             <p className="exercise-detail-last">{getLastExerciseResult(sessions, selectedExercise.id)}</p>
           <ExerciseLogCard
             embedded

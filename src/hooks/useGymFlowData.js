@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { defaultExercises } from '../data/defaultExercises'
 import { defaultProgram } from '../data/defaultProgram'
 import { demoSessions } from '../data/demoSessions'
@@ -71,6 +72,20 @@ const defaultSettings = {
   units: 'kg',
 }
 
+function mergeDefaultExerciseImageKeys(exercises) {
+  const defaultExerciseById = new Map(defaultExercises.map((exercise) => [exercise.id, exercise]))
+
+  return exercises.map((exercise) => {
+    const defaultImageKey = defaultExerciseById.get(exercise.id)?.imageKey
+    if (!defaultImageKey || exercise.imageKey) return exercise
+
+    return {
+      ...exercise,
+      imageKey: defaultImageKey,
+    }
+  })
+}
+
 export function useGymFlowData() {
   const [profile, setProfile] = useLocalStorage('gymflow_user_profile', defaultProfile)
   const [program, setProgram] = useLocalStorage('gymflow_program', defaultProgram)
@@ -78,6 +93,7 @@ export function useGymFlowData() {
   const [sessions, setSessions] = useLocalStorage('gymflow_sessions', demoSessions)
   const [settings, setSettings] = useLocalStorage('gymflow_settings', defaultSettings)
   const [activeDraft, setActiveDraft] = useLocalStorage('gymflow_active_draft', null)
+  const exercisesWithImageKeys = useMemo(() => mergeDefaultExerciseImageKeys(exercises), [exercises])
 
   function resetLocalData() {
     setProfile(defaultProfile)
@@ -144,7 +160,7 @@ export function useGymFlowData() {
   return {
     profile,
     program,
-    exercises,
+    exercises: exercisesWithImageKeys,
     sessions,
     settings,
     activeDraft,

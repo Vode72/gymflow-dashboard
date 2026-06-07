@@ -672,3 +672,33 @@ Notes:
 - Fixed `Sivulkapää käsipainoilla` to `Sivuolkapää käsipainoilla`.
 - Added `imageKey: 'dumbbell-lateral-raise'` to the existing default dumbbell lateral raise exercise.
 - Remaining warnings are expected for the current smaller default exercise bank: `Kulmasoutu` has no exact imageKey, and multiple image assets correspond to expected exercises that are not yet present in `defaultExercises.js`.
+
+## Step IMG-2C Fix — Kulmasoutu ImageKey
+
+Date: 2026-06-07
+
+Summary:
+- Added imageKey for Kulmasoutu / bent-over-row.
+- Image: bench-supported-one-arm-dumbbell-row.
+
+Result:
+- Build passed.
+- Lint passed.
+- Image audit passed with 0 critical errors and 53 warnings.
+
+## Step IMG-2C Fix — Low Cable EZ Bar Curl Image Mapping
+
+Date: 2026-06-07
+
+Summary:
+- Added Low Cable EZ Bar Curl image mapping.
+- FI: Hauiskääntö alataljassa
+- EN: Low Cable EZ Bar Curl
+- imageKey: low-cable-ez-bar-curl
+- file: low-cable-ez-bar-curl.png
+
+Result:
+- Build passed.
+- Lint passed.
+- Image audit passed with 0 critical errors and 55 warnings.
+- `Hauiskääntö alataljassa` is not yet present in `defaultExercises.js`, so no default exercise imageKey was added in this step.

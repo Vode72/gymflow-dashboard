@@ -51,6 +51,7 @@ const expectedMappings = [
   ['Ristikkäistalja alhaalta', 'Low Cable Chest Fly', 'low-cable-chest-fly'],
   ['Ristikkäistalja ylhäältä', 'High Cable Chest Fly', 'high-cable-chest-fly'],
   ['Pullover', 'Dumbbell Pullover on Bench', 'dumbbell-pullover-on-bench'],
+  ['Hauiskääntö alataljassa', 'Low Cable EZ Bar Curl', 'low-cable-ez-bar-curl'],
   ['Hauiskääntö vinopenkissä käsip.', 'Seated Incline Dumbbell Curl', 'seated-incline-dumbbell-curl'],
   ['Hammer vinopenkissä', 'Seated Incline Dumbbell Hammer Curl', 'seated-incline-dumbbell-hammer-curl'],
   ['Rannekääntö ylätaljassa', 'Single-Arm High Cable Wrist Curl', 'single-arm-high-cable-wrist-curl'],

@@ -23,6 +23,7 @@ import legCurl from '../assets/exercises/leg-curl.png'
 import legExtension from '../assets/exercises/leg-extension.png'
 import legPress from '../assets/exercises/leg-press.png'
 import lowCableChestFly from '../assets/exercises/low-cable-chest-fly.png'
+import lowCableEzBarCurl from '../assets/exercises/low-cable-ez-bar-curl.png'
 import machineAbCrunch from '../assets/exercises/machine-ab-crunch.png'
 import machineCalfRaise from '../assets/exercises/machine-calf-raise.png'
 import machineHackSquat from '../assets/exercises/machine-hack-squat.png'
@@ -73,6 +74,7 @@ export const exerciseImages = {
   'leg-extension': legExtension,
   'leg-press': legPress,
   'low-cable-chest-fly': lowCableChestFly,
+  'low-cable-ez-bar-curl': lowCableEzBarCurl,
   'machine-ab-crunch': machineAbCrunch,
   'machine-calf-raise': machineCalfRaise,
   'machine-hack-squat': machineHackSquat,

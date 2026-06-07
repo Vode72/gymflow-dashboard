@@ -47,7 +47,7 @@ function createDraft(workoutDay, selectedExercises) {
       sets: [],
       warmupType: getDefaultWarmupType(exercise),
       customWarmupName: '',
-      durationMinutes: null,
+      durationMinutes: trackingType === 'warmupNote' ? null : 10,
       completed: false,
       topKg: null,
       topReps: null,

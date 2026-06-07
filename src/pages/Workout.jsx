@@ -22,6 +22,9 @@ import { getActiveWorkoutDays, getNextWorkoutDay } from '../utils/workoutLogic'
 
 const feelingOptions = ['Normaali', 'Hyvä', 'Vahva', 'Väsynyt']
 const durationPresets = [30, 45, 60, 75, 90, 105, 120]
+const exerciseDurationPresets = [5, 10, 15, 20, 25, 30]
+const exerciseDurationStep = 5
+const maxExerciseDurationMinutes = 60
 
 function getDraftSummary(draft) {
   const loggedExercises = draft?.exercises.filter(hasLoggedExercise) ?? []
@@ -63,7 +66,13 @@ function ExerciseImageFallback({ exercise, large = false }) {
   )
 }
 
-function DurationControls({ onAdjust, onSelectPreset, value }) {
+function DurationControls({
+  ariaLabel = 'Treenin keston pikavalinnat',
+  onAdjust,
+  onSelectPreset,
+  presets = durationPresets,
+  value,
+}) {
   return (
     <div className="duration-control">
       <div className="duration-stepper">
@@ -71,8 +80,8 @@ function DurationControls({ onAdjust, onSelectPreset, value }) {
         <strong>{formatDuration(value)}</strong>
         <button onClick={() => onAdjust(1)} type="button">+</button>
       </div>
-      <div aria-label="Treenin keston pikavalinnat" className="duration-presets">
-        {durationPresets.map((preset) => (
+      <div aria-label={ariaLabel} className="duration-presets">
+        {presets.map((preset) => (
           <button
             aria-pressed={value === preset}
             key={preset}
@@ -85,6 +94,13 @@ function DurationControls({ onAdjust, onSelectPreset, value }) {
       </div>
     </div>
   )
+}
+
+function normalizeExerciseDuration(value) {
+  const duration = Number(value)
+  if (!Number.isFinite(duration) || duration <= 0) return 10
+
+  return Math.min(maxExerciseDurationMinutes, Math.max(exerciseDurationStep, duration))
 }
 
 function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
@@ -106,6 +122,7 @@ function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
           <img
             alt={`${getExerciseDisplayName(exercise)} exercise illustration`}
             className="exercise-card-thumb"
+            loading="lazy"
             src={exerciseImage}
           />
         ) : (
@@ -191,6 +208,7 @@ export default function Workout({
   const selectedExercise = exerciseList.find((exercise) => exercise.id === selectedExerciseId)
   const selectedExerciseLog = currentDraft?.exercises.find((item) => item.exerciseId === selectedExercise?.id)
   const selectedExerciseImage = getExerciseImage(selectedExercise?.imageKey)
+  const selectedExerciseDurationMinutes = normalizeExerciseDuration(selectedExerciseLog?.durationMinutes)
   const draftSummary = getDraftSummary(currentDraft)
   const workoutDurationMinutes = Number(currentDraft?.durationMinutes) || 0
 
@@ -231,7 +249,6 @@ export default function Workout({
           isValid: isValidSetsText(setsText),
           setsText,
           sets,
-          durationMinutes: null,
           completed: false,
           customWarmupName: '',
           note: '',
@@ -259,7 +276,6 @@ export default function Workout({
           isValid: true,
           setsText: formatSetsText(sets),
           sets,
-          durationMinutes: null,
           completed: false,
           customWarmupName: '',
           note: '',
@@ -293,6 +309,17 @@ export default function Workout({
       exercises: current.exercises.map((exercise) => (
         exercise.exerciseId === exerciseId
           ? { ...exercise, exerciseComment }
+          : exercise
+      )),
+    }))
+  }
+
+  function updateExerciseDuration(exerciseId, durationMinutes) {
+    updateDraft((current) => ({
+      ...current,
+      exercises: current.exercises.map((exercise) => (
+        exercise.exerciseId === exerciseId
+          ? { ...exercise, durationMinutes: normalizeExerciseDuration(durationMinutes) }
           : exercise
       )),
     }))
@@ -386,6 +413,21 @@ export default function Workout({
 
   function setWorkoutDuration(durationMinutes) {
     updateDraftField('durationMinutes', Math.max(0, Number(durationMinutes) || 0))
+  }
+
+  function adjustExerciseDuration(change) {
+    if (!selectedExercise) return
+
+    updateExerciseDuration(
+      selectedExercise.id,
+      selectedExerciseDurationMinutes + change,
+    )
+  }
+
+  function setExerciseDuration(durationMinutes) {
+    if (!selectedExercise) return
+
+    updateExerciseDuration(selectedExercise.id, durationMinutes)
   }
 
   function finishSelectedExercise() {
@@ -572,11 +614,13 @@ export default function Workout({
             </div>
             <div className="workout-detail-card__meta-row">
               <label className="field workout-detail-card__duration">
-                <span className="muted-label">Treenin kesto</span>
+                <span className="muted-label">Liikkeen kesto</span>
                 <DurationControls
-                  onAdjust={adjustWorkoutDuration}
-                  onSelectPreset={setWorkoutDuration}
-                  value={workoutDurationMinutes}
+                  ariaLabel="Liikkeen keston pikavalinnat"
+                  onAdjust={(direction) => adjustExerciseDuration(direction * exerciseDurationStep)}
+                  onSelectPreset={setExerciseDuration}
+                  presets={exerciseDurationPresets}
+                  value={selectedExerciseDurationMinutes}
                 />
               </label>
               <label className="field workout-detail-card__feeling">
@@ -590,21 +634,21 @@ export default function Workout({
                   ))}
                 </select>
               </label>
+              <div className="exercise-detail-image-wrap">
+                {selectedExerciseImage ? (
+                  <img
+                    alt={`${getExerciseDisplayName(selectedExercise)} exercise illustration`}
+                    className="exercise-detail-image"
+                    src={selectedExerciseImage}
+                  />
+                ) : (
+                  <ExerciseImageFallback exercise={selectedExercise} large />
+                )}
+              </div>
             </div>
           </div>
 
           <div className="workout-detail-card__body">
-            <div className="exercise-detail-image-wrap">
-              {selectedExerciseImage ? (
-                <img
-                  alt={`${getExerciseDisplayName(selectedExercise)} exercise illustration`}
-                  className="exercise-detail-image"
-                  src={selectedExerciseImage}
-                />
-              ) : (
-                <ExerciseImageFallback exercise={selectedExercise} large />
-              )}
-            </div>
             <p className="exercise-detail-last">{getLastExerciseResult(sessions, selectedExercise.id)}</p>
           <ExerciseLogCard
             embedded

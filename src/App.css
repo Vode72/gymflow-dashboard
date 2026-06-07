@@ -1080,7 +1080,7 @@ button {
 }
 
 .workout-exercise-row {
-  grid-template-columns: 58px minmax(0, 1fr) auto 16px;
+  grid-template-columns: 66px minmax(0, 1fr) auto 16px;
   align-items: center;
   gap: 10px;
 }
@@ -1096,8 +1096,8 @@ button {
 .exercise-card-media,
 .workout-exercise-row__badge {
   display: grid;
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   place-items: center;
   border: 1px solid rgba(183, 121, 31, 0.22);
   border-radius: var(--card-radius-sm);
@@ -1424,9 +1424,9 @@ button {
 
 .exercise-detail-image-wrap {
   display: grid;
-  width: 100%;
-  max-height: 220px;
-  min-height: 128px;
+  align-self: start;
+  width: clamp(180px, 22vw, 220px);
+  height: 128px;
   place-items: center;
   border: 1px solid rgba(120, 92, 58, 0.16);
   border-radius: var(--card-radius-sm);
@@ -1438,28 +1438,26 @@ button {
   display: block;
   width: 100%;
   height: 100%;
-  max-height: 220px;
   object-fit: contain;
 }
 
 .exercise-detail-fallback {
   display: grid;
   width: 100%;
-  min-height: 128px;
+  height: 100%;
   place-items: center;
   color: #7a5a31;
-  font-size: 1.25rem;
+  font-size: 1.08rem;
   font-weight: 850;
   line-height: 1;
 }
 
 .workout-detail-card__meta-row {
   display: grid;
-  grid-template-columns: auto minmax(160px, 210px);
+  grid-template-columns: auto minmax(150px, 190px) minmax(180px, 220px);
   align-items: start;
-  width: fit-content;
-  max-width: 620px;
-  gap: 24px;
+  width: min(100%, 760px);
+  gap: 16px;
 }
 
 .workout-detail-card__footer {
@@ -1795,10 +1793,16 @@ button {
 
 @media (max-width: 560px) {
   .workout-detail-card__meta-row {
-    grid-template-columns: minmax(0, auto) minmax(122px, 0.72fr);
+    grid-template-columns: minmax(0, 1fr) minmax(122px, 0.75fr);
     width: 100%;
     max-width: 100%;
     gap: 10px;
+  }
+
+  .exercise-detail-image-wrap {
+    grid-column: 1 / -1;
+    width: min(100%, 360px);
+    height: 142px;
   }
 
   .workout-detail-card__feeling select {
@@ -1825,13 +1829,13 @@ button {
 
 @media (max-width: 430px) {
   .workout-exercise-row {
-    grid-template-columns: 52px minmax(0, 1fr) auto 14px;
+    grid-template-columns: 58px minmax(0, 1fr) auto 14px;
     gap: 8px;
   }
 
   .exercise-card-media {
-    width: 50px;
-    height: 50px;
+    width: 56px;
+    height: 56px;
   }
 
   .workout-exercise-row__status {
@@ -1840,12 +1844,8 @@ button {
   }
 
   .exercise-detail-image-wrap {
-    max-height: 180px;
-    min-height: 112px;
-  }
-
-  .exercise-detail-image {
-    max-height: 180px;
+    width: min(100%, 320px);
+    height: 124px;
   }
 
   .workout-detail-card__meta-row {

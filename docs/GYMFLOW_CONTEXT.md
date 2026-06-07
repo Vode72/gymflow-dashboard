@@ -702,3 +702,42 @@ Result:
 - Lint passed.
 - Image audit passed with 0 critical errors and 55 warnings.
 - `Hauiskääntö alataljassa` is not yet present in `defaultExercises.js`, so no default exercise imageKey was added in this step.
+
+## Step IMG-2D — Mobile QA Polish for Exercise Images
+
+Date: 2026-06-07
+
+Summary:
+- Moved/compacted Workout detail exercise image near the workout meta controls.
+- Reduced excessive empty space around detail images.
+- Kept thumbnails compact.
+- Corrected dumbbell lateral raise Finnish display name.
+- No workout logging logic changed.
+
+Result:
+- Build passed.
+- Lint passed.
+- Image audit passed with 0 critical errors and 55 warnings.
+
+## Step IMG-2D — Exercise Duration Split and Image Meta Polish
+
+Date: 2026-06-07
+
+Summary:
+- Split workout-level duration and exercise-level duration in Workout detail.
+- Exercise detail now uses “Liikkeen kesto” with default 10 min.
+- Exercise duration presets are 5/10/15/20/25/30 minutes.
+- Workout-level “Treenin kesto” remains in the workout summary/details section with 30–120 min presets.
+- Exercise image preview remains compact in the detail meta area.
+- Autosave compatibility preserved.
+- No parser logic changed.
+
+Tests run:
+- npm run build
+- npm run lint
+- npm run audit:images
+
+Result:
+- Build passed.
+- Lint passed.
+- Image audit passed with 0 critical errors and 55 warnings.

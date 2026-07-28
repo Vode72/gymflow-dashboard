@@ -23,8 +23,9 @@ import { getActiveWorkoutDays, getNextWorkoutDay } from '../utils/workoutLogic'
 const feelingOptions = ['Normaali', 'Hyvä', 'Vahva', 'Väsynyt']
 const durationPresets = [30, 45, 60, 75, 90, 105, 120]
 const exerciseDurationPresets = [5, 10, 15, 20, 25, 30]
-const exerciseDurationStep = 5
-const maxExerciseDurationMinutes = 60
+const exerciseDurationStep = 1
+const minExerciseDurationMinutes = 5
+const maxExerciseDurationMinutes = 30
 
 function getDraftSummary(draft) {
   const loggedExercises = draft?.exercises.filter(hasLoggedExercise) ?? []
@@ -120,7 +121,7 @@ function normalizeExerciseDuration(value) {
   const duration = Number(value)
   if (!Number.isFinite(duration) || duration <= 0) return 10
 
-  return Math.min(maxExerciseDurationMinutes, Math.max(exerciseDurationStep, duration))
+  return Math.min(maxExerciseDurationMinutes, Math.max(minExerciseDurationMinutes, duration))
 }
 
 function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {

@@ -142,9 +142,9 @@ Exercise-level duration:
 - Default display for missing/old data: 10 minutes.
 - New non-targeted exercise log items default to 10 minutes.
 - Presets: 5 / 10 / 15 / 20 / 25 / 30.
-- Plus/minus step: 5 minutes.
+- Plus/minus step: 1 minute.
 - Min: 5 minutes.
-- Max: 60 minutes.
+- Max: 30 minutes.
 - Completed sessions preserve this value because completed exercise log items are copied from the draft.
 - Old data must keep working when `durationMinutes` is missing.
 
@@ -651,3 +651,40 @@ Result:
 Next recommended step:
 - Continue QA-IMG-3 browser/mobile smoke test.
 - Then consider HIST-1 or NAV-1 depending on QA priorities.
+
+## Step DUR-1B — Exercise Duration Fine Tune Step
+
+Date: 2026-07-28
+
+Goal:
+- Fine tune `LIIKKEEN KESTO` so exercise-level duration uses one-minute +/- adjustments while preserving existing presets.
+
+What changed:
+- Changed exercise-level plus/minus step from 5 minutes to 1 minute.
+- Set exercise-level duration clamp to min 5 minutes and max 30 minutes.
+- Kept exercise-level presets unchanged: 5 / 10 / 15 / 20 / 25 / 30.
+- Kept missing/old `durationMinutes` default display at 10 minutes.
+- No changes were made to workout-level `TREENIN KESTO` logic.
+
+Files changed:
+- `src/pages/Workout.jsx`
+- `docs/GYMFLOW_CONTEXT.md`
+
+Key decisions:
+- Reused the existing `DurationControls` and draft update path.
+- Kept the change local by changing only exercise-specific constants and normalization.
+- Did not migrate old draft/session data; the next UI change clamps edited exercise duration to 5-30 minutes.
+
+Tests run:
+- `npm run build`
+- `npm run lint`
+
+Result:
+- Build passed.
+- Lint passed.
+
+Notes:
+- Browser/mobile manual QA was not performed in this step.
+
+Next recommended step:
+- Continue QA-IMG-3 browser/mobile smoke test, including exercise duration +/- behavior and `TREENIN KESTO` regression check.

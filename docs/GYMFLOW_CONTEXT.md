@@ -620,3 +620,34 @@ Tests run:
 - `npm run build` passed.
 - `npm run lint` passed.
 - `npm run audit:images` passed with 0 critical errors and 55 warnings.
+
+## Step QA-IMG-3A — Fix Workout List Thumbnails and Detail Image Crop
+
+Date: 2026-07-28
+
+Summary:
+- Fixed Workout list thumbnail rendering so valid exercise images display instead of fallback/alt-like text when image loading succeeds.
+- Added defensive image load failure handling so broken image alt text is not shown as the thumbnail.
+- Improved Workout detail image preview sizing/cropping with a more square-like contained preview.
+- Preserved imageKey / exerciseImages mapping.
+- No workout logging, parser, autosave or duration logic changed.
+
+Files changed:
+- `src/pages/Workout.jsx`
+- `src/App.css`
+- `docs/GYMFLOW_CONTEXT.md`
+
+Tests run:
+- `npm run build`
+- `npm run lint`
+- `npm run audit:images`
+
+Result:
+- Build passed.
+- Lint passed.
+- Image audit passed with 0 critical errors and 55 warnings.
+- Browser/manual mobile QA was not completed in this step because the Browser plugin control tool was unavailable in this session.
+
+Next recommended step:
+- Continue QA-IMG-3 browser/mobile smoke test.
+- Then consider HIST-1 or NAV-1 depending on QA priorities.

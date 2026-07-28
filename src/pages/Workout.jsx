@@ -66,6 +66,26 @@ function ExerciseImageFallback({ exercise, large = false }) {
   )
 }
 
+function ExerciseImage({ className, exercise, fallbackLarge = false, src }) {
+  const [failedSrc, setFailedSrc] = useState(null)
+  const hasError = src && failedSrc === src
+
+  if (!src || hasError) {
+    return <ExerciseImageFallback exercise={exercise} large={fallbackLarge} />
+  }
+
+  return (
+    <img
+      alt=""
+      aria-hidden="true"
+      className={className}
+      loading="lazy"
+      onError={() => setFailedSrc(src)}
+      src={src}
+    />
+  )
+}
+
 function DurationControls({
   ariaLabel = 'Treenin keston pikavalinnat',
   onAdjust,
@@ -118,16 +138,11 @@ function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
       type="button"
     >
       <span className="exercise-card-media" aria-hidden={exerciseImage ? undefined : 'true'}>
-        {exerciseImage ? (
-          <img
-            alt={`${getExerciseDisplayName(exercise)} exercise illustration`}
-            className="exercise-card-thumb"
-            loading="lazy"
-            src={exerciseImage}
-          />
-        ) : (
-          <ExerciseImageFallback exercise={exercise} />
-        )}
+        <ExerciseImage
+          className="exercise-card-thumb"
+          exercise={exercise}
+          src={exerciseImage}
+        />
       </span>
       <div className="workout-exercise-row__content">
         <span className="workout-exercise-row__meta">{typeLabel}</span>
@@ -635,15 +650,12 @@ export default function Workout({
                 </select>
               </label>
               <div className="exercise-detail-image-wrap">
-                {selectedExerciseImage ? (
-                  <img
-                    alt={`${getExerciseDisplayName(selectedExercise)} exercise illustration`}
-                    className="exercise-detail-image"
-                    src={selectedExerciseImage}
-                  />
-                ) : (
-                  <ExerciseImageFallback exercise={selectedExercise} large />
-                )}
+                <ExerciseImage
+                  className="exercise-detail-image"
+                  exercise={selectedExercise}
+                  fallbackLarge
+                  src={selectedExerciseImage}
+                />
               </div>
             </div>
           </div>

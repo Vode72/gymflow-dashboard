@@ -74,3 +74,30 @@ Käyttäjätestaus suunnitellaan erikseen: suostumus, tarvittavan tiedon minimoi
 - Liitetty tehtävänanto päättyy kesken dokumenttivastuiden kuvauksen. Puuttuvaa loppuosaa ei esitetä tunnettuna vaatimuksena.
 
 Seuraava aineistonkeruun vaihe on OP-001:n prosessin suunnittelu ja arviointikriteerien sopiminen ennen agenttimallin toteuttamista.
+
+## OP-001 — Agenttiavusteisen kehitysmenetelmän dokumentointi
+
+Päivä: 2026-11-15. Baseline: OP-000 / `fbf4dfa`. Aiempi OP-000:n roolikuvaus on historiallinen suunnitelma; nykyinen täsmennys on [agenttityönkulussa](GYMFLOW_AGENT_WORKFLOW.md). Toteutus ja tarkistusevidenssi: [kehityslokin OP-001-merkintä](GYMFLOW_DEVELOPMENT_LOG.md#op-001--agent-assisted-development-baseline).
+
+### Menetelmä case-projektissa
+
+Käyttäjä ja ChatGPT rajaavat tehtävän, Codex toteuttaa hyväksytyn muutoksen ja Controller-rooli tarkistaa scopen, testit, riskit ja dokumentaation ennen käyttäjän päätöstä. Vastuut ovat Product / UX, Architecture, Implementation, QA / Test, Documentation ja Controller. Nämä ovat kuusi loogista vastuualuetta, eivät väite kuudesta itsenäisestä agentista. Ihminen päättää hyväksynnästä ja yhdistämisestä.
+
+### Suunnitelma, toteutus, testaus ja havainnot
+
+| Näkökulma | OP-001:n evidenssi ja rajat |
+| --- | --- |
+| Suunniteltu toimintamalli | Mobiili-ChatGPT → Codex Cloud → GitHub-muutokset / PR → tarkistus → käyttäjän hyväksyntä. Kokonaisuutta ei ole validoitu. |
+| Toteutettu tekninen ratkaisu | AGENTS.md ja työnkulkudokumentti sekä masterin, lokin ja näiden muistiinpanojen päivitys. Ei agenttien orkestrointia, uusia työkaluja tai ohjelmakoodia. |
+| Käytännössä testattu toiminta | Dokumenttidiffin whitespace-, scope-, sisältö- ja historiatarkistus. Build/lint/image audit, selain-/mobiili-QA ja käyttäjätestaus jäivät ajamatta dokumentaatiovaiheessa. |
+| Havaitut tulokset | Viiden dokumentin rajaus ja vaaditut roolit sekä hyväksyntäportit tarkistettu. Paikallisen haaran vanha baseline havaittiin ja tehtävähaara perustettiin varmennettuun OP-000-commitiin. Ei näyttöä tehokkuushyödystä, paremmasta käytettävyydestä tai vähentyneistä regressioista. |
+
+Yksi Codex-toimija hoiti vastuualueita peräkkäin. Controller-roolin itsearvio ei ole riippumaton vertaisarvio. Dokumenttien hyväksymiskriteerien täyttyminen ei todista menetelmän vaikuttavuutta. Käyttäjän OP-001-hyväksyntä odottaa, eikä sitä kirjata tutkimushavainnoksi ennen päätöstä.
+
+### Myöhemmin kerättävä aineisto
+
+MOBILE-0 (Cloud-yhteyden ja ohjeiden lukemisen smoke test) ja MOBILE-1 (ensimmäinen pieni puhelimella ohjattu kehitystehtävä) ovat OP-001:n jälkeisiä, **ei suoritettuja** validointitestejä. Kerää niistä todellinen laite/selain, tehtävän rajaus, tapahtuneet toimet, diff / PR, testiraportti, esteet, Controllerin löydökset, korjaukset ja ihmisen päätös. Erota onnistunut osavaihe kokonaisen ketjun validoinnista.
+
+Mahdolliset aika-, laatu- tai tehokkuusmittarit määritellään ennen mittaamista. OP-001 ei tuota keksittyjä mittareita tai tutkimushavaintoja. Säilytä myös epäonnistuneet kokeet ja menetelmän rajat aineistossa. Tallennusvirheen ja duration-tavoitteen aiemmat havainnot jäävät avoimiksi; dokumentointi ei ole niiden korjaus.
+
+Seuraavaksi käyttäjän OP-001-tarkistus, sen jälkeen työnkulun validointitestit. Tuotearkkitehtuurin hyväksytty järjestys säilyy: OP-000 → OP-001 → TS-0…TS-4 → OP-002 → ARCH-1 → AUTH-x → GARMIN-x. Tässä vaiheessa ei aloitettu seuraavan vaiheen toteutusta.

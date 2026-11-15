@@ -1,6 +1,6 @@
 # GymFlow Dashboard — Master Context
 
-Last updated: 2026-11-15 — OP-000 (documentation only)
+Last updated: 2026-11-15 — OP-001 (documentation only; awaiting user approval)
 
 ## 1. Project
 
@@ -732,7 +732,7 @@ The OP-000 request specifies +/- 5 minutes, min 5, max 60. This is a documented 
 
 Most code changes require npm run build and npm run lint. Exercise image, bank or mapping changes additionally require npm run audit:images. Record exit/result and meaningful warnings. Never claim manual browser/mobile QA without performing it. OP-000 changes only these three Markdown documents; build/lint/image audit and browser/mobile QA were not run. Historical passes do not prove the present checkout passes.
 
-## 17. Approved Future Direction (planned, not implemented)
+## 17. OP-000 Approved Future Direction (historical plan; OP-001 update in section 19)
 
 Order: OP-001 → TS-0 → TS-1 → TS-2 → TS-3 → TS-4 → OP-002. ARCH-1 is a later architecture decision before implementing production authentication and Garmin integration. Earlier EXB-1, HIST-1 and QA-IMG-3 remain backlog items.
 
@@ -778,3 +778,34 @@ An original practical motivation for login is user testing: testers have individ
 Only GYMFLOW_CONTEXT.md, GYMFLOW_DEVELOPMENT_LOG.md and GYMFLOW_THESIS_NOTES.md are in scope. Preserve all earlier implementation history above. No production code, configuration, dependencies, data, commits, pushes or PRs are part of this step.
 
 Next recommended step: plan OP-001 with explicit acceptance criteria, role handoffs and Controller evidence requirements. Carry forward the duration discrepancy and storage-failure QA observation as open items.
+
+## 19. OP-001 — Agent-assisted Development Baseline
+
+Date: 2026-11-15. Baseline: `fbf4dfa`, OP-000 completed on remote `main`.
+Status: dokumentaatio toteutettu ja tarkistettu; käyttäjän hyväksyntä odottaa. Puhelinohjattua työnkulkua ei ole validoitu kokonaisuutena.
+
+### Summary and changed files
+
+Luotu juuren `AGENTS.md` ja [GYMFLOW_AGENT_WORKFLOW.md](GYMFLOW_AGENT_WORKFLOW.md). Päivitetty tämä master-konteksti, [kehitysloki](GYMFLOW_DEVELOPMENT_LOG.md) ja [opinnäytetyömuistiinpanot](GYMFLOW_THESIS_NOTES.md). Vain nämä viisi dokumenttia kuuluvat OP-001:een. Sovelluskoodia, riippuvuuksia, konfiguraatiota tai GitHub Actions -työnkulkuja ei muutettu.
+
+Paikallinen lähtöhaara `work` oli puhdas mutta vanhassa commitissa `a3850da`. Remote `main` varmistettiin commitiksi `fbf4dfa`; tehtävähaara `docs/op-001-agent-baseline` luotiin tästä jo paikallisesti saatavilla olevasta commitista. OP-000:aa ei toteutettu uudelleen.
+
+### Key decisions and current workflow
+
+OP-000:n kuuden roolin suunnitelma luvussa 17 säilyy historiana. OP-001 täsmentää nykyisiksi vastuualueiksi Product / UX Agent, Architecture Agent, Implementation Agent, QA / Test Agent, Documentation Agent ja Controller Agent. Nämä ovat loogisia rooleja, eivät kuusi itsenäistä agenttia. Ei automaattista orkestrointia, uusia työkaluja tai ohjelmakoodia.
+
+Käyttäjä ja ChatGPT sopivat tehtävän, scopen ja hyväksymiskriteerit; käyttäjä hyväksyy toteutuksen. Codex toteuttaa eristetyssä työympäristössä ja suorittaa soveltuvat testit. Controller-roolin tarkistus arvioi scopen, diffin, testit, riskit ja dokumentaation ennen käyttäjän tarkistusta. Yhdistäminen edellyttää käyttäjän hyväksyntää. Controllerin APPROVE ei ole käyttäjän hyväksyntä. Testivirhe, scopen ylitys tai yhteensopivuusriski palauttaa työn korjattavaksi; uusi rajaus vaatii käyttäjän päätöksen.
+
+### Tests and Controller review
+
+`git diff --check`: hyväksytty. Uudet untracked-dokumentit tarkistettiin lisäksi `git diff --no-index --check /dev/null <tiedosto>` -komennoilla. Tarkistettu viiden tiedoston scope, kaikkien kuuden roolin kuvaus, Controllerin rajat, käyttäjän hyväksyntäportti ja kolmen olemassa olevan dokumentin historian säilyminen.
+
+Build/lint/image audit: ei ajettu, documentation-only-vaihe ei vaadi niitä. Selain-/mobiili-QA: ei tehty. MOBILE-0 ja MOBILE-1: ei suoritettu. Controller-roolin itsearvio: APPROVE käyttäjälle luovutettavaksi; ei riippumatonta agenttitarkastusta eikä käyttäjän hyväksyntää. Tarkempi evidenssi kehityslokissa.
+
+### Roadmap and next recommended step
+
+OP-000 (valmis) → OP-001 (dokumentaatio toteutettu, hyväksyntä odottaa) → TS-0…TS-4 → OP-002 (Garmin/Python POC) → ARCH-1 → AUTH-x → GARMIN-x.
+
+Seuraavaksi käyttäjän OP-001-tarkistus ja hyväksyntä; tämän jälkeen MOBILE-0 ja erikseen rajattu MOBILE-1 validoivat työnkulkua. Ne eivät muuta tuotearkkitehtuurin hyväksyttyä etenemisjärjestystä. Seuraava tuotearkkitehtuurin vaihe on TS-0. Mitään seuraavaa vaihetta ei aloitettu.
+
+Avoimet asiat säilyvät: tallennuksen virhepolun QA ja dokumentoitu duration-tavoitteen ristiriita (luku 16). Niitä ei korjattu tässä vaiheessa. Dokumentoitu prosessi ei osoita puhelinohjauksen toimivuutta tai agenttityön tehokkuutta.

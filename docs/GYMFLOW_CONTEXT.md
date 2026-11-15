@@ -1,6 +1,6 @@
 # GymFlow Dashboard — Master Context
 
-Last updated: 2026-06-07
+Last updated: 2026-11-15 — OP-000 (documentation only)
 
 ## 1. Project
 
@@ -142,7 +142,7 @@ Exercise-level duration:
 - Default display for missing/old data: 10 minutes.
 - New non-targeted exercise log items default to 10 minutes.
 - Presets: 5 / 10 / 15 / 20 / 25 / 30.
-- Plus/minus step: 1 minute.
+- Plus/minus step: 1 minute (DUR-1B; see OP-000 duration decision below).
 - Min: 5 minutes.
 - Max: 30 minutes.
 - Completed sessions preserve this value because completed exercise log items are copied from the draft.
@@ -285,8 +285,8 @@ Implemented:
   - stored in `activeDraft.exercises[].durationMinutes`
   - default 10 minutes
   - presets 5 / 10 / 15 / 20 / 25 / 30
-  - plus/minus step 5 minutes
-  - min 5 minutes, max 60 minutes
+  - plus/minus step 1 minute (DUR-1B superseded the earlier 5-minute setting)
+  - min 5 minutes, max 30 minutes (DUR-1B superseded the earlier 60-minute maximum)
   - shown in Workout detail meta area
 - Feeling select remains in the Workout detail meta area and in the workout details section.
 
@@ -460,7 +460,7 @@ Future steps must not accidentally break:
 - Bottom nav safe-area behavior.
 - Current visual token system.
 
-## 13. Current Recommended Next Steps
+## 13. Earlier Recommended Next Steps (backlog; OP-000 roadmap takes precedence)
 
 ### EXB-1 — Expand Exercise Bank From Master Spreadsheet
 
@@ -688,3 +688,93 @@ Notes:
 
 Next recommended step:
 - Continue QA-IMG-3 browser/mobile smoke test, including exercise duration +/- behavior and `TREENIN KESTO` regression check.
+
+## 16. OP-000 — Thesis Baseline Consolidation
+
+Date: 2026-11-15. Status: documentation baseline; no application changes.
+
+### Evidence and document responsibilities
+
+Repository baseline inspected at commit a3850da (2026-07-30). Sources: this existing context, README, package.json, vite.config.js, public/manifest.json, Workout.jsx, useGymFlowData.js, useLocalStorage.js, parseSets.js and git history. Earlier step results below are historical reports, not tests rerun by OP-000. The supplied request ends mid-section at “OP-000 step”; missing instructions have not been reconstructed as quotations.
+
+- GYMFLOW_CONTEXT.md: technical master context, current behavior, constraints, architecture decisions and roadmap.
+- GYMFLOW_DEVELOPMENT_LOG.md: chronological steps, scope, evidence, checks, outcomes and handoffs.
+- GYMFLOW_THESIS_NOTES.md: thesis outline, research questions, observations and evidence collection; not a finished thesis.
+
+For every future step, update all relevant documents. Record step ID/date, objective, approved scope, changed files, decisions and reasons, actual test results, manual QA status, deviations, limitations and next step. Separate observed facts, historical reports and future plans. Preserve important history.
+
+### Verified technical baseline and regression boundaries
+
+React + Vite, JavaScript and CSS; localStorage persistence; PWA-ready manifest; GitHub Pages deployment via gh-pages and Vite base /gymflow-dashboard/. A manifest alone does not establish full offline PWA capability. No backend, login or cloud sync in the current MVP.
+
+Saved workout sessions are the source of truth for History and Progress. A workoutSession is one training event, not a calendar date; multiple sessions per day must remain possible. Workout days remain generic: the four-day default is demo content. Future user-defined days must support any count, add/delete/rename/reorder. The future exercise bank must support add/edit/delete.
+
+Preserve reps-first inputs (15/40 + 10/60 + 6/75 and 15x40 / 10x60 / 6x75), internal { reps, weight }, set-by-set editing, autosave, draft restore, completed-session save, History reads, general warmups, targeted multi-card warmups, generic workoutDays, multiple sessions per date, bottom navigation safe-area and mobile-first layout.
+
+Existing localStorage keys (useGymFlowData.js) must not change inadvertently:
+- gymflow_user_profile
+- gymflow_program
+- gymflow_exercises
+- gymflow_sessions
+- gymflow_settings
+- gymflow_active_draft
+
+Persistence limitation observed during source review: completeWorkout schedules the session update and then clears the draft; useLocalStorage catches storage write errors. The earlier “only after successful save” statement is an intended safeguard, not evidence of a verified transactional persistence guarantee. OP-000 makes no code fix; storage-failure behavior requires later QA and a separately approved step if needed.
+
+### Duration decision: implemented behavior versus requested target
+
+Workout-level TREENIN KESTO remains the session root durationMinutes, default 45 min, presets 30/45/60/75/90/105/120. Exercise-level LIIKKEEN KESTO remains activeDraft.exercises[].durationMinutes, default/fallback 10 min, presets 5/10/15/20/25/30. Missing exercise duration in old data must remain supported. Never merge workout and exercise duration into one field.
+
+Current code and DUR-1B (2026-07-28) use exercise +/- 1 minute, min 5, max 30.
+The OP-000 request specifies +/- 5 minutes, min 5, max 60. This is a documented target conflicting with the implemented baseline, not an implemented change. Resolve explicitly in a later approved functional step; TypeScript migration must preserve current behavior. Earlier IMG-2D settings remain historical evidence.
+
+### Verification policy
+
+Most code changes require npm run build and npm run lint. Exercise image, bank or mapping changes additionally require npm run audit:images. Record exit/result and meaningful warnings. Never claim manual browser/mobile QA without performing it. OP-000 changes only these three Markdown documents; build/lint/image audit and browser/mobile QA were not run. Historical passes do not prove the present checkout passes.
+
+## 17. Approved Future Direction (planned, not implemented)
+
+Order: OP-001 → TS-0 → TS-1 → TS-2 → TS-3 → TS-4 → OP-002. ARCH-1 is a later architecture decision before implementing production authentication and Garmin integration. Earlier EXB-1, HIST-1 and QA-IMG-3 remain backlog items.
+
+### OP-001 — Agent-assisted development baseline
+
+Plan role-based responsibilities:
+- Planner: define objective, scope, dependencies and acceptance criteria.
+- Implementer: implement the approved bounded change.
+- QA: run relevant checks and document evidence and regressions.
+- Reviewer: review correctness, maintainability and domain rules.
+- Controller: supervise the whole process; compare implementation with scope; inspect changed files and test results; check locked domain rules; detect scope creep and missing documentation; report to Toni/ChatGPT guidance. Production coding is not its primary role.
+- Documentation: maintain context, development chronology and thesis evidence.
+
+Controller verdicts may be APPROVE, FIX REQUIRED or REJECT, with reasons and evidence. Final approval and publication remain with the user. These roles are a future process design, not agents configured by OP-000.
+
+Phone-directed development should eventually allow starting, guiding, monitoring, reviewing and approving/rejecting development from a phone. Maintain human-in-the-loop decision making. Feasibility, usability and control are thesis topics, not verified capabilities.
+
+### TypeScript migration
+
+Run after OP-001 and before actual authentication or GymFlow Garmin integration.
+- TS-0: TypeScript infrastructure, tsconfig, Vite compatibility and lint/build baseline; no functional change.
+- TS-1: core domain types: WorkoutSession, WorkoutDay, Exercise, WorkoutSet, ExerciseLog and duration fields.
+- TS-2: utilities/data: parsers, localStorage helpers, exercise data and image mapping.
+- TS-3: React components incrementally from .jsx to .tsx; props, state and event typing.
+- TS-4: strictness, reduce temporary any types, final build/lint regression check.
+
+Migration preserves current application behavior and persisted data compatibility. Do not combine it with feature work or the duration target change.
+
+### OP-002 — Garmin / Python POC
+
+After migration, investigate a Garmin Personal API proof of concept separately from GymFlow UI; Python may be used. This is the first planned agent-guided external integration experiment, a technical feasibility test and a thesis integration case. Availability, access conditions and suitability require verification at that step. No Garmin functionality is implemented here.
+
+Personal use/POC direction: Garmin Personal API. Potential multi-user production direction: Garmin official business/developer integration, subject to later evaluation. Isolate dependencies behind an integration layer; React UI must not depend directly on one Garmin API implementation. Never put API keys, tokens or other secrets in the repository.
+
+### ARCH-1 — Future production architecture decision
+
+Evaluate and decide user authentication, per-user data, test accounts, likely Supabase/PostgreSQL, Row Level Security, offline-first behavior, local persistence, cloud sync and Garmin integration abstraction. Supabase is a candidate, not a final selection.
+
+An original practical motivation for login is user testing: testers have individual accounts and individual data, and cannot see each other's data. A later production version may reuse that isolation model. Architecture, access controls, sync conflicts and integration contracts must be reviewed before implementation.
+
+## 18. OP-000 Outcome and Handoff
+
+Only GYMFLOW_CONTEXT.md, GYMFLOW_DEVELOPMENT_LOG.md and GYMFLOW_THESIS_NOTES.md are in scope. Preserve all earlier implementation history above. No production code, configuration, dependencies, data, commits, pushes or PRs are part of this step.
+
+Next recommended step: plan OP-001 with explicit acceptance criteria, role handoffs and Controller evidence requirements. Carry forward the duration discrepancy and storage-failure QA observation as open items.

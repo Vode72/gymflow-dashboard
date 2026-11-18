@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { defaultExercises } from '../data/defaultExercises'
 import { defaultProgram } from '../data/defaultProgram'
 import { demoSessions } from '../data/demoSessions'
@@ -106,8 +106,44 @@ export function useGymFlowData() {
     validate: isSessionList,
   })
   const [settings, setSettings] = useLocalStorage('gymflow_settings', defaultSettings)
-  const [activeDraft, setActiveDraft] = useLocalStorage(draftKey, null)
+  const [activeDraft, setActiveDraft] = useLocalStorage(draftKey, null, { autosave: false })
   const exercisesWithImageKeys = useMemo(() => mergeDefaultExerciseImageKeys(exercises), [exercises])
+
+  const cancelDraftAutosave = useRef(null)
+  const [draftPersistence, setDraftPersistence] = useState({ savedDraft: null, failed: false })
+  const hasSavedActiveDraft = Boolean(activeDraft && sessions.some(
+    (session) => session.status === 'completed' && session.id === completedSessionId(activeDraft),
+  ))
+  const draftSaveStatus = draftPersistence.failed
+    ? 'error'
+    : activeDraft && draftPersistence.savedDraft === activeDraft ? 'saved' : 'unsaved'
+
+  const persistDraft = useCallback((draft) => {
+    try {
+      writeLocalStorage(draftKey, draft)
+    } catch {
+      setDraftPersistence((current) => current.failed ? current : { ...current, failed: true })
+      return false
+    }
+    setDraftPersistence({ savedDraft: draft, failed: false })
+    return true
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!activeDraft || hasSavedActiveDraft) return
+
+    // Schedule only committed snapshots. A newer commit or an explicit save
+    // or clear can cancel this write before it reaches localStorage.
+    let canceled = false
+    const cancel = () => { canceled = true }
+    cancelDraftAutosave.current = cancel
+    queueMicrotask(() => {
+      if (canceled) return
+      cancelDraftAutosave.current = null
+      persistDraft(activeDraft)
+    })
+    return cancel
+  }, [activeDraft, hasSavedActiveDraft, persistDraft])
 
   function resetLocalData() {
     setProfile(defaultProfile)
@@ -120,6 +156,12 @@ export function useGymFlowData() {
     }
     setSessions(demoSessions)
     setSettings(defaultSettings)
+    cancelDraftAutosave.current?.()
+    try {
+      writeLocalStorage(draftKey, null)
+    } catch {
+      // Keep the existing best-effort behavior for an explicit demo reset.
+    }
     setActiveDraft(null)
   }
 
@@ -150,8 +192,9 @@ export function useGymFlowData() {
   }
 
   function saveDraft() {
-    updateDraft((current) => current)
-    return { status: 'draft', savedAt: new Date().toISOString() }
+    if (!activeDraft || hasSavedActiveDraft) return false
+    cancelDraftAutosave.current?.()
+    return persistDraft(activeDraft)
   }
 
   function completeWorkout(draft) {
@@ -193,6 +236,7 @@ export function useGymFlowData() {
       return { status: 'failed' }
     }
 
+    cancelDraftAutosave.current?.()
     try {
       writeLocalStorage(draftKey, null)
     } catch {
@@ -209,9 +253,8 @@ export function useGymFlowData() {
     sessions,
     settings,
     activeDraft,
-    hasSavedActiveDraft: Boolean(activeDraft && sessions.some(
-      (session) => session.status === 'completed' && session.id === completedSessionId(activeDraft),
-    )),
+    draftSaveStatus,
+    hasSavedActiveDraft,
     resetLocalData,
     updateProfile,
     startDraft,

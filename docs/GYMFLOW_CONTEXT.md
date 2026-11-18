@@ -1,6 +1,6 @@
 # GymFlow Dashboard — Master Context
 
-Last updated: 2026-11-18 — SAFE-2 (awaiting user approval)
+Last updated: 2026-11-18 — SAFE-3 (awaiting user approval)
 
 ## 1. Project
 
@@ -122,7 +122,7 @@ Tracking types:
 
 Current workout draft behavior:
 - Active workout draft is stored in localStorage.
-- Draft persists through refresh and browser reopen.
+- Successfully persisted drafts can be restored after refresh or browser reopen. A save error means the latest edits may only be in memory.
 - If an active draft exists, Workout must use its `workoutDayId` before suggested next day logic.
 - Draft supports workout-level duration, feeling, warmups, targeted warmups, exercise logs, exercise-level duration, quality stars and exercise comments.
 - Completing a workout stores a completed session in the sessions list and clears the draft only after successful save.
@@ -869,3 +869,19 @@ Muutetut tiedostot ovat `src/hooks/useGymFlowData.js`, `src/hooks/useLocalStorag
 `npm run build`, `npm run lint` ja `git diff --check` läpäisivät. SAFE-1 läpäisi 8/8 tapausta, SAFE-2 5/5 selainregressiota. Headless Chromium 156, 390 × 844 CSS-pikseliä, paikallinen Vite ja kertakäyttöinen profiili. Onnistunut tallennus, tallennusvirhe ja uusinta, osittainen tallennus, sivun päivitys sekä Historia tarkistettiin selaimessa. Fyysinen Android- ja mobiili-QA jäi ajamatta.
 
 localStorage ei tarjoa atomista lue–muokkaa–kirjoita-operaatiota eri välilehtien välillä. Jos myös luonnoksen automaattitallennus on estynyt, viimeisimmät muokkaukset voivat säilyä vain avoimen sivun muistissa. Selain voi poistaa paikallisen datan. Seuraava vaihe on **SAFE-3**.
+
+## QA-BASE-1 — Verified baseline
+
+Käyttäjän toimittama varmennettu `main`-revisio on `bbf1c2d4ab0549f4a27a8de4a2315562dabbcde4`. npm ci, build, lint ja kuva-auditointi läpäisivät. Kuva-auditoinnissa oli 0 kriittistä virhettä. SAFE-1 läpäisi 8/8, SAFE-2 5/5 ja koko regressiosarja 13/13.
+
+## SAFE-3 — Reliable Active Draft Persistence
+
+Päivä 2026-11-18. AUDIT-001:n P1-havainto koski kuittausta, joka perustui luonnoksen React-tilaan ja aikaleimaan. Yleinen tallennusefekti ohitti kirjoitusvirheet, ja käsin tallentaminen päivitti vain aikaleiman.
+
+`src/hooks/useGymFlowData.js` vastaa aktiivisen luonnoksen kirjoituksista olemassa olevan `writeLocalStorage`-funktion avulla. Vain onnistunut kirjoitus kuittaa kyseisen luonnosversion. Uusi versio on tallentamaton ennen kuittausta. Virhe säilyttää muistissa olevat muokkaukset ja viimeksi tallennetun arvon. Virheilmoitus pysyy näkyvissä, kunnes kirjoitus onnistuu. Automaattitallennus yrittää uudelleen seuraavasta muokkauksesta, ja käsin tallennus kirjoittaa heti. Tallennusavaimet ja datamallit säilyvät.
+
+`src/pages/Workout.jsx` näyttää tilan liikelistassa ja liikkeen tiedoissa. Liikkeen tiedoissa tallennuspainike näkyy virhetilassa. SAFE-1:n päivänvaihtovahvistus kertoo myös tallentamattomista muutoksista. SAFE-2:n session synkroninen kirjoitus edeltää luonnoksen tyhjennystä. Uudempi luonnosversio tai luonnoksen sulkeminen peruu mahdollisen vanhan automaattitallennuksen.
+
+`tests/activeDraftSave.test.mjs` kattaa tallennuksen, virheet, uusinnan, nopeat muokkaukset, uudelleenlatauksen, päivänvaihdon, treenin valmistumisen ja vanhan datan. npm ci, build ja lint läpäisivät. Kuva-auditointi läpäisi (0 kriittistä virhettä, 55 varoitusta). SAFE-1 8/8, SAFE-2 5/5 ja SAFE-3 10/10. Koko regressiosarja 23/23. Tarkat komennot ja rajat on kirjattu [kehityslokiin](GYMFLOW_DEVELOPMENT_LOG.md#safe-3--reliable-active-draft-persistence).
+
+Jos selain estää kirjoittamisen, sivun päivitys palauttaa viimeksi kirjoitetun version ja muistissa olleet muutokset menetetään. Välilehtien välinen samanaikainen käyttö ja selaimen poistama data ovat jäljellä olevia riskejä. Seuraava suositeltu vaihe on **SAFE-4A — Reset and Corrupted Data Protection**.

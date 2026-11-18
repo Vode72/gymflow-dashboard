@@ -161,6 +161,7 @@ function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
 export default function Workout({
   activeDraft,
   completeWorkout,
+  draftSaveStatus,
   exercises,
   hasSavedActiveDraft,
   onNavigate,
@@ -232,6 +233,9 @@ export default function Workout({
   const selectedExerciseImage = getExerciseImage(selectedExercise?.imageKey)
   const selectedExerciseDurationMinutes = normalizeExerciseDuration(selectedExerciseLog?.durationMinutes)
   const draftSummary = getDraftSummary(currentDraft)
+  const draftSaveMessage = draftSaveStatus === 'error'
+    ? 'Luonnoksen tallennus epäonnistui. Yritä uudelleen.'
+    : draftSaveStatus === 'saved' ? 'Luonnos tallennettu' : 'Tallentamattomia muutoksia'
   const workoutDurationMinutes = Number(currentDraft?.durationMinutes) || 0
 
   useEffect(() => {
@@ -561,6 +565,7 @@ export default function Workout({
           <p id="day-switch-description">
             Päivän vaihtaminen hylkää nykyisen keskeneräisen treenin luonnoksen ja kaikki sen kirjaukset.
             Peruuta säilyttää nykyisen treenin.
+            {draftSaveStatus !== 'saved' && ' Luonnoksessa on tallentamattomia muutoksia.'}
           </p>
           <div className="button-row">
             <button autoFocus className="btn btn--secondary" onClick={cancelDaySwitch} type="button">Peruuta</button>
@@ -706,7 +711,10 @@ export default function Workout({
             <div>
               <span className="card__eyebrow">{selectedDay.name}</span>
               <h3>{selectedDay.description}</h3>
-              <p>Luonnos tallennettu · {currentDraft?.updatedAt ? new Date(currentDraft.updatedAt).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' }) : 'Ei muutoksia'}</p>
+              <p role="status">{draftSaveMessage}</p>
+              {draftSaveStatus === 'error' && (
+                <button className="btn btn--secondary" onClick={saveDraft} type="button">Tallenna luonnos</button>
+              )}
             </div>
             <div className="workout-detail-card__meta-row">
               <label className="field workout-detail-card__duration">
@@ -782,7 +790,7 @@ export default function Workout({
       <Card>
         <span className="card__eyebrow">Treenin tiedot</span>
         <h3>{currentDraft?.workoutName ?? selectedDay.name}</h3>
-        <p>Luonnos tallennettu · {currentDraft?.updatedAt ? new Date(currentDraft.updatedAt).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' }) : 'Ei muutoksia'}</p>
+        <p role="status">{draftSaveMessage}</p>
         <div className="workout-meta-grid">
           <label className="field">
             <span className="muted-label">Treenin kesto</span>

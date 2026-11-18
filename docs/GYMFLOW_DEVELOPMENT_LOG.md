@@ -204,3 +204,42 @@ Tallennusavaimet, session kentät ja aiempien sessioiden sisältö säilyvät. S
 ### Rajat ja seuraava vaihe
 
 Paikallinen tallennus voi estyä tai selain voi poistaa sen. Jos luonnoksen automaattitallennuskin epäonnistuu, edeltävät pysyvästi tallennetut tiedot jäävät selaimeen ja uusimmat muutokset voivat säilyä vain avoimen sivun muistissa. Samanaikaisten välilehtien kirjoituksia ei lukita. Seuraava vaihe on **SAFE-3**. SAFE-2:n yhdistäminen odottaa käyttäjän hyväksyntää.
+
+## QA-BASE-1 — Verified baseline
+
+Käyttäjän raportoima varmennettu `main`-revisio `bbf1c2d4ab0549f4a27a8de4a2315562dabbcde4`. `npm ci`, `npm run build`, `npm run lint` ja `npm run audit:images` läpäisivät. Kuva-auditoinnissa oli 0 kriittistä virhettä. SAFE-1 läpäisi 8/8, SAFE-2 5/5 ja koko regressiosarja 13/13.
+
+## SAFE-3 — Reliable Active Draft Persistence
+
+Päivä 2026-11-18. GitHubin `origin/main` vastasi QA-BASE-1:n SHA:ta `bbf1c2d4ab0549f4a27a8de4a2315562dabbcde4`. SAFE-1 (PR #3) ja SAFE-2 (PR #4) olivat mukana. Puhdas tehtävähaara `safe-3-reliable-active-draft` luotiin tästä revisiosta.
+
+### Ongelma, toteutus ja tiedostot
+
+AUDIT-001:n P1-virhe syntyi, kun käyttöliittymä näytti tallennuskuittausta React-tilan aikaleimasta ja storage-hook ohitti kirjoituspoikkeukset. Myös käsin tallennus päivitti vain aikaleiman.
+
+- `src/hooks/useGymFlowData.js` käyttää olemassa olevaa `writeLocalStorage`-funktiota ja kuittaa onnistuneen kirjoituksen täsmälleen kirjoitetulle luonnosversiolle. Automaattitallennus käsittelee Reactin vahvistamia versioita ja peruu jonossa olevan kirjoituksen, jos versio vaihtuu tai luonnos suljetaan. Käsin tallennus yrittää kirjoittaa heti. Epäonnistuminen säilyttää muistissa olevan version ja viimeksi onnistuneen kuittauksen. Näytettävä virhe poistuu onnistuneella käsin tallennuksella tai seuraavan muokkauksen onnistuneella automaattitallennuksella. Demon nollaus yrittää edelleen tyhjentää tallennetun luonnoksen.
+- `src/pages/Workout.jsx` näyttää tallentamattoman, tallennetun tai epäonnistuneen luonnoksen tilan. Tallennusvirheen voi uusia myös liikkeen tiedoista. SAFE-1:n vahvistus varoittaa tallentamattomista muutoksista. Peruutus säilyttää muistissa olevat muokkaukset ja vahvistettu vaihto hylkää ne nimenomaisesti.
+- `tests/activeDraftSave.test.mjs` lisää kymmenen Chromium-regressiota, joissa tarkistetaan käyttöliittymän tila ja selaimeen tallennettu data. Kirjoitusvirheet ja jonossa olevat automaattitallennukset ohjataan deterministisesti.
+- `docs/GYMFLOW_CONTEXT.md` ja `docs/GYMFLOW_DEVELOPMENT_LOG.md` kirjaavat lähtötilan, tallennussopimuksen, testitulokset ja rajat.
+
+SAFE-2 kirjoittaa edelleen session synkronisesti ennen luonnoksen tyhjennystä. Luonnoksen jonossa oleva kirjoitus perutaan session tallentamisen jälkeen ennen tyhjennysyritystä. Tyhjennyksen uusinta, deterministinen sessiotunniste ja kaksoistallennuksen esto säilyvät. Tallennusavaimet ja datamallit säilyvät, myös vanhat luonnokset ilman valinnaisia kenttiä.
+
+### Tarkistukset ja tulokset
+
+| Komento | Tulos | Havainto |
+| --- | --- | --- |
+| `npm ci --cache /tmp/gymflow-safe3-npm-cache` | PASS | 181 pakettia lukitustiedostosta. |
+| `npm run build` | PASS | Vite 8.0.13. |
+| `npm run lint` | PASS | 0 virhettä, 0 varoitusta. |
+| `npm run audit:images` | PASS | 0 kriittistä virhettä, 55 varoitusta. |
+| `node tests/activeDraftProtection.test.mjs` | PASS | SAFE-1, 8/8. |
+| `node tests/sessionSave.test.mjs` | PASS | SAFE-2, 5/5. |
+| `node tests/activeDraftSave.test.mjs` | PASS | SAFE-3, 10/10. |
+| `node --test tests/*.test.mjs` | PASS | 23/23 tapausta. Node raportoi 25/25, kun kaksi testien ryhmätason merkintää lasketaan mukaan. |
+| `git diff --check` | PASS | Sallittujen tiedostojen diffissä ei whitespace-virheitä. |
+
+Selainajot käyttivät headless Chromiumia 156.0.8078.79, paikallista Vite-palvelinta, 390 × 844 CSS-pikselin näkymää ja kertakäyttöisiä profiileja. Sandbox esti paikallisen kuunteluportin ensimmäisellä ajolla. Ajo onnistui hyväksytyllä localhost-käytöllä. Fyysistä Android- tai PWA-offline-testausta ei tehty.
+
+### Rajat ja seuraava vaihe
+
+Pysyvä kirjoitusesto jättää uusimmat muokkaukset avoimen sivun muistiin. Uudelleenlataus palauttaa viimeksi tallennetun version. Eri välilehtien kirjoituksia ei synkronoida ja selain voi poistaa paikallisen datan. Toteuttaja teki myös Controller-tarkistuksen. Käyttäjän hyväksyntä odottaa. Seuraava suositeltu vaihe on **SAFE-4A — Reset and Corrupted Data Protection**.

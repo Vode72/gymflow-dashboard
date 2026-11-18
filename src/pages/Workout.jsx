@@ -180,8 +180,11 @@ export default function Workout({
   const [customExerciseNotice, setCustomExerciseNotice] = useState('')
   const [targetedWarmupPopupOpen, setTargetedWarmupPopupOpen] = useState(false)
   const [targetedWarmupPopupMode, setTargetedWarmupPopupMode] = useState('first')
+  const [pendingDaySwitch, setPendingDaySwitch] = useState(null)
+  const pendingDaySwitchRef = useRef(null)
+  const daySwitchDialogRef = useRef(null)
   const pendingExerciseScrollRef = useRef(null)
-  const effectiveSelectedDayId = selectedWorkoutDayId ?? activeDraft?.workoutDayId ?? selectedDayId
+  const effectiveSelectedDayId = activeDraft?.workoutDayId ?? selectedWorkoutDayId ?? selectedDayId
   const selectedDay = activeDays.find((day) => day.id === effectiveSelectedDayId) ?? activeDays[0]
   const currentDraft = activeDraft?.workoutDayId === selectedDay?.id ? activeDraft : null
 
@@ -241,7 +244,38 @@ export default function Workout({
     return () => window.cancelAnimationFrame(frame)
   }, [selectedExercise])
 
+  useEffect(() => {
+    if (pendingDaySwitch) daySwitchDialogRef.current?.showModal()
+  }, [pendingDaySwitch])
+
+  function cancelDaySwitch() {
+    pendingDaySwitchRef.current = null
+    setPendingDaySwitch(null)
+  }
+
   function selectWorkoutDay(dayId) {
+    if (pendingDaySwitchRef.current) return
+    if (activeDraft && activeDraft.workoutDayId !== dayId) {
+      const request = { dayId, draft: activeDraft }
+      pendingDaySwitchRef.current = request
+      setPendingDaySwitch(request)
+      return
+    }
+    applyWorkoutDay(dayId)
+  }
+
+  function confirmDaySwitch() {
+    const request = pendingDaySwitchRef.current
+    cancelDaySwitch()
+    if (!request || request.draft !== activeDraft) return
+    const day = activeDays.find((item) => item.id === request.dayId)
+    if (!day) return
+    const bank = new Map(exercises.map((exercise) => [exercise.id, exercise]))
+    startDraft(day, day.exerciseIds.map((id) => bank.get(id)).filter(Boolean), request.draft)
+    applyWorkoutDay(day.id)
+  }
+
+  function applyWorkoutDay(dayId) {
     setSelectedDayId(dayId)
     onSelectWorkoutDay(dayId)
     setSelectedExerciseState({ dayId: null, exerciseId: null })
@@ -488,6 +522,26 @@ export default function Workout({
       </Card>
 
       <WorkoutDayPicker days={activeDays} selectedId={selectedDay.id} onSelect={selectWorkoutDay} />
+
+      {pendingDaySwitch ? (
+        <dialog
+          aria-describedby="day-switch-description"
+          aria-labelledby="day-switch-title"
+          className="modal-card"
+          onCancel={cancelDaySwitch}
+          ref={daySwitchDialogRef}
+        >
+          <h3 id="day-switch-title">Vaihda treenipäivää?</h3>
+          <p id="day-switch-description">
+            Päivän vaihtaminen hylkää nykyisen keskeneräisen treenin luonnoksen ja kaikki sen kirjaukset.
+            Peruuta säilyttää nykyisen treenin.
+          </p>
+          <div className="button-row">
+            <button autoFocus className="btn btn--secondary" onClick={cancelDaySwitch} type="button">Peruuta</button>
+            <button className="btn btn--danger" onClick={confirmDaySwitch} type="button">Hylkää luonnos ja vaihda päivää</button>
+          </div>
+        </dialog>
+      ) : null}
 
       {!selectedExercise ? (
         <>

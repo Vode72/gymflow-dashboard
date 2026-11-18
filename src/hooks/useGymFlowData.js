@@ -108,12 +108,15 @@ export function useGymFlowData() {
     setProfile((current) => ({ ...current, ...nextProfile }))
   }
 
-  function startDraft(workoutDay, selectedExercises) {
-    if (!workoutDay || activeDraft?.workoutDayId === workoutDay.id) return activeDraft
+  function startDraft(workoutDay, selectedExercises, expectedDraft = null) {
+    if (!workoutDay) return
 
-    const nextDraft = createDraft(workoutDay, selectedExercises)
-    setActiveDraft(nextDraft)
-    return nextDraft
+    setActiveDraft((current) => {
+      if (current?.workoutDayId === workoutDay.id) return current
+      // Replacement requires confirmation of this exact, still-current draft.
+      if (current !== expectedDraft) return current
+      return createDraft(workoutDay, selectedExercises)
+    })
   }
 
   function updateDraft(updater) {

@@ -158,12 +158,66 @@ function WorkoutExerciseListItem({ exercise, log, onSelect, sessions }) {
   )
 }
 
-export default function Workout({
+const windowMessages = {
+  checking: 'Tarkistetaan treenin muokkausoikeutta.',
+  readonly: 'Treeni on aktiivinen toisessa ikkunassa.',
+  yielded: 'Treenin hallinta luovutettiin. Tämä ikkuna on lukutilassa.',
+  requesting: 'Odotetaan treenin hallintaa toisesta ikkunasta.',
+  dirty: 'Hallintaa ei siirretty. Toisessa ikkunassa oli tallentamattomia muutoksia pyyntöhetkellä. Tallenna ne siellä ja pyydä hallintaa uudelleen.',
+  timeout: 'Hallintaa ei saatu. Tarkista toinen ikkuna ja pyydä hallintaa uudelleen.',
+  'storage-blocked': 'Hallintaa ei siirretty. Tallennettua treenidataa ei voitu lukea turvallisesti.',
+  unavailable: 'Selain ei tässä näkymässä voi varmistaa treenin muokkausoikeutta. Treeni on lukutilassa. Käytä ajantasaista selainta ja avaa GymFlow HTTPS-yhteydellä.',
+}
+
+function formatStorageTime(value) {
+  return typeof value === 'string' && Number.isFinite(Date.parse(value)) ? new Date(value).toLocaleString('fi-FI') : 'Ei tiedossa'
+}
+
+export default function Workout({ workoutWindow, ...props }) {
+  const { state, stale, lastSavedAt, lastRead, readOnlyDraft, request } = workoutWindow
+  if (state === 'owner' && !stale) return <WorkoutEditor {...props} lastSavedAt={lastSavedAt} />
+  const canRequest = state !== 'checking' && state !== 'unavailable' && state !== 'owner'
+
+  return (
+    <div className="page-stack">
+      <Card tone="accent">
+        <h2>Treeni lukutilassa</h2>
+        <p role={stale || ['dirty', 'timeout', 'storage-blocked', 'unavailable'].includes(state) ? 'alert' : 'status'}>
+          {stale
+            ? 'Tallennettu treenidata muuttui tässä istunnossa. Kirjoitus on estetty. Tarkista mahdolliset paikalliset muutokset ennen sivun lataamista uudelleen.'
+            : windowMessages[state]}
+        </p>
+        <p>Viimeisin onnistunut tallennus · {formatStorageTime(lastSavedAt)}</p>
+        <p>Tässä ikkunassa luetun luonnosversion tallennusaika · {formatStorageTime(lastRead?.savedAt)}</p>
+        <p>Tallennettu luonnos luettu tässä ikkunassa · {formatStorageTime(lastRead?.readAt)}</p>
+        {!stale && state !== 'dirty' && <p>Toisen ikkunan tallentamattomat muutokset · Ei tiedossa</p>}
+        {stale && props.draftSaveStatus !== 'saved' && props.activeDraft && <p>Luonnoksessa on tallentamattomia paikallisia muutoksia.</p>}
+        {canRequest && (
+          <div className="button-row">
+            <button className="btn btn--accent" disabled={state === 'requesting'} onClick={request} type="button">
+              Pyydä treenin hallinta
+            </button>
+          </div>
+        )}
+      </Card>
+      {stale && <div inert><WorkoutEditor {...props} draftSaveStatus="blocked" lastSavedAt={null} /></div>}
+      {!stale && readOnlyDraft && (
+        <Card>
+          <h3>{readOnlyDraft.workoutName || 'Tallennettu luonnos'}</h3>
+          <p>Treenin kesto · {Number(readOnlyDraft.durationMinutes) || 0} min</p>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function WorkoutEditor({
   activeDraft,
   completeWorkout,
   draftSaveStatus,
   exercises,
   hasSavedActiveDraft,
+  lastSavedAt,
   onNavigate,
   onSelectWorkoutDay,
   program,
@@ -233,9 +287,12 @@ export default function Workout({
   const selectedExerciseImage = getExerciseImage(selectedExercise?.imageKey)
   const selectedExerciseDurationMinutes = normalizeExerciseDuration(selectedExerciseLog?.durationMinutes)
   const draftSummary = getDraftSummary(currentDraft)
-  const draftSaveMessage = draftSaveStatus === 'error'
-    ? 'Luonnoksen tallennus epäonnistui. Yritä uudelleen.'
-    : draftSaveStatus === 'saved' ? 'Luonnos tallennettu' : 'Tallentamattomia muutoksia'
+  const draftSaveMessage = {
+    blocked: 'Luonnoksen tallennus on estetty',
+    error: 'Luonnoksen tallennus epäonnistui. Yritä uudelleen.',
+    saved: 'Luonnos tallennettu',
+    unsaved: 'Tallentamattomia muutoksia',
+  }[draftSaveStatus]
   const workoutDurationMinutes = Number(currentDraft?.durationMinutes) || 0
 
   useEffect(() => {
@@ -712,6 +769,7 @@ export default function Workout({
               <span className="card__eyebrow">{selectedDay.name}</span>
               <h3>{selectedDay.description}</h3>
               <p role="status">{draftSaveMessage}</p>
+              {lastSavedAt && <p>Viimeisin onnistunut tallennus · {formatStorageTime(lastSavedAt)}</p>}
               {draftSaveStatus === 'error' && (
                 <button className="btn btn--secondary" onClick={saveDraft} type="button">Tallenna luonnos</button>
               )}
@@ -791,6 +849,7 @@ export default function Workout({
         <span className="card__eyebrow">Treenin tiedot</span>
         <h3>{currentDraft?.workoutName ?? selectedDay.name}</h3>
         <p role="status">{draftSaveMessage}</p>
+        {lastSavedAt && <p>Viimeisin onnistunut tallennus · {formatStorageTime(lastSavedAt)}</p>}
         <div className="workout-meta-grid">
           <label className="field">
             <span className="muted-label">Treenin kesto</span>

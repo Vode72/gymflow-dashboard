@@ -261,8 +261,9 @@ test('SAFE-3 active draft persistence through Workout', { timeout: 45_000 }, asy
     assert.deepEqual(await read(), legacy)
     await edit(30)
     await expectStatus(saved)
-    const { updatedAt, ...persisted } = await read()
+    const { updatedAt, savedAt, ...persisted } = await read()
     assert.ok(Date.parse(updatedAt))
+    assert.ok(Date.parse(savedAt))
     assert.deepEqual(persisted, { ...legacy, durationMinutes: 30 })
   })
 

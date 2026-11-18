@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function readLocalStorage(key, validate) {
   let raw
@@ -45,5 +45,10 @@ export function useLocalStorage(key, initialValue, { autosave = true, validate }
     }
   }, [autosave, blocked, key, validate, value])
 
-  return [value, setValue, blocked]
+  const acceptStoredValue = useCallback((storedValue) => {
+    lastSaved.current = storedValue
+    setValue(storedValue)
+  }, [])
+
+  return [value, setValue, blocked, acceptStoredValue]
 }

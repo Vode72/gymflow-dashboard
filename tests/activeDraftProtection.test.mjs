@@ -18,7 +18,9 @@ function harness(draft = null) {
     pendingDaySwitchRef: { current: null },
     activeDays: ['a', 'b', 'c'].map(id => ({ id, exerciseIds: ['lift'], name: id })),
     exercises: [{ id: 'lift', name: 'Lift' }],
-    setActiveDraft: update => queued.push(update),
+    currentDraft: { current: draft },
+    canEditDraft: () => true,
+    replaceDraft: value => { context.currentDraft.current = value; queued.push(() => value) },
     selectedDayId: draft?.workoutDayId ?? null,
     onSelectWorkoutDay: id => { context.parentDayId = id },
     setSelectedDayId: id => { context.selectedDayId = id },
@@ -31,7 +33,7 @@ function harness(draft = null) {
     extract(hook, 'startDraft'),
     ...['cancelDaySwitch', 'selectWorkoutDay', 'confirmDaySwitch', 'applyWorkoutDay'].map(name => extract(workout, name)),
   ].join('\n'), context)
-  context.flush = () => { while (queued.length) context.activeDraft = queued.shift()(context.activeDraft) }
+  context.flush = () => { while (queued.length) context.activeDraft = queued.shift()(context.activeDraft); context.currentDraft.current = context.activeDraft }
   return context
 }
 const draft = () => ({ id: 'saved-draft', workoutDayId: 'a', exercises: [{ setsText: '12/40 + 10/50' }], durationMinutes: 45 })
@@ -66,7 +68,7 @@ test('G: stale confirmation preserves newer data, including an update queued bef
   const h = harness(draft()); h.selectWorkoutDay('b'); const newer = { ...h.activeDraft, durationMinutes: 60 }
   h.activeDraft = newer; h.confirmDaySwitch(); h.flush(); assert.equal(h.activeDraft, newer)
   const race = harness(draft()); race.selectWorkoutDay('b')
-  race.setActiveDraft(current => ({ ...current, durationMinutes: 75 }))
+  race.replaceDraft({ ...race.currentDraft.current, durationMinutes: 75 })
   race.confirmDaySwitch(); race.flush(); assert.equal(race.activeDraft.workoutDayId, 'a'); assert.equal(race.activeDraft.durationMinutes, 75)
 })
 test('H: restored old draft without optional fields is preserved by automatic start', () => {

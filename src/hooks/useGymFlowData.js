@@ -1,10 +1,11 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { defaultExercises } from '../data/defaultExercises'
 import { defaultProgram } from '../data/defaultProgram'
 import { demoSessions } from '../data/demoSessions'
 import { getDefaultWarmupType, getExerciseDisplayName, getExerciseTrackingType } from '../utils/exerciseTracking'
 import { hasLoggedExercise, isTargetedWarmup } from '../utils/workoutLogUtils'
 import { isStorageBlocked, readLocalStorage, useLocalStorage, writeLocalStorage } from './useLocalStorage'
+import { coordinateWorkoutWindow } from './workoutWindow'
 
 const sessionsKey = 'gymflow_sessions'
 const draftKey = 'gymflow_active_draft'
@@ -89,6 +90,16 @@ function completedSessionId(draft) {
   return `session-from-${draft.id}`
 }
 
+function lastStoredWorkoutTime(draft, sessions = []) {
+  let latest = typeof draft?.savedAt === 'string' && Number.isFinite(Date.parse(draft.savedAt))
+    ? draft.savedAt : null
+  for (const session of sessions) {
+    if (session.status !== 'completed' || !Number.isFinite(Date.parse(session.completedAt))) continue
+    if (!latest || Date.parse(session.completedAt) > Date.parse(latest)) latest = session.completedAt
+  }
+  return latest
+}
+
 function getLocalDateParts(date = new Date()) {
   return {
     date: [
@@ -171,22 +182,30 @@ function mergeDefaultExerciseImageKeys(exercises) {
 
 export function useGymFlowData() {
   const [profile, setProfile] = useLocalStorage('gymflow_user_profile', defaultProfile, { validate: isProfile })
-  const [program, setProgram] = useLocalStorage(programKey, defaultProgram, { validate: isProgram })
-  const [exercises, setExercises] = useLocalStorage(exercisesKey, defaultExercises, { validate: isExerciseBank })
+  const [program, , , acceptStoredProgram] = useLocalStorage(programKey, defaultProgram, { validate: isProgram })
+  const [exercises, , , acceptStoredExercises] = useLocalStorage(exercisesKey, defaultExercises, { validate: isExerciseBank })
   const [sessions, setSessions] = useLocalStorage(sessionsKey, demoSessions, {
     autosave: false,
     validate: isSessionList,
   })
-  const [settings, setSettings] = useLocalStorage(settingsKey, defaultSettings, { validate: isSettings })
-  const [activeDraft, setActiveDraft, draftReadBlocked] = useLocalStorage(draftKey, null, {
-    autosave: false,
-    validate: isDraft,
-  })
+  const [settings, setSettings, , acceptStoredSettings] = useLocalStorage(settingsKey, defaultSettings, { validate: isSettings })
+  const [activeDraft, setActiveDraft] = useState(null)
   const exercisesWithImageKeys = useMemo(() => mergeDefaultExerciseImageKeys(exercises), [exercises])
 
   const cancelDraftAutosave = useRef(null)
-  const [draftPersistence, setDraftPersistence] = useState({ savedDraft: activeDraft, failed: false })
-  const restoredDraft = useRef(activeDraft)
+  const [draftPersistence, setDraftPersistence] = useState({ savedDraft: null, failed: false })
+  const restoredDraft = useRef(null)
+  const currentDraft = useRef(null)
+  const savedDraft = useRef(null)
+  const unloadProtection = useRef(null)
+  const coordinator = useRef(null)
+  const ownership = useRef(null)
+  const [windowState, setWindowState] = useState('checking')
+  const [lastSavedAt, setLastSavedAt] = useState(null)
+  const [lastRead, setLastRead] = useState(null)
+  const [readOnlyDraft, setReadOnlyDraft] = useState(null)
+  const [stale, setStale] = useState(false)
+
   const hasSavedActiveDraft = Boolean(activeDraft && sessions.some(
     (session) => session.status === 'completed' && session.id === completedSessionId(activeDraft),
   ))
@@ -194,47 +213,159 @@ export function useGymFlowData() {
     ? 'error'
     : activeDraft && draftPersistence.savedDraft === activeDraft ? 'saved' : 'unsaved'
 
-  const persistDraft = useCallback((draft) => {
-    try {
-      if (draftReadBlocked || isStorageBlocked(readLocalStorage(draftKey, isDraft))) {
-        throw new Error('Stored draft is unsafe to replace')
+  useEffect(() => {
+    function refreshStoredData(event) {
+      if (event && event.key !== null && event.key !== draftKey && event.key !== sessionsKey) return
+
+      const draftRead = readLocalStorage(draftKey, isDraft)
+      const sessionRead = readLocalStorage(sessionsKey, isSessionList)
+      const version = ownership.current
+      if (version && client.ownsWorkout() && draftRead.raw !== undefined && draftRead.raw !== version.draftRaw) {
+        version.stale = true
+        setStale(true)
       }
-      writeLocalStorage(draftKey, draft)
+      if (!event || event.key === null || event.key === sessionsKey) {
+        if (!isStorageBlocked(sessionRead)) setSessions(sessionRead.value ?? demoSessions)
+      }
+      setLastSavedAt(lastStoredWorkoutTime(draftRead.value, sessionRead.value))
+      if (!client.ownsWorkout() && event?.key !== sessionsKey) {
+        const draft = draftRead.value ?? null
+        setReadOnlyDraft(draft)
+        setLastRead(draft ? { readAt: new Date().toISOString(), savedAt: draft.savedAt } : null)
+      }
+    }
+
+    const client = coordinateWorkoutWindow({
+      locks: navigator.locks,
+      onState(state) {
+        if (state === 'yielded') {
+          setStale(false)
+          refreshStoredData()
+        }
+        setWindowState(state)
+      },
+      onAcquire(transfer) {
+        const draftRead = readLocalStorage(draftKey, isDraft)
+        const sessionRead = readLocalStorage(sessionsKey, isSessionList)
+        if (transfer) {
+          if (isStorageBlocked(draftRead) || isStorageBlocked(sessionRead)) return false
+          const programRead = readLocalStorage(programKey, isProgram)
+          const exercisesRead = readLocalStorage(exercisesKey, isExerciseBank)
+          acceptStoredProgram(programRead.value ?? defaultProgram)
+          acceptStoredExercises(exercisesRead.value ?? defaultExercises)
+        }
+        ownership.current = {
+          draftRaw: draftRead.raw,
+          draftBlocked: isStorageBlocked(draftRead),
+          stale: false,
+        }
+        const draft = draftRead.value ?? null
+        setLastSavedAt(lastStoredWorkoutTime(draft, sessionRead.value))
+        setLastRead(draft ? { readAt: new Date().toISOString(), savedAt: draft.savedAt } : null)
+        if (draft) delete draft.savedAt
+        currentDraft.current = draft
+        savedDraft.current = draft
+        restoredDraft.current = draft
+        setActiveDraft(draft)
+        if (!isStorageBlocked(sessionRead)) setSessions(sessionRead.value ?? demoSessions)
+        setDraftPersistence({ savedDraft: draft, failed: false })
+        setStale(false)
+        return true
+      },
+      canRelease() {
+        return currentDraft.current === savedDraft.current
+      },
+    })
+    coordinator.current = client
+    const warnBeforeUnload = (event) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    function updateUnloadProtection() {
+      if (client.ownsWorkout() && currentDraft.current !== savedDraft.current) {
+        window.addEventListener('beforeunload', warnBeforeUnload)
+      } else {
+        window.removeEventListener('beforeunload', warnBeforeUnload)
+      }
+    }
+    window.addEventListener('storage', refreshStoredData)
+    refreshStoredData()
+    // StrictMode can dispose this effect before the first browser lock request.
+    void Promise.resolve().then(() => client.acquire())
+    unloadProtection.current = updateUnloadProtection
+    return () => {
+      window.removeEventListener('storage', refreshStoredData)
+      window.removeEventListener('beforeunload', warnBeforeUnload)
+      unloadProtection.current = null
+      client.close()
+    }
+  }, [acceptStoredExercises, acceptStoredProgram, setSessions])
+
+  const checkStoredDraft = useCallback((draftRead) => {
+    const version = ownership.current
+    if (!coordinator.current?.ownsWorkout() || !version || version.stale) return false
+    if (version.draftBlocked || isStorageBlocked(draftRead)) return false
+    if (draftRead.raw !== version.draftRaw) {
+      version.stale = true
+      setStale(true)
+      return false
+    }
+    return true
+  }, [])
+
+  const persistDraft = useCallback((draft, version) => {
+    if (ownership.current !== version || currentDraft.current !== draft
+      || !coordinator.current?.ownsWorkout()) return false
+    const savedAt = new Date().toISOString()
+    const snapshot = { ...draft, savedAt }
+    try {
+      const sessionRead = readLocalStorage(sessionsKey, isSessionList)
+      if (!checkStoredDraft(readLocalStorage(draftKey, isDraft))
+        || sessionRead.value?.some((session) => session.id === completedSessionId(draft))) {
+        throw new Error('Stored workout is unsafe to replace')
+      }
+      writeLocalStorage(draftKey, snapshot)
     } catch {
       setDraftPersistence((current) => current.failed ? current : { ...current, failed: true })
       return false
     }
+    version.draftRaw = JSON.stringify(snapshot)
+    savedDraft.current = draft
+    unloadProtection.current?.()
+    setLastSavedAt(savedAt)
     setDraftPersistence({ savedDraft: draft, failed: false })
     return true
-  }, [draftReadBlocked])
+  }, [checkStoredDraft])
 
   useLayoutEffect(() => {
     if (!activeDraft || activeDraft === restoredDraft.current || hasSavedActiveDraft) return
 
     // Schedule only committed snapshots. A newer commit or an explicit save
     // or clear can cancel this write before it reaches localStorage.
+    const version = ownership.current
     let canceled = false
     const cancel = () => { canceled = true }
     cancelDraftAutosave.current = cancel
     queueMicrotask(() => {
       if (canceled) return
       cancelDraftAutosave.current = null
-      persistDraft(activeDraft)
+      persistDraft(activeDraft, version)
     })
     return cancel
   }, [activeDraft, hasSavedActiveDraft, persistDraft])
 
   function resetLocalData(approvedDiscard) {
+    if (!coordinator.current?.ownsWorkout()) return { status: 'blocked' }
     const storedSessions = readLocalStorage(sessionsKey, isSessionList)
     const storedDraft = readLocalStorage(draftKey, isDraft)
     const changes = [
-      [programKey, defaultProgram, setProgram, readLocalStorage(programKey, isProgram)],
-      [exercisesKey, defaultExercises, setExercises, readLocalStorage(exercisesKey, isExerciseBank)],
-      [settingsKey, defaultSettings, setSettings, readLocalStorage(settingsKey, isSettings)],
+      [programKey, defaultProgram, acceptStoredProgram, readLocalStorage(programKey, isProgram)],
+      [exercisesKey, defaultExercises, acceptStoredExercises, readLocalStorage(exercisesKey, isExerciseBank)],
+      [settingsKey, defaultSettings, acceptStoredSettings, readLocalStorage(settingsKey, isSettings)],
     ]
-    if (draftReadBlocked || isStorageBlocked(storedSessions) || isStorageBlocked(storedDraft)
+    if (!checkStoredDraft(storedDraft) || isStorageBlocked(storedSessions)
       || changes.some(([, , , read]) => isStorageBlocked(read))
-      || !isDraft(activeDraft)
+      || activeDraft !== currentDraft.current || !isDraft(activeDraft)
       || (storedDraft.value && storedDraft.value.id !== activeDraft?.id)) {
       return { status: 'blocked' }
     }
@@ -247,7 +378,7 @@ export function useGymFlowData() {
     } else if (discard) {
       return { status: 'confirm-discard', draft: activeDraft, raw: storedDraft.raw }
     }
-    if (discard) changes.push([draftKey, null, setActiveDraft, storedDraft])
+    if (discard) changes.push([draftKey, null, clearDraftState, storedDraft])
 
     const written = []
     try {
@@ -275,11 +406,8 @@ export function useGymFlowData() {
       return { status: restored ? 'failed' : 'partial' }
     }
 
-    if (discard) {
-      cancelDraftAutosave.current?.()
-      setDraftPersistence({ savedDraft: null, failed: false })
-    }
-    for (const [, value, setValue] of changes) setValue(value)
+    if (discard) cancelDraftAutosave.current?.()
+    for (const [, value, acceptStoredValue] of changes) acceptStoredValue(value)
     return { status: 'saved' }
   }
 
@@ -287,42 +415,52 @@ export function useGymFlowData() {
     setProfile((current) => ({ ...current, ...nextProfile }))
   }
 
-  function startDraft(workoutDay, selectedExercises, expectedDraft = null) {
-    if (!workoutDay) return
+  function replaceDraft(draft) {
+    currentDraft.current = draft
+    unloadProtection.current?.()
+    setActiveDraft(draft)
+  }
 
-    setActiveDraft((current) => {
-      if (current?.workoutDayId === workoutDay.id) return current
-      // Replacement requires confirmation of this exact, still-current draft.
-      if (current !== expectedDraft) return current
-      return createDraft(workoutDay, selectedExercises)
-    })
+  function clearDraftState() {
+    ownership.current.draftRaw = 'null'
+    savedDraft.current = null
+    replaceDraft(null)
+    setLastSavedAt(lastStoredWorkoutTime(null, readLocalStorage(sessionsKey, isSessionList).value))
+    setDraftPersistence({ savedDraft: null, failed: false })
+  }
+
+  function canEditDraft() {
+    return coordinator.current?.ownsWorkout() && !ownership.current.stale
+  }
+
+  function startDraft(workoutDay, selectedExercises, expectedDraft = null) {
+    if (!workoutDay || !canEditDraft()) return
+    const current = currentDraft.current
+    if (current?.workoutDayId === workoutDay.id || current !== expectedDraft) return
+    replaceDraft(createDraft(workoutDay, selectedExercises))
   }
 
   function updateDraft(updater) {
-    setActiveDraft((current) => {
-      if (!current) return current
-      const nextDraft = typeof updater === 'function' ? updater(current) : { ...current, ...updater }
-      return {
-        ...nextDraft,
-        updatedAt: new Date().toISOString(),
-      }
-    })
+    const current = currentDraft.current
+    if (!current || !canEditDraft()) return
+    const nextDraft = typeof updater === 'function' ? updater(current) : { ...current, ...updater }
+    replaceDraft({ ...nextDraft, updatedAt: new Date().toISOString() })
   }
 
   function saveDraft() {
     if (!activeDraft || activeDraft === restoredDraft.current || hasSavedActiveDraft) return false
     cancelDraftAutosave.current?.()
-    return persistDraft(activeDraft)
+    return persistDraft(activeDraft, ownership.current)
   }
 
   function completeWorkout(draft) {
-    if (!draft?.id) return { status: 'failed' }
+    if (!draft?.id || !canEditDraft() || draft !== currentDraft.current) return { status: 'failed' }
 
     let completedSession
     try {
       const sessionRead = readLocalStorage(sessionsKey, isSessionList)
       const draftRead = readLocalStorage(draftKey, isDraft)
-      if (draftReadBlocked || isStorageBlocked(sessionRead) || isStorageBlocked(draftRead)
+      if (!checkStoredDraft(draftRead) || isStorageBlocked(sessionRead)
         || (draftRead.value && draftRead.value.id !== draft.id)) return { status: 'failed' }
       let storedSessions = sessionRead.value ?? demoSessions
 
@@ -350,6 +488,7 @@ export function useGymFlowData() {
         storedSessions = [...storedSessions, completedSession]
         writeLocalStorage(sessionsKey, storedSessions)
       }
+      setLastSavedAt(lastStoredWorkoutTime(draftRead.value, storedSessions))
       setSessions(storedSessions)
     } catch {
       return { status: 'failed' }
@@ -361,7 +500,7 @@ export function useGymFlowData() {
     } catch {
       return { status: 'cleanup-failed' }
     }
-    setActiveDraft(null)
+    clearDraftState()
     return { status: 'saved', session: completedSession }
   }
 
@@ -373,6 +512,10 @@ export function useGymFlowData() {
     settings,
     activeDraft,
     draftSaveStatus,
+    workoutWindow: {
+      state: windowState, stale, lastSavedAt, lastRead, readOnlyDraft,
+      request: () => coordinator.current?.acquire(true),
+    },
     hasSavedActiveDraft,
     resetLocalData,
     updateProfile,

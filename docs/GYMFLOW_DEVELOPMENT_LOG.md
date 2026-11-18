@@ -284,3 +284,56 @@ Selainajot käyttivät headless Chromiumia 156.0.8078.79, paikallista Vite-palve
 ### Rajat ja seuraava vaihe
 
 localStorage ei tarjoa atomista kirjoitusta usealle avaimelle. Jos palautus ja sen peruminen molemmat epäonnistuvat, tallennustila voi jäädä osittain palautetuksi. Välilehtien samanaikainen käyttö, selaimen poistama data ja avoimen sivun muistissa olevat tallentamattomat muokkaukset ovat jäljellä olevia riskejä. Käynnistyksessä lukukelvottomaksi tai vioittuneeksi havaittu luonnos edellyttää uudelleenlatausta ennen sen turvallista korvaamista. Fyysistä Android- tai PWA-offline-QA:ta ei tehty. Toteuttaja teki myös Controller-itsetarkistuksen. Seuraava vaihe on **SAFE-4B — Multi-tab Conflict Protection**.
+
+## SAFE-4B — Single Active Workout Window & Conflict Protection
+
+Päivä 2026-11-18. Repository `Vode72/gymflow-dashboard`, lähtö `origin/main` `0a315548c8fc8f7dc0eccf9d148af4e69f426424` (SAFE-4A yhdistetty PR #6). Työhaara `safe-4b-single-active-workout`.
+
+### Auditointi ennen toteutusta
+
+- `Workout.jsx` käynnistää luonnoksen ja välittää treenin, liikkeiden ja lämmittelyjen muutokset `useGymFlowData.js`:lle. SAFE-1 sitoo päivänvaihtovahvistuksen samaan luonnokseen. SAFE-3 palauttaa luonnoksen avaimesta `gymflow_active_draft`, jonottaa commitoidun React-version automaattitallennuksen ja tunnistaa virheet.
+- SAFE-2 lukee ja kirjoittaa valmiit sessiot avaimessa `gymflow_sessions`. Tallennettu sessio on Historian ja Kehityksen lähde. Session tunniste perustuu luonnokseen, joten luonnoksen siivouksen uudelleenyritys ei lisää kaksoiskappaletta.
+- SAFE-4A:n `Settings.jsx` kutsuu samasta datakoukusta demopalautusta. Palautus tarkistaa raakadatan, säilyttää profiilin ja sessiot, pyytää erillisen luonnoksen hylkäysvahvistuksen ja yrittää perua osittaiset reset-kirjoitukset.
+- Lähtökoodissa oli luonnoksen `updatedAt`, mutta ei ikkunatunnistetta, hallintalukkoa, storage-tapahtumien kuuntelua tai samaan luonnostunnisteeseen tehtyjen raakaversioiden vertailua. Nykyinen regressioympäristö käytti Nodea, Viteä ja Chromiumin CDP:tä. SAFE-4B:n ajoon lisättiin Firefoxin WebDriver BiDi -tuki.
+
+### Toteutus ja tiedostot
+
+| Tiedosto | Muutos |
+| --- | --- |
+| `src/hooks/workoutWindow.js` | Eksklusiivinen Web Lock elää omistavan dokumentin ajan. BroadcastChannel välittää siirtopyynnön ja ilmoituksen tallentamattomasta versiosta. Odotuksen peruminen koskee pyytäjän jonopaikkaa. |
+| `src/hooks/useGymFlowData.js` | Yhteinen kirjoitusoikeus autosavelle, käsin tallennukselle, valmistumiselle ja resetille. Luonnoksen raakatavut tarkistetaan ennen tallennusta. Jonotetut tallennukset sidotaan aktiiviseen hallintajaksoon ja muistiversioon. Handoff lukee uusimman luonnoksen, sessiot ja treenin käyttämän ohjelman sekä liikepankin ennen editorin avaamista. |
+| `src/hooks/useLocalStorage.js` | Synkronisesti tallennettu reset-tulos kuitataan React-tilaan ilman uutta automaattista reset-kirjoitusta. Puuttuvien avainten oletusalustus säilyy. |
+| `src/pages/Workout.jsx` | Lukutila, tallennetun luonnoksen yhteenveto, tallennus- ja lukuajat, hallintapyyntö sekä näkyvät virhetilat. Ristiriidassa paikallinen luonnos on luettavissa ilman muokkausta. |
+| `tests/workoutWindow.test.mjs` | Kahdeksan monivälilehtiskenaariota, Vite, eristetty selainprofiili sekä Chromium/CDP- ja Firefox/BiDi-ajurit. |
+| `tests/activeDraftProtection.test.mjs`, `tests/activeDraftSave.test.mjs` | SAFE-1 testaa vahvistuksen ja uuden muistiversion järjestyksen, SAFE-3 tarkistaa vanhan luonnoksen yhteensopivuuden ja valinnaisen `savedAt`-metatiedon. |
+| `docs/GYMFLOW_CONTEXT.md`, tämä loki | Päivitetty nykytila, tulokset ja rajat. |
+
+Jos luonnos on muuttunut, omistaja säilyttää lukon ja pyytäjä saa tiedon tallentamattomista muutoksista. Käyttäjä voi tallentaa omistavassa ikkunassa ja pyytää hallintaa uudestaan. Kun omistaja luovuttaa, sen kirjoitusoikeus poistuu ennen lukon vapauttamista. Jos uusi ikkuna ei voi lukea luonnosta tai sessioita turvallisesti, se jää lukutilaan. Viiden sekunnin pyyntöaika suojaa käyttöliittymää pitkältä odotukselta. Myös vastaamaton omistaja säilyttää oikeutensa niin kauan kuin selain pitää lukkoa. Kun selain vapauttaa lukon, pyyntö voi onnistua ilman viestiä aiemmalle omistajalle.
+
+Tallennus onnistuu nykyisillä avaimilla. `gymflow_active_draft` saa valinnaisen `savedAt`-kentän, joka tallennetaan samassa kirjoituksessa luonnoksen kanssa. Sitä ei kopioida valmiiseen sessioon. Vanhasta luonnoksesta puuttuva tallennusaika näkyy tuntemattomana. Session valmistuminen lukee ajantasaisen sessiolistan ja lisää session olemassa olevan sisällön perään. Luonnoksen eri raakaversio estää sen korvaamisen, vaikka luonnostunniste olisi sama. Tallennetun session ja luonnoksen tyhjennyksen välinen kirjoitusjärjestys sekä resetin perumisyritys säilyvät.
+
+### Testit
+
+| Tarkistus | Tulos |
+| --- | --- |
+| `npm ci --cache /tmp/gymflow-npm` | Läpäisi, 181 pakettia lukitustiedostosta. |
+| `npm run build`, `npm run lint`, `git diff --check` | Läpäisivät. Vite 8.0.13. |
+| `npm run audit:images` | Läpäisi, 0 kriittistä virhettä ja 55 aiempaa varoitusta. |
+| SAFE-1, SAFE-2, SAFE-3, SAFE-4A | 8/8 + 5/5 + 10/10 + 15/15. Nodessa yhteensä 41/41 ryhmämerkinnät mukaan luettuina. |
+| SAFE-4B, Chromium 156.0.8078.79 | 8/8. |
+| SAFE-4B, Google Chrome 158.0.8127.36 | 8/8 erillisellä Chrome-binäärillä. |
+| SAFE-4B, Firefox ESR 153.5.1 | 8/8 Firefox-binäärillä ja geckodriver 0.36.0:lla. Kontin käyttäjänimiavaruuden rajoitus edellytti testiajossa `MOZ_DISABLE_CONTENT_SANDBOX=1`-asetusta. |
+| SAFE-4B, Microsoft Edge 157.0.4341.60 | 8/8 erillisellä Edge-binäärillä. |
+| SAFE-4B, Opera | Ei ajettu. Opera-binääri puuttui, ja jakelupalvelimien kautta tehty hankinta estyi HTTP 403:een. |
+
+SAFE-4B ajettiin komennolla `node tests/workoutWindow.test.mjs`. Chromium-pohjaisen binäärin voi valita `CHROMIUM_BIN`-muuttujalla. Firefoxin binäärin ja ajurin voi valita `FIREFOX_BIN`- ja `GECKODRIVER_BIN`-muuttujilla. Ajoissa käytettiin headless-selaimia, paikallista Viteä ja 390 × 844 CSS-pikselin näkymää. Vastaamaton omistaja simuloitiin poistamalla viestikanava käytöstä, minkä jälkeen testattiin lukon saanti omistajan sulkemisen jälkeen. Fyysistä mobiili-, offline-PWA- tai selainprosessin kaatumistestiä ei tehty.
+
+### Rajat ja seuraava vaihe
+
+- Web Locks suojaa saman originin ja selainprofiilin SAFE-4B-ikkunoita. Vanhalla sovellusversiolla auki olevat välilehdet ja muut lukkoa käyttämättömät kirjoittajat voivat ohittaa lukon. Odottamaton raakaversion muutos estää ylikirjoituksen, kun se havaitaan ennen kirjoitusta.
+- Ilman Web Locksia treeni ja demopalautus ovat lukutilassa myös yhdellä ikkunalla. Atomista omistajaa ei voida varmistaa. Kun vain BroadcastChannel puuttuu, yksittäinen ikkuna voi silti saada vapaan Web Lockin.
+- Selain voi menettää muistissa olevan kirjoittamattoman version kaatumisessa. Sivulta poistumisesta pyydetään selaimen varoitus, kun versio on tallentamatta. Selaimen varoituksen näkyminen riippuu selaimesta ja käyttäjän vuorovaikutuksesta.
+- Usean avaimen localStorage-kirjoitus voi epäonnistua osittain. Suoja ei ulotu muihin laitteisiin tai profiileihin. Yleistä asetus- tai profiilimuokkausta ei lukita.
+- Avaa Opera QA:ssa kaksi välilehteä samaan HTTPS-originiin. Kirjaa luonnos A:ssa, varmista B:n lukutila, aikaleimat, Historia ja Kehitys. Pyydä hallinta B:ssä, varmista uusimman luonnoksen avautuminen sekä A:n kirjoitusesto. Sulje omistaja ja pyydä hallintaa uudelleen. Tarkista lisäksi tallennusvirhe, valmiin session ilmestyminen Historiaan sekä SAFE-4A:n palautussuoja.
+
+Toteuttaja teki Controller-itsetarkistuksen. Seuraava suositeltu vaihe on Opera QA ja sen jälkeen **MOBILE-1C**. Käyttäjän hyväksyntä odottaa.

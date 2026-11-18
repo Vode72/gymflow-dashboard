@@ -1,6 +1,6 @@
 # GymFlow Dashboard — Master Context
 
-Last updated: 2026-11-18 — SAFE-4A (awaiting user review)
+Last updated: 2026-11-18 — SAFE-4B (awaiting user review)
 
 ## 1. Project
 
@@ -899,3 +899,17 @@ Demopalautus tarkistaa sessiot, luonnoksen ja palautettavat avaimet ennen kirjoi
 Muutetut tiedostot ovat `src/hooks/useLocalStorage.js`, `src/hooks/useGymFlowData.js`, `src/pages/Settings.jsx`, `tests/resetDataProtection.test.mjs`, tämä tiedosto ja [kehitysloki](GYMFLOW_DEVELOPMENT_LOG.md#safe-4a--reset-and-corrupted-data-protection). Seuraava vaihe on **SAFE-4B — Multi-tab Conflict Protection**.
 
 npm ci, build, lint, kuva-auditointi ja `git diff --check` läpäisivät. Kuva-auditoinnissa oli 0 kriittistä virhettä ja 55 aiempaa varoitusta. SAFE-1 8/8, SAFE-2 5/5, SAFE-3 10/10 ja SAFE-4A 15/15. Yhteisajossa kaikki 38 regressiotapausta läpäisivät. Node raportoi 41/41, kun kolme ryhmämerkintää lasketaan mukaan. Selainregressiot ajettiin eristetyissä headless Chromium -profiileissa.
+
+## SAFE-4B — Single Active Workout Window & Conflict Protection
+
+Päivä 2026-11-18. Lähtö `origin/main` `0a315548c8fc8f7dc0eccf9d148af4e69f426424` (SAFE-4A, PR #6). Työhaara `safe-4b-single-active-workout`.
+
+Yksi GymFlow-ikkuna saman originin ja selainprofiilin sisällä pitää eksklusiivista Web Lockia. Muut ikkunat näyttävät tallennetun luonnoksen yhteenvedon lukutilassa. Historia ja Kehitys lukevat edelleen tallennettuja sessioita. Hallintapyyntö kulkee BroadcastChannelilla. Aktiivinen ikkuna luovuttaa lukon vain, kun luonnoksen nykyinen versio on tallessa. Pyytäjä lataa tallennetun luonnoksen ja sessiot lukon saatuaan ennen muokkauksen avaamista. Vastaamattoman ikkunan kohdalla pyyntö päättyy viiden sekunnin jälkeen. Selaimen vapauttaman lukon voi pyytää uudelleen ikkunan sulkeuduttua.
+
+Luonnoskirjoitukset tarkistavat voimassa olevan lukon ja luonnoksen tarkan tallennetun raakaversion. Jonotettu autosave tarkistaa myös hallintajakson ja muistiversion. Session valmistuminen lukee kelvollisen, uusimman sessiolistan, lisää session kerran ja tyhjentää luonnoksen vasta session tallennuksen jälkeen. SAFE-4A:n reset tarkistaa saman kirjoitusoikeuden ja säilyttää historiansa mukaiset esiluvut ja perumisyritykset. Tallennusavaimet ja valmiin session rakenne säilyvät. Luonnoksen valinnainen `savedAt` kuvaa onnistunutta kirjoitusta. Käyttöliittymä näyttää tallennus- ja lukuajat tai tiedon puuttumisesta.
+
+Ajantasaiset Chrome, Edge, Firefox ja Opera on huomioitu Web Locks -ominaisuustarkistuksella. Kun Web Locks puuttuu tai lukkoa ei voi turvallisesti käyttää, treeni ja demopalautus pysyvät kirjoitussuojattuina. Jos viestikanava puuttuu, Web Lock suojaa yhä kirjoituksia ja hallintaa voi pyytää lukon vapauduttua. Suoja koskee SAFE-4B:tä käyttäviä ikkunoita. Eri laitteiden ja selainprofiilien data on erillistä. localStorage-kirjoitukset usealle avaimelle voivat edelleen epäonnistua osittain.
+
+Muutetut tiedostot ovat `src/hooks/workoutWindow.js`, `src/hooks/useGymFlowData.js`, `src/hooks/useLocalStorage.js`, `src/pages/Workout.jsx`, `tests/workoutWindow.test.mjs`, `tests/activeDraftProtection.test.mjs`, `tests/activeDraftSave.test.mjs`, tämä tiedosto ja [kehitysloki](GYMFLOW_DEVELOPMENT_LOG.md#safe-4b--single-active-workout-window--conflict-protection).
+
+Build, lint, kuva-auditointi ja whitespace-tarkistus läpäisivät. Kuva-auditoinnissa oli 0 kriittistä virhettä ja 55 aiempaa varoitusta. SAFE-1 8/8, SAFE-2 5/5, SAFE-3 10/10 ja SAFE-4A 15/15. SAFE-4B 8/8 jokaisessa testatussa binäärissä: Chromium 156.0.8078.79, Google Chrome 158.0.8127.36, Firefox ESR 153.5.1 ja Microsoft Edge 157.0.4341.60. Opera-binääriä ei ollut saatavilla. Seuraava vaihe on Opera QA ja sen jälkeen MOBILE-1C.

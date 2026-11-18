@@ -809,3 +809,13 @@ OP-000 (valmis) → OP-001 (dokumentaatio toteutettu, hyväksyntä odottaa) → 
 Seuraavaksi käyttäjän OP-001-tarkistus ja hyväksyntä; tämän jälkeen MOBILE-0 ja erikseen rajattu MOBILE-1 validoivat työnkulkua. Ne eivät muuta tuotearkkitehtuurin hyväksyttyä etenemisjärjestystä. Seuraava tuotearkkitehtuurin vaihe on TS-0. Mitään seuraavaa vaihetta ei aloitettu.
 
 Avoimet asiat säilyvät: tallennuksen virhepolun QA ja dokumentoitu duration-tavoitteen ristiriita (luku 16). Niitä ei korjattu tässä vaiheessa. Dokumentoitu prosessi ei osoita puhelinohjauksen toimivuutta tai agenttityön tehokkuutta.
+
+## 20. MOBILE-1A — MOBILE-0-dokumentointi ja Cloud-työnkulun tarkistus
+
+Päivä 2026-11-18. Kolmen dokumentin päivitys on valmis käyttäjän tarkistettavaksi. Lähtönä oli puhdas `main` annetussa revisiossa `a044f793`. [Kehitysloki](GYMFLOW_DEVELOPMENT_LOG.md#mobile-1a--mobile-0-dokumentointi-ja-cloud-työnkulun-tarkistus) sisältää hakutulokset ja tarkistukset, [opinnäytetyömuistiinpanot](GYMFLOW_THESIS_NOTES.md) kuvaavat työnkulun havainnot.
+
+OP-001 kirjasi MOBILE-0:n suorittamattomaksi. MOBILE-1A:ssa varmennettiin Cloudista pääsy oikeaan repoon, lähtörevisio sekä agenttiohjeiden ja master-kontekstin lukeminen. Aiempi MOBILE-0-tulos ja puhelimelta ohjatun ketjun toimivuus jäävät varmentamatta. Manuaalinen sovelluksen mobiili-QA jäi tekemättä. Tallennuksen virhepolun QA ja liikkeen keston tavoiteristiriita ovat edelleen avoinna (luku 16).
+
+Dokumenttidiffin whitespace, tiedostorajaus, historia ja lisäysten sisältö tarkistettiin. Build, lint ja kuva-auditointi jäivät ajamatta dokumentaatiorajauksen vuoksi.
+
+Seuraavaksi suositellaan MOBILE-1B:n mobiili-UX-rajauksen määrittelyä. Valitaan yksi treenin kirjaamisen käyttäjäpolku ja sovitaan puhelin- ja selainmatriisi, havainnoitavat hyväksymiskriteerit sekä suojattavat regressiokohdat ennen toteutusta.

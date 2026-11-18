@@ -113,3 +113,32 @@ Controller-roolin itsearvio: APPROVE käyttäjän tarkistukseen. Dokumentaation 
 Puhelinohjattu ketju on vielä validoimatta. Aiemmat duration-ristiriita ja localStorage-tallennusvirheen QA-tarve säilyvät avoimina. Ei sovelluskoodin, datamallin tai arkkitehtuurin muutoksia. Ei commitia, pushia, PR:ää tai mergeä tässä vaiheessa.
 
 Seuraavaksi käyttäjän OP-001-tarkistus ja hyväksyntä, sitten MOBILE-0 ja erikseen hyväksyttävä MOBILE-1. Tuotearkkitehtuurin järjestys säilyy: OP-000 → OP-001 → TS-0…TS-4 → OP-002 → ARCH-1 → AUTH-x → GARMIN-x. Seuraavaa vaihetta ei aloitettu.
+
+## MOBILE-1A — MOBILE-0-dokumentointi ja Cloud-työnkulun tarkistus
+
+Päivä 2026-11-18. Tavoitteena oli tarkistaa aiempi MOBILE-0-näyttö ja kokeilla rajatun dokumentaatiomuutoksen viemistä Cloudista GitHub-katselmointiin.
+
+### Varmennettu lähtötila
+
+`Vode72/gymflow-dashboard` kloonattiin omaan hakemistoon, koska Cloud-työtilassa oli valmiina toinen repo. Uuden kloonin työpuu oli puhdas. `origin` osoitti osoitteeseen `https://github.com/Vode72/gymflow-dashboard.git`. GitHubin oletushaara `main` osoitti annettuun SHA:han `a044f7930e6b579f21eaed02917dba1d4274ac95`. Ero annettuun lähtötilaan oli haarassa: `work` puuttui etäreposta, ja SHA vastasi `main`-haaraa. Revisio ei ollut edennyt. Tehtävähaara `docs/mobile-1a` perustettiin tästä commitista.
+
+### MOBILE-0-tulokset ja evidenssi
+
+Haussa käytiin läpi repositoryn tiedostot, saatavilla olevien Git-viitteiden historia sekä GitHubin PR- ja issue-haut. OP-001:n agenttityönkulku, kehitysloki ja [PR #1](https://github.com/Vode72/gymflow-dashboard/pull/1) kirjaavat MOBILE-0:n suorittamattomaksi OP-001:n aikaan. Myöhempää testilokia, laite- tai selaintietoja, puhelintoimien havaintoja tai MOBILE-0-kohtaista PR:ää ei löytynyt. Varsinainen MOBILE-0-tulos jää varmentamatta.
+
+| Tila | Toteutunut havainto |
+| --- | --- |
+| PASS | MOBILE-1A:n Cloud-osuudessa varmennettiin oikea repo, haara ja revisio sekä luettiin `AGENTS.md`, agenttityönkulku ja master-konteksti. |
+| FAIL | Ei kirjattuja MOBILE-0-testivirheitä. |
+| BLOCKED | Aiemman MOBILE-0-tuloksen varmentamiseen puuttuu suoritusnäyttö. MOBILE-1A:n ensimmäinen Git-yhteys pysähtyi sandboxin välityspalvelinyhteyteen. Hyväksytty uusintayritys onnistui. |
+| NOT RUN | OP-001 kirjasi MOBILE-0:n suorittamattomaksi. MOBILE-1A:ssa ei suoritettu erillistä MOBILE-0-puhelintestiä eikä sovelluksen manuaalista mobiili-QA:ta. |
+
+### Muutokset, tarkistukset ja luovutus
+
+Päivitettiin `docs/GYMFLOW_CONTEXT.md` nykytilalla, tämä loki tarkistusevidenssillä ja `docs/GYMFLOW_THESIS_NOTES.md` menetelmän havainnoilla ja rajoilla.
+
+- PASS — `git diff --check`, `git status --short`, `git diff --stat` ja `git diff --name-only`. Diff ja työpuun tiedostolista osoittivat vain kolme sallittua Markdown-muutosta.
+- PASS — Lisäykset säilyttävät aiemmat tekstit. Dokumenttidiffin tarkistuksessa ei havaittu salaisuuksia tai tunnuksia. Sovelluskoodiin ja konfiguraatioon ei tullut muutoksia.
+- NOT RUN — Build, lint ja kuva-auditointi eivät kuulu tähän dokumentaatiomuutokseen.
+
+Controller-roolin itsearvio on APPROVE käyttäjän tarkistukseen. Sama Codex-toimija teki toteutuksen ja tarkistuksen. Yhdistäminen ja julkaisu edellyttävät käyttäjän hyväksyntää. Puhelintoimien näyttö puuttuu, ja tallennuksen virhepolun QA sekä liikkeen keston tavoiteristiriita ovat avoinna. Seuraava rajattava vaihe on MOBILE-1B.

@@ -1,6 +1,6 @@
 # GymFlow — Kehitysloki
 
-Päivitetty 2026-11-15. Tekninen master: [GYMFLOW_CONTEXT.md](GYMFLOW_CONTEXT.md). Opinnäytetyön aineisto: [GYMFLOW_THESIS_NOTES.md](GYMFLOW_THESIS_NOTES.md).
+Päivitetty 2026-11-18. Tekninen master: [GYMFLOW_CONTEXT.md](GYMFLOW_CONTEXT.md). Opinnäytetyön aineisto: [GYMFLOW_THESIS_NOTES.md](GYMFLOW_THESIS_NOTES.md).
 
 ## Dokumentointiperiaate
 
@@ -243,3 +243,44 @@ Selainajot käyttivät headless Chromiumia 156.0.8078.79, paikallista Vite-palve
 ### Rajat ja seuraava vaihe
 
 Pysyvä kirjoitusesto jättää uusimmat muokkaukset avoimen sivun muistiin. Uudelleenlataus palauttaa viimeksi tallennetun version. Eri välilehtien kirjoituksia ei synkronoida ja selain voi poistaa paikallisen datan. Toteuttaja teki myös Controller-tarkistuksen. Käyttäjän hyväksyntä odottaa. Seuraava suositeltu vaihe on **SAFE-4A — Reset and Corrupted Data Protection**.
+
+## SAFE-4A — Reset and Corrupted Data Protection
+
+Päivä 2026-11-18. Varmennettu kohde `Vode72/gymflow-dashboard`, `origin/main` `4168250bab1df184c015a61f3be203929103aafe`. Git-historia ja GitHub vahvistivat SAFE-3:n PR:n #5 yhdistämisen. Puhdas tehtävähaara `safe-4a-reset-data-protection` luotiin tästä revisiosta.
+
+### Lukuauditointi ennen muutoksia
+
+- `App.jsx` pitää `useGymFlowData`-hookin samassa elinkaaressa Asetuksista Treeniin. Asetusten painike kutsui suoraan `resetLocalData`-funktiota ja pysyi Asetuksissa.
+- `useLocalStorage` luki avaimen alustuksessa. Puuttuva avain, epäonnistunut JSON-jäsennys ja estetty luku päätyivät vara-arvoon. Yleinen tallennusefekti kirjoitti käytetyn arvon ensimmäisellä renderöinnillä ja arvojen muuttuessa. Profiili, ohjelma, liikepankki ja asetukset saattoivat ylikirjoittua heti. Liikkeiden kuvatunnisteiden täydennys tapahtui muistissa.
+- Sessioiden yleinen automaattitallennus oli poistettu SAFE-2:ssa. Valmiin treenin tallennus luki uusimman listan ennen lisäämistä ja kuittasi session ennen luonnoksen tyhjennystä. JSON- tai lukuvirhe keskeytti tämän polun jo lähtötilanteessa. Tyhjennyksen epäonnistuessa tallennettua sessiota pystyi käyttämään uusinnan tunnistamiseen.
+- Luonnoksen yleinen automaattitallennus oli poistettu SAFE-3:ssa. Käyttökelvottomasta lukemasta saattoi silti syntyä tyhjä muistivara-arvo. Treeni valitsee ensisijaisesti luonnoksen päivän ja luo tarvittaessa uuden luonnoksen. SAFE-3:n jonotettu kirjoitus ja käsin tallennus saattoivat korvata vanhan raakaversion tarkistamatta sitä.
+- Vanha reset kirjoitti ohjelman, liikepankin, asetukset ja profiilin React-tilasta. Se kirjoitti sessiolistan ja luonnoksen suoraan sekä ohitti näiden kirjoitusvirheet. Se perui jonotetun luonnoskirjoituksen ja tyhjensi muistiluonnoksen jo kirjoitusvirheen sattuessa. Asetuksissa ei ollut vahvistusta tai tulosilmoitusta.
+
+### Toteutus ja tiedostot
+
+- `src/hooks/useLocalStorage.js` erottaa puuttuvan, kelvollisen, vioittuneen ja lukukelvottoman avaimen. Tallennusefekti jättää vioittuneen ja lukukelvottoman raakaversion suojaan sekä säilyttää puuttuvien avainten oletusalustuksen. Kelvollista raakaversiota ei muotoilla uudelleen sivua ladattaessa.
+- `src/hooks/useGymFlowData.js` tarkistaa rakenteet näkymien ja kirjoitusten tarvitsemilta osin. SAFE-2:n kirjoitusjärjestys sekä SAFE-3:n versioihin sidottu tallennus ja uudelleenyritys säilyvät. Demopalautus esilukee sessiot, luonnoksen ja palautettavat kolme avainta. Se säilyttää profiilin ja sessiot tavutarkasti. Luonnoksen yhteensopivuus perustuu aktiiviseen demopäivään, sille kuuluviin liikkeisiin ja kirjaustyyppiin. Luonnoksesta itsestään renderöitävät kohdennetut lämmittelyt voivat säilyä. Hylkäys edellyttää erillistä hyväksyntää samalle muisti- ja raakaversiolle. Vahvistetun hylkäyksen kirjoitus tulee viimeisenä ja peruu jonotetun tallennuksen onnistuttuaan.
+- `src/pages/Settings.jsx` näyttää kaksi vahvistusaskelta tarvittaessa, käyttää nykyisiä dialogi- ja painiketyylejä ja torjuu kaksoisaktivoinnin. Onnistuminen näkyy vasta synkronisten kirjoitusten jälkeen. Epäonnistuessa kirjoitetut avaimet palautetaan mahdollisuuksien mukaan alkuperäisiin raakaversioihin. Epävarma peruminen ilmoitetaan erikseen.
+- `tests/resetDataProtection.test.mjs` kattaa T01–T15 käyttöliittymässä ja tarkastaa localStorage-arvot. Virheet injektoidaan testiselaimessa.
+- `docs/GYMFLOW_CONTEXT.md` ja tämä loki päivittävät nykytilan ja säilyttävät aiemman kehityshistorian.
+
+### Tarkistukset ja tulokset
+
+| Komento | Tulos | Havainto |
+| --- | --- | --- |
+| `npm ci --cache /tmp/gymflow-safe4a-npm-cache` | PASS | 181 pakettia lukitustiedostosta. |
+| `npm run build` | PASS | Vite 8.0.13. |
+| `npm run lint` | PASS | 0 virhettä, 0 varoitusta. |
+| `npm run audit:images` | PASS | 0 kriittistä virhettä, 55 aiempaa varoitusta. |
+| `node tests/activeDraftProtection.test.mjs` | PASS | SAFE-1, 8/8. |
+| `node tests/sessionSave.test.mjs` | PASS | SAFE-2, 5/5. Node raportoi 6/6 ryhmän kanssa. |
+| `node tests/activeDraftSave.test.mjs` | PASS | SAFE-3, 10/10. Node raportoi 11/11 ryhmän kanssa. |
+| `node tests/resetDataProtection.test.mjs` | PASS | SAFE-4A, 15/15. Node raportoi 16/16 ryhmän kanssa. |
+| `node --test tests/*.test.mjs` | PASS | 38/38 tapausta. Node raportoi 41/41 kolmen ryhmän kanssa. |
+| `git diff --check` | PASS | Tarkistettu myös stagingissa. Vain kuusi sovittua tiedostoa muuttui. |
+
+Selainajot käyttivät headless Chromiumia 156.0.8078.79, paikallista Vite-palvelinta, 390 × 844 CSS-pikselin näkymää ja kertakäyttöisiä profiileja. Ensimmäisten SAFE-4A-ajojen testidata ja Storage-vikojen testieristys korjattiin. Lopulliset ajot läpäisivät.
+
+### Rajat ja seuraava vaihe
+
+localStorage ei tarjoa atomista kirjoitusta usealle avaimelle. Jos palautus ja sen peruminen molemmat epäonnistuvat, tallennustila voi jäädä osittain palautetuksi. Välilehtien samanaikainen käyttö, selaimen poistama data ja avoimen sivun muistissa olevat tallentamattomat muokkaukset ovat jäljellä olevia riskejä. Käynnistyksessä lukukelvottomaksi tai vioittuneeksi havaittu luonnos edellyttää uudelleenlatausta ennen sen turvallista korvaamista. Fyysistä Android- tai PWA-offline-QA:ta ei tehty. Toteuttaja teki myös Controller-itsetarkistuksen. Seuraava vaihe on **SAFE-4B — Multi-tab Conflict Protection**.

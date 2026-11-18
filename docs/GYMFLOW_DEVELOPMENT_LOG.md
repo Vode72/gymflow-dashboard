@@ -178,3 +178,29 @@ Ei parserin, sarjaeditorin, autosave-hookin, storage-avainten/skeeman, completed
 Yksi toimija teki toteutuksen, testit ja Controller-itsearvion; ei riippumatonta review'ta. Diffin scope/historian säilyminen sekä `git diff --check` tarkistetaan ennen toimitusta. Merge ja julkaisu odottavat käyttäjän hyväksyntää; automaattista mergeä tai deploymentia ei tehdä.
 
 Seuraava suositeltu vaihe: **SAFE-2**. Käyttäjän päivitetty järjestys: SAFE-1 → SAFE-2 → SAFE-3 → SAFE-4 → MOBILE-1C → QA-1 → TS-0 → TS-1…TS-4. Tämä tarkentaa aiempia historiallisia etenemissuunnitelmia; myöhempiä vaiheita ei toteutettu.
+
+## SAFE-2 — Reliable Workout Session Save
+
+Päivä 2026-11-18. Lähtörevisiona `9f0adf02ef2dfbb9138155574d842f6ad628400c` (`origin/main`, SAFE-1 PR #3). Työhaara `safe-2-reliable-session-save`.
+
+### F02 ja toteutus
+
+Workoutin vahvistus kutsui `completeWorkout`-funktiota, joka ajasti session lisäyksen ja luonnoksen tyhjennyksen. Historiaan siirryttiin, vaikka `useLocalStorage` kirjoitti vasta React-efektissä ja ohitti kirjoituspoikkeukset. Historia käyttää hookin sessiotilaa ja näyttää valmiit sessiot, joten käyttöliittymä saattoi näyttää pelkästään muistissa olevan session.
+
+Vahvistus lukee ja tarkistaa `gymflow_sessions`-listan ennen synkronista kirjoitusta. Listan automaattinen efektikirjoitus poistettiin, jotta latauksen varadata tai vanhentunut React-tila ei ylikirjoita tallennettua historiaa. Eksplisiittinen demon nollaus tallentaa edelleen demolistan. Workout näyttää suomenkielisen virheen ja tarjoaa uusintaa, jos luku tai tallennus epäonnistuu. Luonnos tyhjennetään vasta session tallennuksen jälkeen. Jos tyhjennys epäonnistuu, tallennettu sessio säilyy ja Treeni tarjoaa tyhjennyksen uusinnan myös sivun päivityksen jälkeen. Uuden session tunniste perustuu luonnokseen, joten uusinta ei lisää toista sessiota.
+
+Tallennusavaimet, session kentät ja aiempien sessioiden sisältö säilyvät. Samalle päivälle voi tallentua useita sessioita. Valmiin session aikaleimat sekä liikelokien sallinta ja kohdennettujen lämmittelyjen suodatus toimivat aiemmin käytetyillä säännöillä. SAFE-1:n päivävalinta, parseri, sarjaeditori, geneerinen ohjelmamalli, kestomallit, lämmittelyt, kuvamapping, Historia- ja Kehitys-tietomallit sekä navigaatioarkkitehtuuri säilyvät. F03–F06 kuuluvat muihin vaiheisiin.
+
+### Tiedostot ja verifiointi
+
+- Sovellus: `src/hooks/useGymFlowData.js`, `src/hooks/useLocalStorage.js`, `src/pages/Workout.jsx`.
+- Testit: `tests/sessionSave.test.mjs`.
+- Dokumentaatio: `docs/GYMFLOW_CONTEXT.md`, `docs/GYMFLOW_DEVELOPMENT_LOG.md`.
+- `npm ci --cache /tmp/gymflow-safe2-npm-cache`, `npm run build` (Vite 8.0.13), `npm run lint` ja `git diff --check`: läpäisivät.
+- `node tests/activeDraftProtection.test.mjs`: 8/8 läpäisi. `node --test tests/activeDraftProtection.test.mjs`: exit 0.
+- `node --test tests/sessionSave.test.mjs`: 5/5 selainregressiota läpäisi. Paikallinen Vite, headless Chromium 156.0.8078.79 ja 390 × 844 CSS-pikselin mobiilinäkymä. Kertakäyttöisellä profiililla tarkistettiin onnistunut tallennus, kirjoitusjärjestys, tallennuskiintiö- ja käyttöestepoikkeukset, virheilmoitus ja uusinta, nopea kaksoisvahvistus, saman päivän sessiot, vanha data, virheellisen tallennuslistan säilyminen, osittainen tallennus, sivun päivitys ja Historia.
+- Fyysinen Android- tai kosketuslaitetestaus jäi ajamatta. Toteutus ja Controller-itsetarkistus tehtiin samalla toimijalla.
+
+### Rajat ja seuraava vaihe
+
+Paikallinen tallennus voi estyä tai selain voi poistaa sen. Jos luonnoksen automaattitallennuskin epäonnistuu, edeltävät pysyvästi tallennetut tiedot jäävät selaimeen ja uusimmat muutokset voivat säilyä vain avoimen sivun muistissa. Samanaikaisten välilehtien kirjoituksia ei lukita. Seuraava vaihe on **SAFE-3**. SAFE-2:n yhdistäminen odottaa käyttäjän hyväksyntää.

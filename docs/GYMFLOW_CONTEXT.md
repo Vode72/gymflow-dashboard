@@ -1,6 +1,6 @@
 # GymFlow Dashboard — Master Context
 
-Last updated: 2026-11-15 — OP-001 (documentation only; awaiting user approval)
+Last updated: 2026-11-18 — SAFE-2 (awaiting user approval)
 
 ## 1. Project
 
@@ -855,3 +855,17 @@ Ei parserin, sarjaeditorin, autosave-hookin, storage-avainten/skeeman, completed
 Yksi toimija teki toteutuksen, testit ja Controller-itsearvion; ei riippumatonta review'ta. Diffin scope/historian säilyminen sekä `git diff --check` tarkistetaan ennen toimitusta. Merge ja julkaisu odottavat käyttäjän hyväksyntää; automaattista mergeä tai deploymentia ei tehdä.
 
 Seuraava suositeltu vaihe: **SAFE-2**. Käyttäjän päivitetty järjestys: SAFE-1 → SAFE-2 → SAFE-3 → SAFE-4 → MOBILE-1C → QA-1 → TS-0 → TS-1…TS-4. Tämä tarkentaa aiempia historiallisia etenemissuunnitelmia; myöhempiä vaiheita ei toteutettu.
+
+## SAFE-2 — Reliable Workout Session Save
+
+Baseline `9f0adf02ef2dfbb9138155574d842f6ad628400c` sisältää SAFE-1:n (PR #3). SAFE-2 korjaa MOBILE-1B:n F02-havainnon. Aiemmin vahvistus ajasti React-tilapäivitykset ja siirtyi Historiaan ennen localStorage-kirjoitusta. Yleinen tallennusefekti ohitti kirjoitusvirheet, joten luonnos saattoi tyhjentyä session tallennuksen epäonnistuessa.
+
+Vahvistus lukee uusimman tallennetun sessiolistan, tarkistaa sen rakenteen ja kirjoittaa valmiin session synkronisesti ennen luonnoksen tyhjennystä. Puuttuva sessioavain käyttää edelleen demosessioita. Vioittunut lista säilytetään ja tallennus keskeytetään. Luonnoksen tunnisteesta johdettu uuden session tunniste mahdollistaa turvallisen uusinnan myös sivun päivityksen jälkeen. Jos session kirjoitus onnistuu ja luonnoksen tyhjennys epäonnistuu, Treeni-näkymä kertoo tilanteen ja tarjoaa pelkän tyhjennyksen uusintaa. Historiaan siirrytään, kun tallennus ja tyhjennys ovat onnistuneet.
+
+Storage-avaimet ja session kentät säilyvät. Vanhat sessiot kopioidaan sellaisinaan, ja samalla kalenteripäivällä voi olla useita sessioita. Sarjat, harjoitelokit, kommentit, kesto- ja lämmittelytiedot sekä aikaleimojen käsittely noudattavat aiempaa mallia. Luonnoksen automaattitallennus ja SAFE-1:n päivävalinnan suojaus säilyvät.
+
+Muutetut tiedostot ovat `src/hooks/useGymFlowData.js`, `src/hooks/useLocalStorage.js`, `src/pages/Workout.jsx`, `tests/sessionSave.test.mjs`, `docs/GYMFLOW_CONTEXT.md` ja `docs/GYMFLOW_DEVELOPMENT_LOG.md`.
+
+`npm run build`, `npm run lint` ja `git diff --check` läpäisivät. SAFE-1 läpäisi 8/8 tapausta, SAFE-2 5/5 selainregressiota. Headless Chromium 156, 390 × 844 CSS-pikseliä, paikallinen Vite ja kertakäyttöinen profiili. Onnistunut tallennus, tallennusvirhe ja uusinta, osittainen tallennus, sivun päivitys sekä Historia tarkistettiin selaimessa. Fyysinen Android- ja mobiili-QA jäi ajamatta.
+
+localStorage ei tarjoa atomista lue–muokkaa–kirjoita-operaatiota eri välilehtien välillä. Jos myös luonnoksen automaattitallennus on estynyt, viimeisimmät muokkaukset voivat säilyä vain avoimen sivun muistissa. Selain voi poistaa paikallisen datan. Seuraava vaihe on **SAFE-3**.

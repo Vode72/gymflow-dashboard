@@ -162,6 +162,7 @@ export default function Workout({
   activeDraft,
   completeWorkout,
   exercises,
+  hasSavedActiveDraft,
   onNavigate,
   onSelectWorkoutDay,
   program,
@@ -176,6 +177,7 @@ export default function Workout({
   const [selectedDayId, setSelectedDayId] = useState(activeDraft?.workoutDayId ?? suggestedDay?.id ?? activeDays[0]?.id)
   const [selectedExerciseState, setSelectedExerciseState] = useState({ dayId: null, exerciseId: null })
   const [showConfirm, setShowConfirm] = useState(false)
+  const [completionError, setCompletionError] = useState('')
   const [completedSummary, setCompletedSummary] = useState(null)
   const [customExerciseNotice, setCustomExerciseNotice] = useState('')
   const [targetedWarmupPopupOpen, setTargetedWarmupPopupOpen] = useState(false)
@@ -184,6 +186,7 @@ export default function Workout({
   const pendingDaySwitchRef = useRef(null)
   const daySwitchDialogRef = useRef(null)
   const pendingExerciseScrollRef = useRef(null)
+  const completionConfirmedRef = useRef(false)
   const effectiveSelectedDayId = activeDraft?.workoutDayId ?? selectedWorkoutDayId ?? selectedDayId
   const selectedDay = activeDays.find((day) => day.id === effectiveSelectedDayId) ?? activeDays[0]
   const currentDraft = activeDraft?.workoutDayId === selectedDay?.id ? activeDraft : null
@@ -493,12 +496,35 @@ export default function Workout({
   }
 
   function confirmCompletion() {
-    const completed = completeWorkout(currentDraft)
-    setShowConfirm(false)
-    setCompletedSummary(completed)
-    if (completed) {
-      onNavigate('history')
+    if (completionConfirmedRef.current) return
+    const result = completeWorkout(hasSavedActiveDraft ? activeDraft : currentDraft)
+    if (result.status !== 'saved') {
+      setCompletionError(
+        result.status === 'cleanup-failed' || hasSavedActiveDraft
+          ? 'Treeni on tallennettu, mutta luonnosta ei voitu sulkea. Tarkista selaimen tallennusasetukset ja yritä uudelleen.'
+          : 'Treeniä ei voitu tallentaa. Luonnos on yhä avoinna. Tarkista selaimen tallennusasetukset ja vapaa tila, ja yritä uudelleen.',
+      )
+      return
     }
+
+    completionConfirmedRef.current = true
+    setShowConfirm(false)
+    setCompletedSummary(result.session)
+    onNavigate('history')
+  }
+
+  if (hasSavedActiveDraft) {
+    return (
+      <div className="page-stack">
+        <Card tone="accent">
+          <h2>Viimeistele treenin tallennus</h2>
+          <p role="alert">
+            {completionError || 'Treeni on tallennettu, mutta luonnos on vielä auki. Voit sulkea luonnoksen tallentamatta treeniä uudelleen.'}
+          </p>
+          <button className="btn btn--success" onClick={confirmCompletion} type="button">Yritä uudelleen</button>
+        </Card>
+      </div>
+    )
   }
 
   if (!selectedDay) {
@@ -781,7 +807,10 @@ export default function Workout({
         </div>
         <div className="button-row">
           <button className="btn btn--secondary" onClick={saveDraft} type="button">Tallenna luonnos</button>
-          <button className="btn btn--success" onClick={() => setShowConfirm(true)} type="button">Merkitse valmiiksi</button>
+          <button className="btn btn--success" onClick={() => {
+            setCompletionError('')
+            setShowConfirm(true)
+          }} type="button">Merkitse valmiiksi</button>
         </div>
       </Card>
       ) : null}
@@ -797,9 +826,12 @@ export default function Workout({
             <span className="card__eyebrow">Vahvistus</span>
             <h3>Merkitäänkö treeni valmiiksi?</h3>
             <p>Treeni tallennetaan historiaan. Voit avata treenin myöhemmin uudelleen muokattavaksi.</p>
+            {completionError ? <p role="alert">{completionError}</p> : null}
             <div className="button-row">
               <button className="btn btn--ghost" onClick={() => setShowConfirm(false)} type="button">Peruuta</button>
-              <button className="btn btn--success" onClick={confirmCompletion} type="button">Kyllä, tallenna</button>
+              <button className="btn btn--success" onClick={confirmCompletion} type="button">
+                {completionError ? 'Yritä uudelleen' : 'Kyllä, tallenna'}
+              </button>
             </div>
           </div>
         </div>

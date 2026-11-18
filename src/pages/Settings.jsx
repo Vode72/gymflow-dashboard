@@ -1,6 +1,57 @@
+import { useEffect, useRef, useState } from 'react'
 import Card from '../components/Card'
 
+const resetMessages = {
+  saved: 'Demo-ohjelma, liikepankki ja asetukset palautettiin.',
+  blocked: 'Tallennettuja tietoja ei voitu tarkistaa turvallisesti. Palautus estettiin.',
+  failed: 'Demodatan palautus epäonnistui. Palautuksen muutokset peruttiin.',
+  partial: 'Demodatan palautus jäi kesken. Osa paikallisista tiedoista saattoi muuttua.',
+}
+
 export default function Settings({ profile, settings, updateProfile, setSettings, resetLocalData }) {
+  const [confirmation, setConfirmation] = useState(null)
+  const [result, setResult] = useState(null)
+  const pending = useRef(null)
+  const dialog = useRef(null)
+  const cancelButton = useRef(null)
+
+  useEffect(() => {
+    if (confirmation) {
+      if (!dialog.current.open) dialog.current.showModal()
+      cancelButton.current.focus()
+    }
+  }, [confirmation])
+
+  function requestReset() {
+    if (pending.current) return
+    const request = { status: 'confirm-reset' }
+    pending.current = request
+    setResult(null)
+    setConfirmation(request)
+  }
+
+  function cancelReset() {
+    pending.current = null
+    setConfirmation(null)
+  }
+
+  function confirmReset() {
+    const request = pending.current
+    if (!request || request !== confirmation) return
+    pending.current = null
+    const outcome = resetLocalData(request.status === 'confirm-discard' ? request : undefined)
+    if (outcome.status === 'confirm-discard') {
+      pending.current = outcome
+      setConfirmation(outcome)
+      return
+    }
+    setConfirmation(null)
+    setResult(outcome.status)
+  }
+
+  const discarding = confirmation?.status === 'confirm-discard'
+
+
   return (
     <div className="page-stack">
       <Card tone="accent">
@@ -44,10 +95,37 @@ export default function Settings({ profile, settings, updateProfile, setSettings
       </div>
       <Card>
         <span className="card__eyebrow">Paikallinen data</span>
-        <p>Reset palauttaa demo-ohjelman, liikepankin ja demo-historian localStorageen.</p>
+        <p>Palauta demo-ohjelma, liikepankki ja oletusasetukset. Treenihistoria ja profiili säilyvät.</p>
         <div className="button-row">
-          <button className="btn btn--danger" onClick={resetLocalData} type="button">Nollaa paikallinen data</button>
+          <button className="btn btn--secondary" onClick={requestReset} type="button">Palauta demodata</button>
         </div>
+        {result && (
+          <p className={result === 'saved' ? 'hint--success' : 'inline-notice'} role={result === 'saved' ? 'status' : 'alert'}>
+            {resetMessages[result]}
+          </p>
+        )}
+        {confirmation && (
+          <dialog
+            aria-describedby="demo-reset-description"
+            aria-labelledby="demo-reset-title"
+            className="modal-card"
+            onCancel={cancelReset}
+            ref={dialog}
+          >
+            <h3 id="demo-reset-title">{discarding ? 'Hylätäänkö keskeneräinen treeni?' : 'Palautetaanko demodata?'}</h3>
+            <p id="demo-reset-description">
+              {discarding
+                ? 'Keskeneräinen treeni ei sovi demo-ohjelmaan. Jatkaminen hylkää luonnoksen ja sen kaikki kirjaukset, myös tallentamattomat muutokset.'
+                : 'Nykyinen ohjelma, liikepankki ja asetukset korvataan demo-oletuksilla.'}
+            </p>
+            <div className="button-row">
+              <button className="btn btn--secondary" onClick={cancelReset} ref={cancelButton} type="button">Peruuta</button>
+              <button className="btn btn--danger" onClick={confirmReset} type="button">
+                {discarding ? 'Hylkää luonnos ja palauta' : 'Vahvista palautus'}
+              </button>
+            </div>
+          </dialog>
+        )}
       </Card>
     </div>
   )

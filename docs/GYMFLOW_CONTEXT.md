@@ -1,6 +1,6 @@
 # GymFlow Dashboard — Master Context
 
-Last updated: 2026-11-18 — SAFE-3 (awaiting user approval)
+Last updated: 2026-11-18 — SAFE-4A (awaiting user review)
 
 ## 1. Project
 
@@ -885,3 +885,17 @@ Päivä 2026-11-18. AUDIT-001:n P1-havainto koski kuittausta, joka perustui luon
 `tests/activeDraftSave.test.mjs` kattaa tallennuksen, virheet, uusinnan, nopeat muokkaukset, uudelleenlatauksen, päivänvaihdon, treenin valmistumisen ja vanhan datan. npm ci, build ja lint läpäisivät. Kuva-auditointi läpäisi (0 kriittistä virhettä, 55 varoitusta). SAFE-1 8/8, SAFE-2 5/5 ja SAFE-3 10/10. Koko regressiosarja 23/23. Tarkat komennot ja rajat on kirjattu [kehityslokiin](GYMFLOW_DEVELOPMENT_LOG.md#safe-3--reliable-active-draft-persistence).
 
 Jos selain estää kirjoittamisen, sivun päivitys palauttaa viimeksi kirjoitetun version ja muistissa olleet muutokset menetetään. Välilehtien välinen samanaikainen käyttö ja selaimen poistama data ovat jäljellä olevia riskejä. Seuraava suositeltu vaihe on **SAFE-4A — Reset and Corrupted Data Protection**.
+
+## SAFE-4A — Reset and Corrupted Data Protection
+
+Päivä 2026-11-18. Varmennettu `origin/main` oli `4168250bab1df184c015a61f3be203929103aafe` (SAFE-3, yhdistetty PR #5).
+
+Asetusten demopalautus koskee ohjelmaa, liikepankkia ja sovellusasetuksia. Aiemmin sama toiminto kirjoitti myös demosessiot ja oletusprofiilin sekä tyhjensi luonnoksen. Uusi palautus säilyttää sessio- ja profiiliavainten alkuperäiset tavut. Treeni-näkymässä käytettävissä pysyvä luonnos säilyy myös muistissa. Demosta puuttuva aktiivinen päivä tai luonnoksen liikeloki, jolle ei ole yhteensopivaa käyttöliittymää demo-ohjelmassa, vaatii erillisen hylkäysvahvistuksen. Vahvistus sidotaan sekä muistissa olevaan versioon että tallennettuun raakaversioon. Peruutus ei käynnistä palautuskirjoituksia.
+
+Tallennuslukema erottaa puuttuvan, kelvollisen, vioittuneen ja lukukelvottoman arvon. Käynnistyksen näyttövara-arvoa ei kirjoiteta epäonnistuneen luvun päälle. Luonnoksen tallennus ja valmiin treenin tallennus tarkistavat myös ajantasaisen tallennustilan ennen kirjoitusta. Avaimet ja tallennusmuodot säilyvät. Jos luonnosta ei voi lukea käynnistyksessä, uudelleenlataus tarvitaan turvallisen lähtötilan tarkistamiseksi ennen luonnoksen korvaamista.
+
+Demopalautus tarkistaa sessiot, luonnoksen ja palautettavat avaimet ennen kirjoituksia. Epäonnistunut palautus yrittää palauttaa jo kirjoitettujen avainten alkuperäiset raakaversiot. Epävarma peruminen saa oman virheilmoituksensa. localStorage ei takaa usean avaimen atomisuutta eikä estä muiden välilehtien samanaikaisia muutoksia. Epäonnistuneen luonnostallennuksen uusimmat muokkaukset voivat edelleen olla vain avoimen sivun muistissa.
+
+Muutetut tiedostot ovat `src/hooks/useLocalStorage.js`, `src/hooks/useGymFlowData.js`, `src/pages/Settings.jsx`, `tests/resetDataProtection.test.mjs`, tämä tiedosto ja [kehitysloki](GYMFLOW_DEVELOPMENT_LOG.md#safe-4a--reset-and-corrupted-data-protection). Seuraava vaihe on **SAFE-4B — Multi-tab Conflict Protection**.
+
+npm ci, build, lint, kuva-auditointi ja `git diff --check` läpäisivät. Kuva-auditoinnissa oli 0 kriittistä virhettä ja 55 aiempaa varoitusta. SAFE-1 8/8, SAFE-2 5/5, SAFE-3 10/10 ja SAFE-4A 15/15. Yhteisajossa kaikki 38 regressiotapausta läpäisivät. Node raportoi 41/41, kun kolme ryhmämerkintää lasketaan mukaan. Selainregressiot ajettiin eristetyissä headless Chromium -profiileissa.

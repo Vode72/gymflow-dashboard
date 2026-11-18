@@ -337,3 +337,35 @@ SAFE-4B ajettiin komennolla `node tests/workoutWindow.test.mjs`. Chromium-pohjai
 - Avaa Opera QA:ssa kaksi välilehteä samaan HTTPS-originiin. Kirjaa luonnos A:ssa, varmista B:n lukutila, aikaleimat, Historia ja Kehitys. Pyydä hallinta B:ssä, varmista uusimman luonnoksen avautuminen sekä A:n kirjoitusesto. Sulje omistaja ja pyydä hallintaa uudelleen. Tarkista lisäksi tallennusvirhe, valmiin session ilmestyminen Historiaan sekä SAFE-4A:n palautussuoja.
 
 Toteuttaja teki Controller-itsetarkistuksen. Seuraava suositeltu vaihe on Opera QA ja sen jälkeen **MOBILE-1C**. Käyttäjän hyväksyntä odottaa.
+
+## QA-OPERA-1 — Opera Browser Smoke Test
+
+Päivä 2026-11-18. Tila **BLOCKED**. Repository `Vode72/gymflow-dashboard`. Lähtöhaara `work` oli puhdas ja commitissa `a044f79` (PR #1). Haettu `origin/main` oli `414c3602855b10d351f9544738c34aff87d9ee2f`, PR #7:n merge-commit. Työhaara `qa-opera-1` luotiin tästä commitista erilliseen työpuuhun. Muutokset koskevat vain master-kontekstia ja tätä kehityslokia.
+
+### Ympäristö ja Opera-tapaukset
+
+Codex Cloud, Debian GNU/Linux 13, Node 24.22.1 ja npm 11.9.0. Paikallinen Vite palveli automatisoituja selainregressioita osoitteessa `127.0.0.1` eristetyillä Chromium-testiprofiileilla. Opera-binääriä tai Opera-pakettia ei löytynyt. Virallisten osoitteiden `www.opera.com`, `download.opera.com` ja `deb.opera.com` yhteydet estyivät välityspalvelimen HTTP 403 -vastaukseen. Opera-versiota, Web Locks API:a ja BroadcastChannelia ei voitu todentaa. Testeissä käytettiin erillistä testidataa.
+
+| Tapaus | Opera-tulos |
+| --- | --- |
+| QA-OPERA-1.1 — Yksi kirjoittava välilehti | Ei ajettu. |
+| QA-OPERA-1.2 — Luonnoksen yhteenveto, aikaleimat ja hallintapyyntö | Ei ajettu. |
+| QA-OPERA-1.3 — Hallinnan siirto ja luonnoksen luku | Ei ajettu. |
+| QA-OPERA-1.4 — Tallentamattomien muutosten suoja | Ei ajettu. |
+| QA-OPERA-1.5 — Aiemman omistajan kirjoitus- ja autosave-esto | Ei ajettu. |
+| QA-OPERA-1.6 — Lukon vapautuminen ja luonnoksen palautus | Ei ajettu. |
+| QA-OPERA-1.7 — Valmis sessio, Historia ja Kehitys | Ei ajettu. |
+| QA-OPERA-1.8 — Demopalautus ja tallennusvirheet | Ei ajettu. |
+
+### Ajetut tarkistukset
+
+| Komento | Tulos |
+| --- | --- |
+| `npm ci --no-audit --no-fund` | Exit 0, 181 pakettia lukitustiedostosta. |
+| `CHROMIUM_BIN=/usr/bin/chromium node --test tests/*.test.mjs` | Exit 0. SAFE-1 8/8, SAFE-2 5/5, SAFE-3 10/10, SAFE-4A 15/15, SAFE-4B 8/8. Node raportoi 50/50 ryhmät mukaan lukien. Selainregressioissa Chromium 156.0.8078.79. |
+| `npm run build` | Exit 0, Vite 8.0.13. |
+| `npm run lint` | Exit 0. |
+| `npm run audit:images` | Exit 0, 0 kriittistä virhettä ja 55 varoitusta. |
+| `git diff --check` | Exit 0. |
+
+Opera-yhteensopivuus jää avoimeksi kaikissa kahdeksassa tapauksessa. Jatka ympäristössä, jossa on virallinen Opera-binääri. Varmista versio ja selainrajapinnat ja aja 1.1–1.8 samalla localhost- tai HTTPS-originilla eristetyssä Opera-profiilissa. Suositeltu seuraava kehitysvaihe on **MOBILE-1C** Opera QA:n läpäisyn jälkeen.

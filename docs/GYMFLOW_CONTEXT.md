@@ -1,6 +1,6 @@
 # GymFlow Dashboard — Master Context
 
-Last updated: 2026-11-18 — SAFE-4B (awaiting user review)
+Last updated: 2026-11-18 — QA-OPERA-1 (BLOCKED)
 
 ## 1. Project
 
@@ -913,3 +913,13 @@ Ajantasaiset Chrome, Edge, Firefox ja Opera on huomioitu Web Locks -ominaisuusta
 Muutetut tiedostot ovat `src/hooks/workoutWindow.js`, `src/hooks/useGymFlowData.js`, `src/hooks/useLocalStorage.js`, `src/pages/Workout.jsx`, `tests/workoutWindow.test.mjs`, `tests/activeDraftProtection.test.mjs`, `tests/activeDraftSave.test.mjs`, tämä tiedosto ja [kehitysloki](GYMFLOW_DEVELOPMENT_LOG.md#safe-4b--single-active-workout-window--conflict-protection).
 
 Build, lint, kuva-auditointi ja whitespace-tarkistus läpäisivät. Kuva-auditoinnissa oli 0 kriittistä virhettä ja 55 aiempaa varoitusta. SAFE-1 8/8, SAFE-2 5/5, SAFE-3 10/10 ja SAFE-4A 15/15. SAFE-4B 8/8 jokaisessa testatussa binäärissä: Chromium 156.0.8078.79, Google Chrome 158.0.8127.36, Firefox ESR 153.5.1 ja Microsoft Edge 157.0.4341.60. Opera-binääriä ei ollut saatavilla. Seuraava vaihe on Opera QA ja sen jälkeen MOBILE-1C.
+
+## QA-OPERA-1 — Opera Browser Smoke Test
+
+Päivä 2026-11-18. Tila **BLOCKED**. GitHubista haettu `origin/main` oli `414c3602855b10d351f9544738c34aff87d9ee2f` (SAFE-4B, PR #7). Työhaara `qa-opera-1` luotiin tästä commitista erilliseen työpuuhun. Muutokset koskevat tätä tiedostoa ja [kehityslokia](GYMFLOW_DEVELOPMENT_LOG.md#qa-opera-1--opera-browser-smoke-test).
+
+Codex Cloudin Debian 13 -ympäristöstä ei löytynyt Opera-binääriä eikä pakettihakemistosta Opera-pakettia. Välityspalvelin esti Operan viralliset lataus- ja pakettiosoitteet (HTTP 403). Opera-versio, Web Locks ja BroadcastChannel sekä kaikki Opera-tapaukset 1.1–1.8 jäivät todentamatta.
+
+SAFE-1–SAFE-4B läpäisivät 46/46 tapausta (Node 50/50 ryhmät mukaan lukien). Selainregressiot ajettiin Chromiumilla 156.0.8078.79 paikallisessa Vitessä eristetyillä testiprofiileilla. Build, lint ja whitespace-tarkistus läpäisivät. Kuva-auditointi läpäisi, 0 kriittistä virhettä ja 55 varoitusta.
+
+Avoin riski on Operan tallennus- ja monivälilehtisuojauksen toimivuus. Käytä ympäristöä, jossa on virallinen Opera-asennus, ja suorita QA-OPERA-1.1–1.8 samalla localhost- tai HTTPS-originilla ja eristetyllä Opera-profiililla. Suositeltu seuraava kehitysvaihe on **MOBILE-1C** Opera QA:n läpäisyn jälkeen.

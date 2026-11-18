@@ -4,7 +4,18 @@ import { defaultProgram } from '../data/defaultProgram'
 import { demoSessions } from '../data/demoSessions'
 import { getDefaultWarmupType, getExerciseDisplayName, getExerciseTrackingType } from '../utils/exerciseTracking'
 import { hasLoggedExercise, isTargetedWarmup } from '../utils/workoutLogUtils'
-import { useLocalStorage } from './useLocalStorage'
+import { readLocalStorage, useLocalStorage, writeLocalStorage } from './useLocalStorage'
+
+const sessionsKey = 'gymflow_sessions'
+const draftKey = 'gymflow_active_draft'
+
+function isSessionList(value) {
+  return Array.isArray(value) && value.every((session) => Array.isArray(session?.exercises))
+}
+
+function completedSessionId(draft) {
+  return `session-from-${draft.id}`
+}
 
 function getLocalDateParts(date = new Date()) {
   return {
@@ -90,15 +101,23 @@ export function useGymFlowData() {
   const [profile, setProfile] = useLocalStorage('gymflow_user_profile', defaultProfile)
   const [program, setProgram] = useLocalStorage('gymflow_program', defaultProgram)
   const [exercises, setExercises] = useLocalStorage('gymflow_exercises', defaultExercises)
-  const [sessions, setSessions] = useLocalStorage('gymflow_sessions', demoSessions)
+  const [sessions, setSessions] = useLocalStorage(sessionsKey, demoSessions, {
+    autosave: false,
+    validate: isSessionList,
+  })
   const [settings, setSettings] = useLocalStorage('gymflow_settings', defaultSettings)
-  const [activeDraft, setActiveDraft] = useLocalStorage('gymflow_active_draft', null)
+  const [activeDraft, setActiveDraft] = useLocalStorage(draftKey, null)
   const exercisesWithImageKeys = useMemo(() => mergeDefaultExerciseImageKeys(exercises), [exercises])
 
   function resetLocalData() {
     setProfile(defaultProfile)
     setProgram(defaultProgram)
     setExercises(defaultExercises)
+    try {
+      writeLocalStorage(sessionsKey, demoSessions)
+    } catch {
+      // Keep the existing best-effort behavior for an explicit demo reset.
+    }
     setSessions(demoSessions)
     setSettings(defaultSettings)
     setActiveDraft(null)
@@ -136,28 +155,51 @@ export function useGymFlowData() {
   }
 
   function completeWorkout(draft) {
-    if (!draft) return null
+    if (!draft?.id) return { status: 'failed' }
 
-    const now = new Date()
-    const { time } = getLocalDateParts(now)
-    const completedSession = {
-      ...draft,
-      id: `session-${now.getTime()}`,
-      endTime: time,
-      completedAt: now.toISOString(),
-      status: 'completed',
-      durationMinutes: Number(draft.durationMinutes) || 0,
-      exercises: draft.exercises.filter((exercise) => (
-        exercise.enabled !== false &&
-        (!isTargetedWarmup(exercise) || (exercise.enabledByUser && hasLoggedExercise(exercise)))
-      )),
-      createdAt: draft.createdAt ?? now.toISOString(),
-      updatedAt: now.toISOString(),
+    let completedSession
+    try {
+      let storedSessions = readLocalStorage(sessionsKey, demoSessions)
+      if (!isSessionList(storedSessions)) return { status: 'failed' }
+      const storedDraft = readLocalStorage(draftKey, null)
+      if (storedDraft !== null && storedDraft.id !== draft.id) return { status: 'failed' }
+
+      // The same draft can reach this path again after a failed cleanup or refresh.
+      const id = completedSessionId(draft)
+      completedSession = storedSessions.find((session) => session.id === id)
+      if (completedSession && completedSession.status !== 'completed') return { status: 'failed' }
+      if (!completedSession) {
+        const now = new Date()
+        const { time } = getLocalDateParts(now)
+        completedSession = {
+          ...draft,
+          id,
+          endTime: time,
+          completedAt: now.toISOString(),
+          status: 'completed',
+          durationMinutes: Number(draft.durationMinutes) || 0,
+          exercises: draft.exercises.filter((exercise) => (
+            exercise.enabled !== false &&
+            (!isTargetedWarmup(exercise) || (exercise.enabledByUser && hasLoggedExercise(exercise)))
+          )),
+          createdAt: draft.createdAt ?? now.toISOString(),
+          updatedAt: now.toISOString(),
+        }
+        storedSessions = [...storedSessions, completedSession]
+        writeLocalStorage(sessionsKey, storedSessions)
+      }
+      setSessions(storedSessions)
+    } catch {
+      return { status: 'failed' }
     }
 
-    setSessions((current) => [...current, completedSession])
+    try {
+      writeLocalStorage(draftKey, null)
+    } catch {
+      return { status: 'cleanup-failed' }
+    }
     setActiveDraft(null)
-    return completedSession
+    return { status: 'saved', session: completedSession }
   }
 
   return {
@@ -167,6 +209,9 @@ export function useGymFlowData() {
     sessions,
     settings,
     activeDraft,
+    hasSavedActiveDraft: Boolean(activeDraft && sessions.some(
+      (session) => session.status === 'completed' && session.id === completedSessionId(activeDraft),
+    )),
     resetLocalData,
     updateProfile,
     startDraft,

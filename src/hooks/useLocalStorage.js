@@ -1,22 +1,32 @@
 import { useEffect, useState } from 'react'
 
-export function useLocalStorage(key, initialValue) {
+export function readLocalStorage(key, initialValue) {
+  const stored = window.localStorage.getItem(key)
+  return stored === null ? initialValue : JSON.parse(stored)
+}
+
+export function writeLocalStorage(key, value) {
+  window.localStorage.setItem(key, JSON.stringify(value))
+}
+
+export function useLocalStorage(key, initialValue, { autosave = true, validate } = {}) {
   const [value, setValue] = useState(() => {
     try {
-      const stored = window.localStorage.getItem(key)
-      return stored ? JSON.parse(stored) : initialValue
+      const stored = readLocalStorage(key, initialValue)
+      return !validate || validate(stored) ? stored : initialValue
     } catch {
       return initialValue
     }
   })
 
   useEffect(() => {
+    if (!autosave) return
     try {
-      window.localStorage.setItem(key, JSON.stringify(value))
+      writeLocalStorage(key, value)
     } catch {
       // Ignore private browsing or storage quota failures for the MVP.
     }
-  }, [key, value])
+  }, [autosave, key, value])
 
   return [value, setValue]
 }

@@ -101,3 +101,11 @@ MOBILE-0 (Cloud-yhteyden ja ohjeiden lukemisen smoke test) ja MOBILE-1 (ensimmä
 Mahdolliset aika-, laatu- tai tehokkuusmittarit määritellään ennen mittaamista. OP-001 ei tuota keksittyjä mittareita tai tutkimushavaintoja. Säilytä myös epäonnistuneet kokeet ja menetelmän rajat aineistossa. Tallennusvirheen ja duration-tavoitteen aiemmat havainnot jäävät avoimiksi; dokumentointi ei ole niiden korjaus.
 
 Seuraavaksi käyttäjän OP-001-tarkistus, sen jälkeen työnkulun validointitestit. Tuotearkkitehtuurin hyväksytty järjestys säilyy: OP-000 → OP-001 → TS-0…TS-4 → OP-002 → ARCH-1 → AUTH-x → GARMIN-x. Tässä vaiheessa ei aloitettu seuraavan vaiheen toteutusta.
+
+## MOBILE-1A — Puhelinohjatun kehityksen havaintoaineisto
+
+**Tavoiteltu työnkulku.** Käyttäjä rajaa ja käynnistää tehtävän ChatGPT:ssä puhelimella. Codex Cloud tarkistaa lähtötilan, toteuttaa sovitun muutoksen työhaarassa ja toimittaa diffin, soveltuvien tarkistusten tulokset sekä GitHub-PR:n. Controller-roolin arvio tukee käyttäjän katselmointia ja päätöstä. Yhdistäminen ja julkaisu edellyttävät käyttäjän nimenomaista hyväksyntää.
+
+**Havaittu Cloud-osuus.** Codex varmisti kohderepon ja revision, luki repo-ohjeet sekä valmisteli ja tarkisti kolmen Markdown-tiedoston muutoksen. Yksi toimija hoiti toteutuksen ja Controller-itsearvion. Lähtötila, lähteet ja tarkistustulokset on kirjattu [kehityslokiin](GYMFLOW_DEVELOPMENT_LOG.md#mobile-1a--mobile-0-dokumentointi-ja-cloud-työnkulun-tarkistus).
+
+**Aineiston rajat.** Käytettyä puhelinta, selainta, puhelimella tehtyjä toimia ja käyttäjän katselmointikokemusta ei voitu todentaa. MOBILE-0:n erillinen tulos jäi varmentamatta. Sovelluksen manuaalista mobiili-QA:ta ei tehty. Cloud-osuudesta voidaan arvioida rajatun dokumentaatiotehtävän käsittelyä. Puhelinohjauksen kattavuus, työnkulun käytettävyys ja agentin itsenäisyyden aste vaativat erillistä havaintoaineistoa.

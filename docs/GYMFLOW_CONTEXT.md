@@ -819,3 +819,39 @@ OP-001 kirjasi MOBILE-0:n suorittamattomaksi. MOBILE-1A:ssa varmennettiin Cloudi
 Dokumenttidiffin whitespace, tiedostorajaus, historia ja lisäysten sisältö tarkistettiin. Build, lint ja kuva-auditointi jäivät ajamatta dokumentaatiorajauksen vuoksi.
 
 Seuraavaksi suositellaan MOBILE-1B:n mobiili-UX-rajauksen määrittelyä. Valitaan yksi treenin kirjaamisen käyttäjäpolku ja sovitaan puhelin- ja selainmatriisi, havainnoitavat hyväksymiskriteerit sekä suojattavat regressiokohdat ennen toteutusta.
+
+
+## SAFE-1 — Active Draft Protection
+
+Päivä: 2026-11-18. Lähtörevision SHA: `fee6c777f5dece6cbd3d4220ccbd02d2eb7dde68`, varmennettu remote main (MOBILE-1A PR #2). Tehtävähaara: `safe-1-active-draft`, erillinen puhdas worktree. Alkuperäinen `work`-haara säilytettiin muuttumattomana.
+
+### Toteutus ja päätökset
+
+Korjattu vain MOBILE-1B F01: treenipäivän valinta ei enää korvaa aktiivista luonnosta ilman nimenomaista hylkäysvahvistusta. Sama päivä säilyttää luonnoksen; ilman luonnosta uusi päivä käynnistyy normaalisti. Päivänvaihto avaa paikallisen natiivin `dialog`-elementin olemassa olevilla modal-card/button-row/btn-tyyleillä. Peruuta on neutraali oletustoiminto ja saa fokuksen; Escape peruuttaa. Hylkäys käyttää nykyistä puna/ruskeaa danger-väriä. Selain rajoittaa fokuksen ja taustainteraktiot modal-dialogiin; uutta modal-kehystä tai CSS:ää ei lisätty.
+
+Vahvistus tallentaa kohdepäivän ja tarkan draft-olioviitteen. Ref-lukko torjuu nopeat toistuvat pyynnöt ja vahvistuksen kaksoisaktivoinnin. Muuttunut luonnos mitätöi vanhan vahvistuksen. Hook tarkistaa saman version myös funktionaalisessa tilapäivityksessä, joten jonossa aiemmin muuttunut luonnos säilyy. Aktiivinen luonnos määrää näkyvän päivän ennen aiempaa päivävalintaa. Vanhentunut vahvistus suljetaan tekemättä vaihtoa; käyttäjä voi pyytää vaihtoa uudelleen.
+
+Muuttuneet tiedostot:
+- `src/pages/Workout.jsx`
+- `src/hooks/useGymFlowData.js` (vain startDraft-suojaus)
+- `tests/activeDraftProtection.test.mjs`
+- `docs/GYMFLOW_CONTEXT.md`
+- `docs/GYMFLOW_DEVELOPMENT_LOG.md`
+
+### Todellinen testievidenssi
+
+- `npm ci --cache /tmp/gymflow-safe-1-npm-cache`: PASS, 181 pakettia; manifestia tai lockfilea ei muutettu. Ensimmäinen npm ci epäonnistui oletusvälimuistin hakemistoon; uusinta kirjoitettavalla cache-polulla onnistui.
+- `node tests/activeDraftProtection.test.mjs`: PASS, 8 testiä / 0 virhettä. A–H: uusi luonnos, sama päivä, vahvistuspyyntö, peruutus, vahvistettu vaihto, nopeat valinnat/kaksoisvahvistus, vanhentunut ja jonossa muuttunut luonnos sekä vanhan palautetun luonnoksen säilyminen. Riippuvuudeton harness suorittaa lähteestä poimitut todelliset handlerit ja hookin startDraft-funktion mockatuilla state-settereillä; ei koko React-mountin testi.
+- `node --test tests/activeDraftProtection.test.mjs`: exit 0 (ympäristön runner raportoi tiedostotason läpäisyn); suora ajo yllä raportoi kaikki kahdeksan tapausta.
+- `npm run build`: PASS, exit 0, Vite 8.0.13.
+- `npm run lint`: PASS, exit 0.
+- Headless Chromium / Chrome 156.0.8078.79, paikallinen Vite ja kertakäyttöinen selainprofiili: PASS. 390 × 844 CSS px: luonnoksen luonti, sama päivä, liikekeston muokkauksen säilyminen peruutuksessa, nopeat päivävalinnat, Peruuta-oletusfokus, Escape, hylkäys/kaksoisaktivointi ja refresh restore.
+- Dialogin selainmittaus 320/360/390/430 × 844 CSS px: dialogi pysyi viewportin sisällä, molempien toimintopainikkeiden korkeus 48 px. Ei fyysistä Android- tai kosketuslaitetestiä. Stale-state-kilpailut testattiin Node-harnessissa, ei selaimen React-tilan injektoinnilla.
+
+### Rajat, tarkistus ja seuraava vaihe
+
+Ei parserin, sarjaeditorin, autosave-hookin, storage-avainten/skeeman, completed-session-tallennuksen, Historyn, Progressin, warmupien, kestojen, kuvamappingin, riippuvuusmääritysten tai navigaatioarkkitehtuurin muutoksia. F02–F04 ja duration-tavoiteristiriita jäävät avoimiksi. Koko sovelluksen regressiota tai fyysistä mobiili-QA:ta ei väitetä suoritetuksi. Kuva-auditointia ei ajettu, koska kuvia/pankkia/mappingia ei muutettu.
+
+Yksi toimija teki toteutuksen, testit ja Controller-itsearvion; ei riippumatonta review'ta. Diffin scope/historian säilyminen sekä `git diff --check` tarkistetaan ennen toimitusta. Merge ja julkaisu odottavat käyttäjän hyväksyntää; automaattista mergeä tai deploymentia ei tehdä.
+
+Seuraava suositeltu vaihe: **SAFE-2**. Käyttäjän päivitetty järjestys: SAFE-1 → SAFE-2 → SAFE-3 → SAFE-4 → MOBILE-1C → QA-1 → TS-0 → TS-1…TS-4. Tämä tarkentaa aiempia historiallisia etenemissuunnitelmia; myöhempiä vaiheita ei toteutettu.
